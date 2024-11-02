@@ -1,0 +1,19 @@
+api_platform:
+    title: Fantasy Academy API
+    version: 1.0.0
+    enable_entrypoint: false
+    use_symfony_listeners: true
+    formats:
+        json: [ 'application/json' ]
+        jsonld: [ 'application/ld+json' ]
+    swagger:
+        api_keys:
+            access_token:
+                name: Authorization
+                type: header
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+        normalization_context:
+            skip_null_values: false
