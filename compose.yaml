@@ -17,7 +17,7 @@ services:
         depends_on:
             - postgres
         ports:
-            - "8081:80"
+            - "8080:80"
         environment:
             XDEBUG_CONFIG: "client_host=host.docker.internal"
             XDEBUG_MODE: debug
@@ -25,16 +25,28 @@ services:
             SERVER_NAME: :80
 
     frontend:
-        image: node:23
+        image: fantasy_academy_frontend
+        build:
+            context: ./frontend
+            target: dev
         restart: unless-stopped
         tty: true
         volumes:
             - ./frontend:/app
         working_dir: /app
+        environment:
+            NEXT_PUBLIC_ENTRYPOINT: http://api
+            NEXT_PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-api-platform-pwa}
+            NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://localhost/oidc/realms/demo}
+            NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/demo}
+            NEXT_PUBLIC_OIDC_AUTHORIZATION_CLIENT_ID: ${OIDC_AUTHORIZATION_CLIENT_ID:-api-platform-api}
+            AUTH_SECRET: ${AUTH_SECRET:-!ChangeThisNextAuthSecret!}
+            AUTH_URL: ${AUTH_URL:-https://localhost/api/auth}
+            NEXT_SHARP_PATH: /srv/app/node_modules/sharp
         depends_on:
             - api
         ports:
-            - "8080:80"
+            - "3000:3000"
 
     postgres:
         image: postgres:17.0
