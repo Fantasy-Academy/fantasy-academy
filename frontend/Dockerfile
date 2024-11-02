@@ -1,23 +1,16 @@
-#syntax=docker/dockerfile:1.4
-
-
-# Versions
 FROM node:23 AS node_upstream
 
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # Base stage for dev and build
 FROM node_upstream AS base
 
-WORKDIR /srv/app
+WORKDIR /app
 
 RUN corepack enable && \
 	corepack prepare --activate pnpm@latest && \
 	pnpm config -g set store-dir /.pnpm-store
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Delete the following line in case you want to enable telemetry during dev and build.
-ENV NEXT_TELEMETRY_DISABLED 1
 
 
 # Development image
@@ -48,10 +41,9 @@ RUN	pnpm install --frozen-lockfile --offline --prod && \
 # Production image, copy all the files and run next
 FROM node_upstream AS prod
 
-WORKDIR /srv/app
+WORKDIR /app
 
 ENV NODE_ENV production
-# Delete the following line in case you want to enable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs; \
