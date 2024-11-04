@@ -1,54 +1,132 @@
-"use client";
+"use client"; 
+import React from 'react';
+import { Disclosure, Menu } from '@headlessui/react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link'; // Import Link from next/link
 
-import { signIn, signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+const navigation: { name: string; href: string }[] = [
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Challenges', href: '/challenges' },
+  { name: 'Leaderboard', href: '/leaderboard' },
+];
 
-import { NEXT_PUBLIC_OIDC_SERVER_URL } from "../../config/keycloak";
+function classNames(...classes: string[]): string {
+  return classes.filter(Boolean).join(' ');
+}
 
 export const Header = () => {
-  const pathname = usePathname();
-  const { data: session, status } = useSession();
-
-  if (pathname === "/" || pathname.match(/^\/admin/)) return <></>;
+  const currentPath = usePathname();
+  
+  // Mock authentication status
+  const isAuth = false; // Change this value to test
 
   return (
-    <header className="bg-neutral-100 sticky top-0 z-10">
-      <nav className="container mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
-        <div className="block text-4xl font-bold">
-          <Link href="/books" className="text-gray-700 hover:text-gray-900">
-            Books Store
-          </Link>
+    <Disclosure as="nav" className="bg-gray-800">
+      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+        <div className="relative flex h-16 items-center justify-between">
+          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            {/* Mobile menu button */}
+            <Disclosure.Button className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+              <span className="sr-only">Open main menu</span>
+              <div className="flex flex-col space-y-1">
+                <div className="h-0.5 w-6 bg-gray-400 group-hover:bg-white transition duration-200"></div>
+                <div className="h-0.5 w-6 bg-gray-400 group-hover:bg-white transition duration-200"></div>
+                <div className="h-0.5 w-6 bg-gray-400 group-hover:bg-white transition duration-200"></div>
+              </div>
+            </Disclosure.Button>
+          </div>
+          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <div className="hidden sm:ml-6 sm:block">
+              <div className="flex space-x-4">
+                {navigation.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    aria-current={item.href === currentPath ? 'page' : undefined}
+                    className={classNames(
+                      item.href === currentPath ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                      'rounded-md px-3 py-2 text-sm font-medium'
+                    )}
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            {/* Conditional rendering of Login or Your Profile */}
+            {isAuth ? (
+              <Link
+                href="/profile" // Link to user profile page
+                className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+              >
+                Your Profile
+              </Link>
+            ) : (
+              <Link
+                href="/login" // Use Link for client-side navigation
+                className="bg-gray-300 text-gray-800 hover:bg-gray-400 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+              >
+                Login
+              </Link>
+            )}
+
+            {/* Profile dropdown - remove user image */}
+            <Menu as="div" className="relative ml-3">
+              <Menu.Button className="flex text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                <span className="sr-only">Open user menu</span>
+                {/* Optional: Add a profile icon or placeholder here */}
+              </Menu.Button>
+              <Menu.Items
+                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none"
+              >
+                <Menu.Item>
+                  {({ active }: { active: boolean }) => (
+                    <a
+                      href="#"
+                      className={`block px-4 py-2 text-sm text-gray-700 ${active && 'bg-gray-100'}`}
+                    >
+                      Your Profile
+                    </a>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }: { active: boolean }) => (
+                    <a
+                      href="#"
+                      className={`block px-4 py-2 text-sm text-gray-700 ${active && 'bg-gray-100'}`}
+                    >
+                      Sign out
+                    </a>
+                  )}
+                </Menu.Item>
+              </Menu.Items>
+            </Menu>
+          </div>
         </div>
-        <div className="lg:flex lg:flex-1 lg:justify-end lg:gap-x-12">
-          <Link href="/bookmarks" className="font-semibold text-gray-700 hover:text-gray-900 mr-4">
-            <FavoriteBorderIcon className="w-6 h-6 mr-1"/>
-            My Bookmarks
-          </Link>
-          {/* @ts-ignore */}
-          {status === "authenticated" && (
-            <a href="#" className="font-semibold text-gray-900" role="menuitem" onClick={(e) => {
-              e.preventDefault();
-              signOut({
-                // @ts-ignore
-                callbackUrl: `${NEXT_PUBLIC_OIDC_SERVER_URL}/protocol/openid-connect/logout?id_token_hint=${session.idToken}&post_logout_redirect_uri=${window.location.origin}/books`,
-              });
-            }}>
-              Sign out
-            </a>
-          ) || (
-            <a href="#" className="font-semibold text-gray-900" role="menuitem" onClick={(e) => {
-              e.preventDefault();
-              signIn("keycloak");
-            }}>
-              <PersonOutlineIcon className="w-6 h-6 mr-1"/>
-              Log in
-            </a>
-          )}
+      </div>
+
+      <Disclosure.Panel className="sm:hidden">
+        <div className="space-y-1 px-2 pb-3 pt-2">
+          {navigation.map((item) => (
+            <Disclosure.Button
+              key={item.name}
+              as="a"
+              href={item.href}
+              aria-current={item.href === currentPath ? 'page' : undefined}
+              className={classNames(
+                item.href === currentPath ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                'block rounded-md px-3 py-2 text-base font-medium'
+              )}
+            >
+              {item.name}
+            </Disclosure.Button>
+          ))}
         </div>
-      </nav>
-    </header>
-  )
-}
+      </Disclosure.Panel>
+    </Disclosure>
+  );
+};
+
+export default Header;
