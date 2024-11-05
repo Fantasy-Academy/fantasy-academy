@@ -1,4 +1,4 @@
-# WMS
+# Fantasy Academy
 
 ## Development
 Simply run `docker compose up`
