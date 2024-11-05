@@ -1,3 +1,4 @@
 composer.lock binary
 symfony.lock binary
 yarn.lock binary
+pnpm-lock.yaml binary

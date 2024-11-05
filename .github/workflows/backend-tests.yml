@@ -1,11 +1,15 @@
-name: Tests
+name: Backend tests
 
 on:
     push:
+        paths:
+            - 'api/**'
     pull_request:
+        paths:
+            - 'api/**'
 
 env:
-    DATABASE_URL: postgresql://postgres:postgres@postgres:5432/wms_test?serverVersion=17.0&charset=utf8
+    DATABASE_URL: postgresql://postgres:postgres@postgres:5432/fantasy_academy_test?serverVersion=17.0&charset=utf8
 
 jobs:
   tests:
@@ -31,9 +35,16 @@ jobs:
                   ${{ runner.os }}-composer-
 
       -   run: composer install --no-scripts --no-progress
+          working-directory: ./api
+
       -   run: bin/console importmap:install
+          working-directory: ./api
+
       -   run: bin/console asset-map:compile
+          working-directory: ./api
+
       -   run: vendor/bin/phpunit
+          working-directory: ./api
 
 
   phpstan:
@@ -49,8 +60,13 @@ jobs:
                     ${{ runner.os }}-composer-
 
         -   run: composer install --no-scripts --no-progress
+            working-directory: ./api
+
         -   run: bin/console cache:warmup --env=dev
+            working-directory: ./api
+
         -   run: composer run-script phpstan
+            working-directory: ./api
 
 
   migrations-up-to-date:
@@ -61,7 +77,7 @@ jobs:
               image: postgres:17.0
               env:
                   POSTGRES_PASSWORD: postgres
-                  POSTGRES_DB: wms_test
+                  POSTGRES_DB: fantasy_academy_test
               options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
               ports:
                   - 5432:5432
@@ -76,7 +92,13 @@ jobs:
                       ${{ runner.os }}-composer-
 
           -   run: composer install --no-scripts --no-progress
+              working-directory: ./api
 
           -   run: bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+              working-directory: ./api
+
           -   run: bin/console doctrine:schema:update --dump-sql
+              working-directory: ./api
+
           -   run: bin/console doctrine:schema:validate
+              working-directory: ./api

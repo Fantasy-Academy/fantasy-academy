@@ -3,16 +3,8 @@
 ## Development
 Simply run `docker compose up`
 
-Application runs at http://localhost:8080
-
-## Quick start
-
-To run these commands, containers must be running.
-
-Create your admin user run (replace email+password placeholders):
-```bash
-docker compose exec web bin/console app:user:register admin@admin.com admin
-```
+- Frontend runs at http://localhost:3000  
+- API runs at http://localhost:8080
 
 ### Adminer (Database)
 
