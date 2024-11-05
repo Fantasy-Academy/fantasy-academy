@@ -11,7 +11,7 @@ services:
         tty: true
         volumes:
             - ./api:/app
-            - ./.docker/php/docker-entrypoint.sh:/usr/local/bin/docker-php-entrypoint
+            - ./api/.docker/docker-entrypoint.sh:/usr/local/bin/docker-php-entrypoint
             - caddy_data:/data
             - caddy_config:/config
         depends_on:
