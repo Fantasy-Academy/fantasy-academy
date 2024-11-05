@@ -13,7 +13,7 @@ http://localhost:8000
 Driver: `postgres`  
 User: `postgres`  
 Password: `postgres`  
-Database: `wms`
+Database: `fantasy_academy`
 
 ### Mail catcher
 
