@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Ramsey\Uuid\Doctrine\UuidType;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use FantasyAcademy\API\Doctrine\AddressDoctrineType;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
 

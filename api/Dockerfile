@@ -13,9 +13,6 @@ RUN composer install --no-dev --no-interaction --no-scripts
 
 COPY . .
 
-RUN bin/console importmap:install
-RUN bin/console asset-map:compile
-
 # Need to run again to trigger scripts with application code present
 RUN composer install --no-dev --no-interaction --classmap-authoritative
 
