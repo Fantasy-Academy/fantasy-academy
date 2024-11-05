@@ -1,6 +1,6 @@
 FROM node:23 AS node_upstream
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Base stage for dev and build
 FROM node_upstream AS base
@@ -14,11 +14,11 @@ RUN corepack enable && \
 
 
 # Development image
-FROM base as dev
+FROM base AS dev
 
 EXPOSE 3000
-ENV PORT 3000
-ENV HOSTNAME localhost
+ENV PORT=3000
+ENV HOSTNAME=localhost
 
 CMD ["sh", "-c", "pnpm install; pnpm dev"]
 
@@ -30,10 +30,6 @@ RUN pnpm fetch --prod
 
 COPY --link . .
 
-ARG AUTH_SECRET
-# https://nextjs.org/docs/app/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser
-ARG NEXT_PUBLIC_OIDC_SERVER_URL
-
 RUN	pnpm install --frozen-lockfile --offline --prod && \
 	pnpm run build
 
@@ -43,28 +39,20 @@ FROM node_upstream AS prod
 
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs; \
-	adduser --system --uid 1001 nextjs
+COPY --from=builder --link /app/public ./public
 
-COPY --from=builder --link /srv/app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next; \
-	chown nextjs:nodejs .next
+RUN mkdir .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --link --chown=1001:1001 /srv/app/.next/standalone ./
-COPY --from=builder --link --chown=1001:1001 /srv/app/.next/static ./.next/static
-
-USER nextjs
+COPY --from=builder --link /app/.next/standalone ./
+COPY --from=builder --link /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
