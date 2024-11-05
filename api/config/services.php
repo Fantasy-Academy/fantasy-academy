@@ -50,6 +50,7 @@ return static function(ContainerConfigurator $configurator): void
     $services->load('FantasyAcademy\\API\\Query\\', __DIR__ . '/../src/Query/**/{*.php}');
 
     // API
+    $services->load('FantasyAcademy\\API\\Controller\\', __DIR__ . '/../src/Controller/**/{*.php}');
     $services->load('FantasyAcademy\\API\\Api\\Processor\\', __DIR__ . '/../src/Api/Processor/**/{*.php}');
 
     /** @see https://github.com/doctrine/migrations/issues/1406 */
