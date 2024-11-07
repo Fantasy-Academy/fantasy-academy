@@ -4,11 +4,11 @@ on:
     push:
         paths:
             - 'api/**'
-            - '.github/workflows/backend-**'
+            - '.github/workflows/backend-*'
     pull_request:
         paths:
             - 'api/**'
-            - '.github/workflows/backend-**'
+            - '.github/workflows/backend-*'
 
 env:
     DATABASE_URL: postgresql://postgres:postgres@postgres:5432/fantasy_academy_test?serverVersion=17.0&charset=utf8
