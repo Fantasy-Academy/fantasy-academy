@@ -11,9 +11,8 @@ on:
             - '.github/workflows/frontend-*'
 
 jobs:
-    cache-and-install:
+    eslint:
         runs-on: ubuntu-latest
-
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -28,13 +27,13 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: 23
-                  cache-dependency-path: "frontend"
+                  cache-dependency-path: "frontend/pnpm-lock.yaml"
                   cache: "pnpm"
 
             - name: Install dependencies
               working-directory: ./frontend
               run: pnpm install
 
-            - name: Install dependencies
+            - name: ESLint
               working-directory: ./frontend
               run: pnpm lint
