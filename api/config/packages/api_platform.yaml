@@ -8,7 +8,7 @@ api_platform:
         jsonld: [ 'application/ld+json' ]
     swagger:
         api_keys:
-            access_token:
+            JWT:
                 name: Authorization
                 type: header
     defaults:

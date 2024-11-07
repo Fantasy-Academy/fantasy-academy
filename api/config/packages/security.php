@@ -23,22 +23,24 @@ return static function (SecurityConfig $securityConfig): void {
         ->security(false);
 
     $securityConfig->firewall('stateless')
-        ->pattern('^(/-/health-check|/media/cache|/sitemap)')
+        ->pattern('^(/-/health-check)')
         ->stateless(true)
         ->security(false);
 
     $apiFirewall = $securityConfig->firewall('api')
         ->pattern('^/api')
         ->stateless(true)
-        ->lazy(true)
-        ->provider('user_provider');
+        ->provider('user_provider')
+        ->jsonLogin()
+            ->checkPath('/api/auth')
+            ->usernamePath('email')
+            ->passwordPath('password')
+            ->successHandler('lexik_jwt_authentication.handler.authentication_success')
+            ->failureHandler('lexik_jwt_authentication.handler.authentication_failure');
 
-    $mainFirewall = $securityConfig->firewall('main')
-        ->lazy(true)
-        ->provider('user_provider');
 
     $securityConfig->accessControl()
-        ->path('^/(api/docs)')
+        ->path('^/api/(auth|docs)')
         ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
 
     $securityConfig->accessControl()
