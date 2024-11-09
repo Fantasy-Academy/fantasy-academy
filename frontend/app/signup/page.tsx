@@ -1,21 +1,23 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter for redirection
+import { useRouter } from 'next/navigation';
+import SignupForm from '../../components/common/forms/SignupForm';
+import LinkBtn from '../../components/common/LinkBtn';
 
-export default function Login() {
-    const router = useRouter(); // Use Next.js router for navigation
+const SignUp = () => {
+    const router = useRouter();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Here you can handle your login logic, e.g., authenticate the user
+        // Handle signup logic here, e.g., send form data to an API
 
-        // Redirect to the dashboard or another page after successful login
+        // Redirect to the dashboard or another page after successful signup
         router.push('/dashboard');
     };
 
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-8 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
                 <h2 className="mt-10 text-2xl font-bold tracking-tight text-gray-900">
                     Create New Account
@@ -23,92 +25,14 @@ export default function Login() {
             </div>
 
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                        <label htmlFor="nickname" className="block text-sm font-medium text-gray-900">
-                            Nickname
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="nickname"
-                                name="nickname"
-                                type="text"
-                                required
-                                autoComplete="nickname"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-800 sm:text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                            Email address
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                required
-                                autoComplete="email"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-800 sm:text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex items-center justify-between">
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-900">
-                                Password
-                            </label>
-                        </div>
-                        <div className="mt-2">
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                autoComplete="current-password"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-800 sm:text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex items-center justify-between">
-                            <label htmlFor="confirm password" className="block text-sm font-medium text-gray-900">
-                                Comfirm password
-                            </label>
-                        </div>
-                        <div className="mt-2">
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                autoComplete="current-password"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-800 sm:text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <button
-                            type="submit"
-                            className="flex w-full justify-center rounded-md bg-gray-800 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800"
-                        >
-                            Create Account
-                        </button>
-                    </div>
-                </form>
-
-                <p className="mt-10 text-center text-sm text-gray-500">
-                    Do you have an account already?{' '}
-                    <a href="/login" className="font-semibold text-gray-800 hover:text-gray-600">
-                        Login
-                    </a>
-                </p>
+                <SignupForm handleSubmit={handleSubmit} />
+                <div className="mt-10 flex justify-center text-sm text-gray-500">
+                    <span className="mr-1">Already have an account?</span>
+                    <LinkBtn link="/login" text="Login" />
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default SignUp;

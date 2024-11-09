@@ -22,13 +22,13 @@ const Challenges = () => {
 
     return (
         <div className="flex flex-col p-4">
-            <h1 className="text-3xl font-bold text-black">Current Challenges</h1>
-            <div className='container mx-auto flex flex-wrap items-start'>
+            <h1 className="text-3xl font-bold text-black text-center">Current Challenges</h1>
+            <div className="container mx-auto flex flex-wrap items-center justify-center md:justify-start">
                 {renderChallenges(true)}
             </div>
 
-            <h1 className="text-3xl font-bold text-black mt-8">Expired Challenges</h1>
-            <div className='container mx-auto flex flex-wrap items-start'>
+            <h1 className="text-3xl font-bold text-black mt-8 text-center">Expired Challenges</h1>
+            <div className="container mx-auto flex flex-wrap items-start justify-center sm:justify-start">
                 {renderChallenges(false)}
             </div>
         </div>

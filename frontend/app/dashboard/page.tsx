@@ -16,16 +16,16 @@ export default function Dashboard() {
     const challenges = { total: 6, completed: 4 };
 
     return (
-        <div className='flex flex-col p-4'>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <DashboardStats 
-                season={season} 
-                points={points} 
-                rank={rank} 
-                challenges={challenges} 
+        <div className="flex flex-col p-4 items-center sm:items-start">
+            <h1 className="text-3xl font-bold text-center sm:text-left">Your Stats</h1>
+            <DashboardStats
+                season={season}
+                points={points}
+                rank={rank}
+                challenges={challenges}
             />
-            <h1 className="text-3xl font-bold mt-8">Skills</h1>
-            <div className='container mx-auto flex flex-row flex-wrap items-start gap-1'>
+            <h1 className="text-3xl font-bold mt-8 text-center sm:text-left">Skills</h1>
+            <div className="container flex flex-row flex-wrap items-start gap-1 justify-center sm:justify-start">
                 {skills.map((skill) => (
                     <SkillCard key={skill.label} label={skill.label} percentage={skill.percentage} />
                 ))}
