@@ -1,84 +1,62 @@
-'use client';
-import { signIn } from "next-auth/react";
 import React, { useState } from 'react';
-import InputField from '../../inputField/InputField';
-import Btn from '../../button/Btn';
+import InputField from '../InputField';
 import LinkButton from '../LinkBtn';
-import { loginValidation } from '../../../utils/loginValidation';
+import Btn from '../../button/Btn';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const LoginForm = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
+    const [userInfo, setUserInfo] = useState({ email: '', password: '' });
+    const router = useRouter();
 
-    async function handleFormSubmit(e: React.FormEvent) {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Clear any previous error
-        setError(null);
+        console.log('Submitting form with', userInfo);
 
-        // Validate credentials before attempting sign-in
-        const validationError = await loginValidation(email, password);
-        if (validationError) {
-            setError(validationError);
-            return;
+        const res = await signIn('credentials', {
+            email: userInfo.email,
+            password: userInfo.password,
+            redirect: false,
+        });
+
+        console.log('SignIn response:', res);
+
+        if (res?.error) {
+            console.log('Authentication failed:', res.error);
+        } else if (res?.ok) {
+            console.log('Login successful:', res);
+            router.push('/dashboard');
         }
-
-        try {
-            // Call signIn with credentials and disable automatic redirection
-            const result = await signIn('credentials', {
-                redirect: false,
-                email,
-                password,
-            });
-
-            if (result?.error) {
-                setError(result.error); // Display error message if login fails
-            } else {
-                window.location.href = '/profile'; // Redirect manually on success
-            }
-        } catch (err) {
-            console.error('Login failed:', err);
-            setError('An unexpected error occurred. Please try again.');
-        }
-    }
-
+    };
 
     return (
-        <form onSubmit={handleFormSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
             <InputField
                 id="email"
+                value={userInfo.email}
+                onChange={({ target }) => setUserInfo({ ...userInfo, email: target.value })}
                 label="Email address"
                 type="email"
-                name="email"
-                value={email}
-                error=""
-                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
-                placeholder="Email..."
             />
             <div>
                 <div className="flex flex-col gap-2">
                     <InputField
                         id="password"
+                        value={userInfo.password}
+                        onChange={({ target }) => setUserInfo({ ...userInfo, password: target.value })}
                         label="Password"
                         type="password"
-                        name="password"
-                        value={password}
-                        error=""
-                        onChange={(e) => setPassword(e.target.value)}
                         autoComplete="current-password"
                         required
-                        placeholder="Password..."
                     />
-                    {error && <p className="text-vibrantCoral">{error}</p>}
                     <LinkButton link="/forgotPassword" text="Forgot password?" />
                 </div>
             </div>
-            <div className='mt-6'>
+            <div>
                 <Btn type="submit">Login</Btn>
-
             </div>
         </form>
     );

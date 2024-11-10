@@ -6,7 +6,7 @@ interface ButtonProps {
   onClick?: () => void;
 }
 
-const Btn: React.FC<ButtonProps> = ({ children, type = "button", onClick }) => {
+const Button: React.FC<ButtonProps> = ({ children, type = "button", onClick }) => {
 
   return (
     <button
@@ -20,5 +20,4 @@ const Btn: React.FC<ButtonProps> = ({ children, type = "button", onClick }) => {
   );
 };
 
-export default Btn;
 export default Button;
