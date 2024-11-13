@@ -2,9 +2,8 @@
 import React from 'react';
 import { Disclosure, Menu } from '@headlessui/react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
-import Btn from '../button/Btn';
-import { useSession, signOut } from 'next-auth/react';
+import { auth } from '../../auth';
+import Link from 'next/link'; // Import Link from next/link
 
 const navigation: { name: string; href: string }[] = [
   { name: 'Home', href: '/home' },

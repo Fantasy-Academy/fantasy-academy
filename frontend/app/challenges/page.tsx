@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ChallengeCard from '../../components/challenges/ChallengeCard';
-import BackgroundWrapper from '../../layouts/BackgroundWrapper';
-import { challenges as challengesData } from '../../data/challenges';
-import ChallengeModal from '../../components/modal/ChallangeModal';
+import Link from 'next/link';
+import { challenges } from '../../data/challenges';
 
 const Challenges = () => {
     const [tab, setTab] = useState<'current' | 'completed' | "time's up">('current');
