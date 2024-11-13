@@ -1,9 +1,11 @@
+'use client';
+import { doCredentialLogin } from '../../../app/actions';
 import React, { useState } from 'react';
 import InputField from '../InputField';
 import LinkButton from '../LinkBtn';
 import Btn from '../../button/Btn';
 import { useRouter } from 'next/navigation';
-import { signIn } from "next-auth/react"; // Ujistěte se, že používáte správný import
+
 
 const LoginForm = () => {
     const router = useRouter();
@@ -11,27 +13,25 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    async function handleFormSubmit(e: React.FormEvent) {
         e.preventDefault();
-        console.log("Form submitted"); // Kontrolní výstup pro potvrzení odeslání formuláře
+        try {
+            const formData = new FormData(e.currentTarget as HTMLFormElement);
+            const response = await doCredentialLogin(formData);
 
-        const result = await signIn("credentials", {
-            redirect: false,
-            email,
-            password,
-        });
+            if (!!response.error){
 
-        if (result && result.error) {
-            setError("Invalid credentials, please try again.");
-            console.error(result.error); // Výpis chyby pro ladění
-        } else {
-            console.log("User signed in successfully.");
-            router.push("/"); // Přesměrování po úspěšném přihlášení
+            }else{
+                router.push('/profile')
+            }
+
+        } catch (error) {
+            console.error(e);
         }
     };
 
     return (
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleFormSubmit}>
             <InputField
                 id="email"
                 label="Email address"
@@ -59,7 +59,7 @@ const LoginForm = () => {
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <div>
-                {/* Přidáváme type="submit" pro odeslání formuláře */}
+
                 <Btn text="Login" type="submit" />
             </div>
         </form>

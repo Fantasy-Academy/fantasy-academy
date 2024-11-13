@@ -3,7 +3,6 @@
 import React from 'react';
 import LoginForm from '../../components/common/forms/LoginForm';
 import LinkBtn from '../../components/common/LinkBtn';
-import { handleSignIn } from '../actions/signInAction';
 
 
 
