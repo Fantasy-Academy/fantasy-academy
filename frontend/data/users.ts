@@ -14,4 +14,7 @@ const users = [
   },
 ];
 
-export default users;
+export const getUserByEmail = email => {
+  const found = users.find(user => user.email === email);
+  return found;
+};
