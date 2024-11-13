@@ -3,6 +3,8 @@
 import React from 'react';
 import LoginForm from '../../components/common/forms/LoginForm';
 import LinkBtn from '../../components/common/LinkBtn';
+import { handleSignIn } from '../actions/signInAction';
+
 
 const Login = () => {
 
@@ -15,7 +17,7 @@ const Login = () => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <LoginForm />
+        <LoginForm  />
         <div className="mt-10 flex justify-center text-sm text-gray-500">
           <span className="mr-1">Don't have an account?</span>
           <LinkBtn link="/signup" text="Sign Up" />

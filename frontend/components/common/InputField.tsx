@@ -4,13 +4,14 @@ interface InputFieldProps {
   id: string;
   label: string;
   value: string;
+  name: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
   type: string;
   autoComplete: string;
   required: boolean;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ id, label, value, type, onChange, autoComplete, required }) => {
+const InputField: React.FC<InputFieldProps> = ({ id, label, value, name, type, onChange, autoComplete, required }) => {
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-gray-900">
@@ -19,8 +20,8 @@ const InputField: React.FC<InputFieldProps> = ({ id, label, value, type, onChang
       <div className="mt-2">
         <input
           id={id}
-          value={value}
-          name={id}
+         value={value}
+          name={name}
           type={type}
           onChange={onChange}
           required={required}
