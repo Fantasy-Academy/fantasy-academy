@@ -10,7 +10,7 @@ export const {
   signOut
 
 } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET, 
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt'
   },
@@ -37,7 +37,7 @@ export const {
           }
 
         } catch (error) {
-          throw new Error(error);
+          throw new Error(error instanceof Error ? error.message : String(error));
         }
       }
     }),
