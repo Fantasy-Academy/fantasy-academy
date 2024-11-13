@@ -2,42 +2,43 @@ import React, { useState } from 'react';
 import InputField from '../InputField';
 import LinkButton from '../LinkBtn';
 import Btn from '../../button/Btn';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { signIn } from "next-auth/react"; // Ujistěte se, že používáte správný import
 
 const LoginForm = () => {
-    const [userInfo, setUserInfo] = useState({ email: '', password: '' });
     const router = useRouter();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Form submitted"); // Kontrolní výstup pro potvrzení odeslání formuláře
 
-        console.log('Submitting form with', userInfo);
-
-        const res = await signIn('credentials', {
-            email: userInfo.email,
-            password: userInfo.password,
+        const result = await signIn("credentials", {
             redirect: false,
+            email,
+            password,
         });
 
-        console.log('SignIn response:', res);
-
-        if (res?.error) {
-            console.log('Authentication failed:', res.error);
-        } else if (res?.ok) {
-            console.log('Login successful:', res);
-            router.push('/dashboard');
+        if (result && result.error) {
+            setError("Invalid credentials, please try again.");
+            console.error(result.error); // Výpis chyby pro ladění
+        } else {
+            console.log("User signed in successfully.");
+            router.push("/"); // Přesměrování po úspěšném přihlášení
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
             <InputField
                 id="email"
-                value={userInfo.email}
-                onChange={({ target }) => setUserInfo({ ...userInfo, email: target.value })}
                 label="Email address"
                 type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
             />
@@ -45,18 +46,21 @@ const LoginForm = () => {
                 <div className="flex flex-col gap-2">
                     <InputField
                         id="password"
-                        value={userInfo.password}
-                        onChange={({ target }) => setUserInfo({ ...userInfo, password: target.value })}
                         label="Password"
                         type="password"
+                        name="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         autoComplete="current-password"
                         required
                     />
                     <LinkButton link="/forgotPassword" text="Forgot password?" />
                 </div>
             </div>
+            {error && <p className="text-red-500">{error}</p>}
             <div>
-                <Btn type="submit">Login</Btn>
+                {/* Přidáváme type="submit" pro odeslání formuláře */}
+                <Btn text="Login" type="submit" />
             </div>
         </form>
     );
