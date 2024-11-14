@@ -1,8 +1,7 @@
-'use client';
-import { doCredentialLogin } from '../../../app/actions';
 import React, { useState } from 'react';
 import InputField from '../InputField';
 import LinkButton from '../LinkBtn';
+import { doCredentialLogin } from '../../../app/actions';
 import Btn from '../Btn';
 import { useRouter } from 'next/navigation';
 

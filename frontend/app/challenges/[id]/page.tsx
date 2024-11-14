@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { challenges } from '../../../mockData/challenges';
+import { challenges } from '../../../data/challenges';
 
 const ChallengeDetail = () => {
     const { id } = useParams();
