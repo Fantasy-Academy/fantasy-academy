@@ -1,17 +1,11 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import LoginForm from '../../components/common/forms/LoginForm';
 import LinkBtn from '../../components/common/LinkBtn';
 
-const Login = () => {
-  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    router.push('/dashboard');
-  };
+const Login = () => {
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -22,9 +16,9 @@ const Login = () => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <LoginForm handleSubmit={handleSubmit} />
+        <LoginForm  />
         <div className="mt-10 flex justify-center text-sm text-gray-500">
-          <span className="mr-1">Don't have an account?</span>
+          <span className="mr-1">Don&apos;t have an account?</span>
           <LinkBtn link="/signup" text="Sign Up" />
         </div>
       </div>

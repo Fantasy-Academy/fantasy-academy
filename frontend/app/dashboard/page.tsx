@@ -1,8 +1,9 @@
 import React from 'react';
 import SkillCard from '../../components/dashboard/SkillCard';
-import DashboardStats from '../../components/dashboard/DashboardStats'; // Adjust the import path if necessary
+import DashboardStats from '../../components/dashboard/DashboardStats';
 
 export default function Dashboard() {
+
     const skills = [
         { label: "Mistr kotle", percentage: 95 },
         { label: "Lucky 7", percentage: 88 },
@@ -16,6 +17,7 @@ export default function Dashboard() {
     const challenges = { total: 6, completed: 4 };
 
     return (
+        
         <div className="flex flex-col p-4 items-center sm:items-start">
             <h1 className="text-3xl font-bold text-center sm:text-left">Your Stats</h1>
             <DashboardStats

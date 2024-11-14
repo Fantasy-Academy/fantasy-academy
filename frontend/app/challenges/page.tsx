@@ -1,7 +1,7 @@
 import React from 'react';
 import ChallengeCard from '../../components/challenges/ChallengeCard';
 import Link from 'next/link';
-import { challenges } from '../../mockData/challenges';
+import { challenges } from '../../data/challenges';
 
 const Challenges = () => {
     const renderChallenges = (isActive: boolean) => {

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Disclosure, Menu } from '@headlessui/react';
 import { usePathname } from 'next/navigation';
+import { auth } from '../../auth';
 import Link from 'next/link'; // Import Link from next/link
 
 const navigation: { name: string; href: string }[] = [
