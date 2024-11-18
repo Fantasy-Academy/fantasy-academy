@@ -2,8 +2,9 @@
 import React from 'react';
 import { Disclosure, Menu } from '@headlessui/react';
 import { usePathname } from 'next/navigation';
-import { auth } from '../../auth';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+
 
 const navigation: { name: string; href: string }[] = [
   { name: 'Home', href: '/home' },
@@ -18,7 +19,7 @@ function classNames(...classes: string[]): string {
 
 export const Header = () => {
   const currentPath = usePathname();
-  const { data: session } = useSession();
+  const {data : session} = useSession();
 
   return (
     <Disclosure as="nav" className="bg-white fixed top-0 w-full z-50 shadow-md">
@@ -57,20 +58,12 @@ export const Header = () => {
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             {/* Conditional rendering of Login or Your Profile */}
             {session ? (
-              <div className='flex'>
-                <Link
-                  href="/profile" // Link to user profile page
-                  className="text-charcoal hover:bg-vibrantCoral hover:text-white rounded px-3 py-2 text-sm font-semibold"
-                >
-                  Your Profile
-                </Link>
-                <Link
-                  href=""
-                  className=" text-vibrantCoral hover:bg-charcoal hover:text-white rounded px-3 py-2 text-sm font-medium"
-                  onClick={() => signOut({ callbackUrl: 'http://localhost:3000/login' })}
-                >Logout
-                </Link>
-              </div>
+              <Link
+                href="/profile" // Link to user profile page
+                className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+              >
+                Your Profile
+              </Link>
             ) : (
               <Link
                 href="/login" // Use Link for client-side navigation
