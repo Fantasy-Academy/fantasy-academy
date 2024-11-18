@@ -1,3 +1,4 @@
+'use server'
 import React from 'react';
 import ProfileSection from '../../components/profile/ProfileSection';
 import { auth } from '../../auth';

@@ -5,6 +5,8 @@ import InputField from '../InputField';
 import LinkButton from '../LinkBtn';
 import Btn from '../Btn';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+
 
 
 const LoginForm = () => {
@@ -13,15 +15,18 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
+    const { data: session } = useSession();
+    console.log(JSON.stringify(session));
+
     async function handleFormSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
             const formData = new FormData(e.currentTarget as HTMLFormElement);
             const response = await doCredentialLogin(formData);
 
-            if (!!response.error){
+            if (!!response.error) {
 
-            }else{
+            } else {
                 router.push('/profile')
             }
 
@@ -30,7 +35,7 @@ const LoginForm = () => {
         }
     };
 
-    
+
 
     return (
         <form className="space-y-6" onSubmit={handleFormSubmit}>

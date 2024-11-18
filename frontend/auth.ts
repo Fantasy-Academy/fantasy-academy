@@ -2,7 +2,6 @@ import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { getUserByEmail } from './data/users';
 
-
 export const {
   handlers: { GET, POST },
   auth,
@@ -14,7 +13,6 @@ export const {
   session: {
     strategy: 'jwt'
   },
-
   providers: [
     CredentialsProvider({
       async authorize(credentials) {

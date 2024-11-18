@@ -2,8 +2,9 @@
 import React from 'react';
 import { Disclosure, Menu } from '@headlessui/react';
 import { usePathname } from 'next/navigation';
-import { auth } from '../../auth';
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+
 
 const navigation: { name: string; href: string }[] = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -17,9 +18,7 @@ function classNames(...classes: string[]): string {
 
 export const Header = () => {
   const currentPath = usePathname();
-  
-  // Mock authentication status
-  const isAuth = false; // Change this value to test
+  const {data : session} = useSession();
 
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -57,7 +56,7 @@ export const Header = () => {
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             {/* Conditional rendering of Login or Your Profile */}
-            {isAuth ? (
+            {session ? (
               <Link
                 href="/profile" // Link to user profile page
                 className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
