@@ -1,9 +1,6 @@
 'use server';
-import { signIn, signOut } from '../../auth';
+import { signIn } from '../../auth';
 
-export async function doLogout() {
-    await signOut({ redirectTo: '/login' });
-}
 
 export async function doCredentialLogin(formData: FormData) {
     try {
