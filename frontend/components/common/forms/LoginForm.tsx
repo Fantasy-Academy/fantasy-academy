@@ -1,41 +1,39 @@
 'use client';
-import { doCredentialLogin } from '../../../app/actions';
+import { signIn } from "next-auth/react";
 import React, { useState } from 'react';
 import InputField from '../InputField';
+import Btn from '../Btn';
 import LinkButton from '../LinkBtn';
-import Btn from '../../button/Btn';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-
-
 
 const LoginForm = () => {
-    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-    const { data: session } = useSession();
-    console.log(JSON.stringify(session));
-
     async function handleFormSubmit(e: React.FormEvent) {
         e.preventDefault();
+
+        // Clear any previous error
+        setError(null);
+
         try {
-            const formData = new FormData(e.currentTarget as HTMLFormElement);
-            const response = await doCredentialLogin(formData);
+            // Call signIn with credentials and disable automatic redirection
+            const result = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            });
 
-            if (!!response.error) {
-
+            if (result?.error) {
+                setError(result.error); // Display error message if login fails
             } else {
-                router.push('/profile')
+                window.location.href = '/profile'; // Redirect manually on success
             }
-
-        } catch (error) {
-            console.error(e);
+        } catch (err) {
+            console.error('Login failed:', err);
+            setError('An unexpected error occurred. Please try again.');
         }
-    };
-
-
+    }
 
     return (
         <form className="space-y-6" onSubmit={handleFormSubmit}>
@@ -66,8 +64,7 @@ const LoginForm = () => {
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <div>
-
-                <Btn text="Login" type="submit" />
+                <Btn type="submit" text="Login"/>
             </div>
         </form>
     );
