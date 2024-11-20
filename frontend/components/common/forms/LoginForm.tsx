@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import InputField from '../InputField';
 import Btn from '../Btn';
 import LinkButton from '../LinkBtn';
+import {loginValidation} from '../../../utils/loginValidation';
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
@@ -15,6 +16,13 @@ const LoginForm = () => {
 
         // Clear any previous error
         setError(null);
+
+        // Validate credentials before attempting sign-in
+        const validationError = await loginValidation(email, password);
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
 
         try {
             // Call signIn with credentials and disable automatic redirection
@@ -64,7 +72,7 @@ const LoginForm = () => {
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <div>
-                <Btn type="submit" text="Login"/>
+                <Btn type="submit" text="Login" />
             </div>
         </form>
     );
