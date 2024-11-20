@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import ProfileSection from '../../components/profile/ProfileSection';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signOut, getSession } from 'next-auth/react';
 import Btn from '../../components/common/Btn';
 
 const UserProfile: React.FC = () => {
