@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
 
+
 const navigation: { name: string; href: string }[] = [
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Challenges', href: '/challenges' },

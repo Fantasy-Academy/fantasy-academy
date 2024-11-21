@@ -43,6 +43,7 @@ const LoginForm = () => {
         }
     }
 
+
     return (
         <form className="space-y-6" onSubmit={handleFormSubmit}>
             <InputField
@@ -72,7 +73,9 @@ const LoginForm = () => {
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <div>
+
                 <Btn type="submit" text="Login" />
+
             </div>
         </form>
     );

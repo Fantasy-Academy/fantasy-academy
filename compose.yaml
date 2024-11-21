@@ -9,6 +9,7 @@ services:
         image: ghcr.io/thedevs-cz/php:8.3
         restart: unless-stopped
         tty: true
+        stdin_open: true
         volumes:
             - ./api:/app
             - ./api/.docker/docker-entrypoint.sh:/usr/local/bin/docker-php-entrypoint
@@ -31,6 +32,7 @@ services:
             target: dev
         restart: unless-stopped
         tty: true
+        stdin_open: true
         volumes:
             - ./frontend:/app
         working_dir: /app

@@ -2,10 +2,12 @@
 import React from 'react';
 import SkillCard from '../../components/dashboard/SkillCard';
 import DashboardStats from '../../components/dashboard/DashboardStats';
+
 import { useSession } from 'next-auth/react';
 
 export default function Dashboard() {
     const {data : session} = useSession();
+
 
     const skills = [
         { label: "Mistr kotle", percentage: 95 },
@@ -18,15 +20,17 @@ export default function Dashboard() {
     const points = 1000;
     const rank = 5;
     const challenges = { total: 6, completed: 4 };
-    
+
     return (
         
         <div className="flex flex-col p-4 items-center sm:items-start">
+
             {session ? (
                 <h1>welcome back {session.user?.name}</h1>
             ):(
                 <h1>you are not logged in</h1>
             )}
+
             <h1 className="text-3xl font-bold text-center sm:text-left">Your Stats</h1>
             <DashboardStats
                 season={season}

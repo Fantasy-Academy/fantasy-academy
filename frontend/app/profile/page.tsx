@@ -8,6 +8,7 @@ const UserProfile: React.FC = () => {
     const { data: session } = useSession();
     console.log(JSON.stringify(session));
 
+
     const userData = {
         skills: ["Skill 1", "Skill 2", "Skill 3"],
         rank: "Gold",
@@ -15,6 +16,7 @@ const UserProfile: React.FC = () => {
         points: 1500,
         challenges: ["Daily Login", "Weekly Coding Challenge"],
     };
+
 
     return (
         <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -31,6 +33,7 @@ const UserProfile: React.FC = () => {
             />
         </div>
     );
+
 };
 
 export default UserProfile;
