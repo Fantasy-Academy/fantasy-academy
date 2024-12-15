@@ -26,7 +26,13 @@ export const {
             const isMatch = user?.password === credentials?.password;
 
             if (isMatch) {
-              return user;
+              return {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                rank: user.rank,
+                rounds: user.rounds,
+              }
             }
             else {
               throw new Error('Check your password')

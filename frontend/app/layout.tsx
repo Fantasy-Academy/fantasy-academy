@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 import SessionWrapper from '../components/SessionWrapper';
 import '../globals.css';
-
 import Header from '../components/common/Header';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -11,7 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <head>
                     <title>Fantasy Academy</title>
                 </head>
-                <body>
+                <body className='bg-blueBlack'>
                     <Header />
                     {children}
                 </body>

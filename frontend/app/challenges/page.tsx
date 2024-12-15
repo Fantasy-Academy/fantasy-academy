@@ -1,37 +1,79 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
 import ChallengeCard from '../../components/challenges/ChallengeCard';
-import Link from 'next/link';
-import { challenges } from '../../data/challenges';
+import BackgroundWrapper from '../../layouts/BackgroundWrapper';
+import { challenges as challengesData } from '../../data/challenges';
 
 const Challenges = () => {
-    const renderChallenges = (isActive: boolean) => {
-        return challenges
-            .filter(challenge => challenge.isActive === isActive)
-            .map(challenge => (
-                <Link key={challenge.id} href={`/challenges/${challenge.id}`}>
-                    <ChallengeCard
-                        title={challenge.title}
-                        description={challenge.description}
-                        duration={challenge.duration}
-                        isActive={challenge.isActive}
-                        isCompleted={challenge.isCompleted}
-                    />
-                </Link>
-            ));
-    };
+    const [tab, setTab] = useState<'current' | 'completed' | 'expired'>('current');
+
+    const filteredChallenges = challengesData.filter((challenge) => {
+        if (tab === 'current') {
+            return challenge.duration > 0 && !challenge.isCompleted;
+        }
+        if (tab === 'completed') {
+            return challenge.isCompleted;
+        }
+        if (tab === 'expired') {
+            return challenge.duration === 0 && !challenge.isCompleted;
+        }
+        return false;
+    });
 
     return (
-        <div className="flex flex-col p-4">
-            <h1 className="text-3xl font-bold text-black text-center">Current Challenges</h1>
-            <div className="container mx-auto flex flex-wrap items-center justify-center md:justify-start">
-                {renderChallenges(true)}
-            </div>
+        <BackgroundWrapper>
+            <div className="flex items-start min-h-screen">
+                <div className="flex flex-col items-center p-4 w-full max-w-[860px] mx-auto">
 
-            <h1 className="text-3xl font-bold text-black mt-8 text-center">Expired Challenges</h1>
-            <div className="container mx-auto flex flex-wrap items-start justify-center sm:justify-start">
-                {renderChallenges(false)}
+                    <h1 className="text-4xl font-bold text-white font-alexandria mb-4 w-full text-left">
+                        CHALLENGES
+                    </h1>
+
+                    <div className="w-full">
+                        {/* Tabs (Current, Completed, Expired) */}
+                        <div className="flex justify-start mb-4 bg-[#363636]/50 backdrop-blur-md rounded-3xl p-1">
+                            <div
+                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'current' ? 'font-semibold underline' : 'font-light'}`}
+                                onClick={() => setTab('current')}
+                            >
+                                Current
+                            </div>
+                            <div
+                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'completed' ? 'font-semibold underline' : 'font-light'}`}
+                                onClick={() => setTab('completed')}
+                            >
+                                Completed
+                            </div>
+                            <div
+                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'expired' ? 'font-semibold underline' : 'font-light'}`}
+                                onClick={() => setTab('expired')}
+                            >
+                                Expired
+                            </div>
+                        </div>
+
+                        {/* Challenge Cards */}
+                        <div className="p-4 w-full bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg rounded-tl-3xl">
+                            {filteredChallenges.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {filteredChallenges.map((challenge) => (
+                                        <ChallengeCard
+                                            key={challenge.id} // Použijeme unikátní `id` jako klíč
+                                            id={challenge.id}  // Předáme `id` jako prop
+                                            title={challenge.title}
+                                            duration={challenge.duration}
+                                            isCompleted={challenge.isCompleted}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-white font-light">No challenges found.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </BackgroundWrapper>
     );
 };
 
