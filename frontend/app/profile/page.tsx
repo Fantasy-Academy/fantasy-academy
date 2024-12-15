@@ -1,20 +1,28 @@
 'use client';
 import React from 'react';
-import ProfileSection from '../../components/profile/ProfileSection';
-import { useSession, signOut, getSession } from 'next-auth/react';
 import Btn from '../../components/common/Btn';
+import { useSession, signOut } from 'next-auth/react';
+import Achievement from '../../components/common/Achievement';
+import TitleContainer from '../../components/containers/TitleContainer';
+import BackgroundWrapper from '../../layouts/BackgroundWrapper';
 
 const UserProfile: React.FC = () => {
     const { data: session } = useSession();
-    console.log(JSON.stringify(session));
 
-    const userData = {
-        skills: ["Skill 1", "Skill 2", "Skill 3"],
-        rank: "Gold",
-        achievements: ["Completed 50 challenges", "Achieved a perfect score"],
-        points: 1500,
-        challenges: ["Daily Login", "Weekly Coding Challenge"],
-    };
+    const achievements = [
+        { title: 'Achievement 1', description: 'Description of achievement 1.' },
+        { title: 'Achievement 2', description: 'Description of achievement 2.' },
+        { title: 'Achievement 3', description: 'Description of achievement 3.' },
+        { title: 'Achievement 4', description: 'Description of achievement 4.' },
+        { title: 'Achievement 5', description: 'Description of achievement 5.' },
+    ];
+    const skills = [
+        { title: 'Skill 1', description: 'Description of skill 1.' },
+        { title: 'Skill 2', description: 'Description of skill 2.' },
+        { title: 'Skill 3', description: 'Description of skill 3.' },
+        { title: 'Skill 4', description: 'Description of skill 4.' },
+        { title: 'Skill 5', description: 'Description of skill 5.' },
+    ];
 
     return (
         <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -31,6 +39,7 @@ const UserProfile: React.FC = () => {
             />
         </div>
     );
+
 };
 
 export default UserProfile;

@@ -1,15 +1,11 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import ChallengeCard from '../../components/challenges/ChallengeCard';
-import Link from 'next/link';
-import { challenges } from '../../data/challenges';
+import BackgroundWrapper from '../../layouts/BackgroundWrapper';
+import { challenges as challengesData } from '../../data/challenges';
 
 const Challenges = () => {
-    const [tab, setTab] = useState<'current' | 'completed' | "time's up">('current');
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const challengeId = searchParams.get('id');
+    const [tab, setTab] = useState<'current' | 'completed' | 'expired'>('current');
 
     const filteredChallenges = challengesData.filter((challenge) => {
         if (tab === 'current') {
@@ -18,76 +14,66 @@ const Challenges = () => {
         if (tab === 'completed') {
             return challenge.isCompleted;
         }
-        if (tab === "time's up") {
+        if (tab === 'expired') {
             return challenge.duration === 0 && !challenge.isCompleted;
         }
         return false;
     });
 
-    // Najdeme challenge podle ID z URL
-    const selectedChallenge = challengesData.find((challenge) => challenge.id === challengeId);
-
-    // Zavření modalu a reset URL
-    const closeModal = () => {
-        router.push('/challenges', { scroll: false });
-    };
-
     return (
         <BackgroundWrapper>
-            <div className="min-h-screen py-8">
-                {/* Sticky navigační lišta */}
-                <div className="w-fit mb-8 mx-auto px-8 py-4">
-                    <div className="max-w-[1200px] mx-auto flex justify-center gap-12 text-lg">
-                        <button
-                            className={`py-2 px-4 transition-colors border-b-4 ${tab === 'current'
-                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                                }`}
-                            onClick={() => setTab('current')}
-                        >
-                            Current
-                        </button>
-                        <button
-                            className={`py-2 px-4 transition-colors border-b-4 ${tab === 'completed'
-                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                                }`}
-                            onClick={() => setTab('completed')}
-                        >
-                            Completed
-                        </button>
-                        <button
-                            className={`py-2 px-4 transition-colors border-b-4 ${tab === "time's up"
-                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                                }`}
-                            onClick={() => setTab("time's up")}
-                        >
-                            Time&apos;s up
-                        </button>
-                    </div>
-                </div>
+            <div className="flex items-start min-h-screen">
+                <div className="flex flex-col items-center p-4 w-full max-w-[860px] mx-auto">
 
-                <div className="flex flex-col items-center">
-                    <div className="w-full max-w-[1200px] mx-auto">
-                        <div className="flex flex-col gap-4">
-                            {filteredChallenges.map((challenge) => (
-                                <ChallengeCard key={challenge.id} challengeCard={challenge} />
-                            ))}
+                    <h1 className="text-4xl font-bold text-white font-alexandria mb-4 w-full text-left">
+                        CHALLENGES
+                    </h1>
+
+                    <div className="w-full">
+                        {/* Tabs (Current, Completed, Expired) */}
+                        <div className="flex justify-start mb-4 bg-[#363636]/50 backdrop-blur-md rounded-3xl p-1">
+                            <div
+                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'current' ? 'font-semibold underline' : 'font-light'}`}
+                                onClick={() => setTab('current')}
+                            >
+                                Current
+                            </div>
+                            <div
+                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'completed' ? 'font-semibold underline' : 'font-light'}`}
+                                onClick={() => setTab('completed')}
+                            >
+                                Completed
+                            </div>
+                            <div
+                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'expired' ? 'font-semibold underline' : 'font-light'}`}
+                                onClick={() => setTab('expired')}
+                            >
+                                Expired
+                            </div>
+                        </div>
+
+                        {/* Challenge Cards */}
+                        <div className="p-4 w-full bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg rounded-tl-3xl">
+                            {filteredChallenges.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {filteredChallenges.map((challenge) => (
+                                        <ChallengeCard
+                                            key={challenge.id} // Použijeme unikátní `id` jako klíč
+                                            id={challenge.id}  // Předáme `id` jako prop
+                                            title={challenge.title}
+                                            duration={challenge.duration}
+                                            isCompleted={challenge.isCompleted}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-white font-light">No challenges found.</p>
+                            )}
                         </div>
                     </div>
                 </div>
-
-                {selectedChallenge && (
-                    <ChallengeModal
-                        title={selectedChallenge.title}
-                        description={selectedChallenge.description}
-                        duration={selectedChallenge.duration}
-                        isCompleted={selectedChallenge.isCompleted}
-                        onClose={closeModal}
-                    />
-                )}
             </div>
+        </BackgroundWrapper>
         </BackgroundWrapper>
     );
 };
