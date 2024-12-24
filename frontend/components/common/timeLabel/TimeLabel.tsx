@@ -18,7 +18,7 @@ const TimeLabel: React.FC<TimeLabelProps> = ({ duration, isCompleted }) => {
     })();
 
     return (
-        <div className={`px-2 py-1 rounded text-center ${labelClasses}`}>
+        <div className={`px-4 py-2 rounded text-center ${labelClasses}`}>
             <p className='font-medium'>
                 {label}
                 {typeof label === 'number' && label > 0 ? ' h' : ''}
