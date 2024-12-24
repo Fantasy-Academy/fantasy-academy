@@ -14,22 +14,25 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ id, title, duration, isCo
     const router = useRouter();
 
     const handleClick = () => {
-        router.push(`/challenges/${id}`); // Přesměrování na stránku výzvy
+        router.push(`/challenges/${id}`);
     };
 
     return (
         <div
-            className="bg-blueBlack rounded-xl shadow-md cursor-pointer p-2.5 w-full max-w-[300px]"
+            className="bg-blueBlack rounded-xl shadow-md cursor-pointer p-4 sm:p-6 w-full flex flex-col sm:flex-row gap-4"
             onClick={handleClick}
         >
-            <div className="flex flex-col gap-2.5">
-                <div className="bg-slate-200 rounded aspect-video flex items-center justify-center text-gray-700">
-                    img
-                </div>
-                <h3 className="font-semibold text-white text-center font-alexandria text-base">
+            <div className="bg-slate-200 rounded aspect-video flex items-center justify-center text-gray-700 h-40 sm:h-48">
+                img
+            </div>
+            <div className="flex flex-col w-full text-left justify-between">
+                <h3 className="text-xl sm:text-3xl font-semibold text-white font-alexandria">
                     {title}
                 </h3>
-                <TimeLabel duration={duration} isCompleted={isCompleted} />
+                <div className="flex justify-between items-center mt-4 sm:mt-2">
+                    <div></div> {/* Prázdný blok pro vyrovnání */}
+                    <TimeLabel duration={duration} isCompleted={isCompleted} />
+                </div>
             </div>
         </div>
     );

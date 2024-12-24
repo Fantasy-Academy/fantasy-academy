@@ -55,11 +55,11 @@ const Challenges = () => {
                         {/* Challenge Cards */}
                         <div className="p-4 w-full bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg rounded-tl-3xl">
                             {filteredChallenges.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                <div className="flex flex-col sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                     {filteredChallenges.map((challenge) => (
                                         <ChallengeCard
-                                            key={challenge.id} // Použijeme unikátní `id` jako klíč
-                                            id={challenge.id}  // Předáme `id` jako prop
+                                            key={challenge.id}
+                                            id={challenge.id}  
                                             title={challenge.title}
                                             duration={challenge.duration}
                                             isCompleted={challenge.isCompleted}
