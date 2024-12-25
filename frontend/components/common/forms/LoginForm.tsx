@@ -74,7 +74,7 @@ const LoginForm = () => {
             {error && <p className="text-red-500">{error}</p>}
             <div>
 
-                <Btn type="submit" text="Login" />
+                <Btn type="submit" text="Login" className="bg-cyan-400"/>
 
             </div>
         </form>
