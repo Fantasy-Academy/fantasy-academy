@@ -31,21 +31,35 @@ const Challenges = () => {
 
                     <div className="w-full">
                         {/* Tabs (Current, Completed, Expired) */}
-                        <div className="flex justify-start mb-4 bg-[#363636]/50 backdrop-blur-md rounded-3xl p-1">
+                        <div className="relative flex justify-between mb-4 bg-[#363636]/50 backdrop-blur-md rounded-3xl p-2">
+                            {/* Highlight for active tab */}
                             <div
-                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'current' ? 'font-semibold underline' : 'font-light'}`}
+                                className="absolute top-2 transform bg-white rounded-2xl h-[70%] transition-all duration-300 ease-in-out"
+                                style={{
+                                    width: '30.33%',
+                                    transform: `translateX(${tab === 'completed' ? '110%' : tab === 'expired' ? '220%' : '0'})`,
+                                }}
+                            />
+                            <div
+                                className={`relative z-10 text-center cursor-pointer px-4 py-2 flex-1 ${
+                                    tab === 'current' ? 'font-semibold text-black' : 'font-light text-white'
+                                }`}
                                 onClick={() => setTab('current')}
                             >
                                 Current
                             </div>
                             <div
-                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'completed' ? 'font-semibold underline' : 'font-light'}`}
+                                className={`relative z-10 text-center cursor-pointer px-4 py-2 flex-1 ${
+                                    tab === 'completed' ? 'font-semibold text-black' : 'font-light text-white'
+                                }`}
                                 onClick={() => setTab('completed')}
                             >
                                 Completed
                             </div>
                             <div
-                                className={`text-white cursor-pointer px-4 py-2 ${tab === 'expired' ? 'font-semibold underline' : 'font-light'}`}
+                                className={`relative z-10 text-center cursor-pointer px-4 py-2 flex-1 ${
+                                    tab === 'expired' ? 'font-semibold text-black' : 'font-light text-white'
+                                }`}
                                 onClick={() => setTab('expired')}
                             >
                                 Expired
@@ -59,7 +73,7 @@ const Challenges = () => {
                                     {filteredChallenges.map((challenge) => (
                                         <ChallengeCard
                                             key={challenge.id}
-                                            id={challenge.id}  
+                                            id={challenge.id}
                                             title={challenge.title}
                                             duration={challenge.duration}
                                             isCompleted={challenge.isCompleted}
