@@ -18,7 +18,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-white">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
         <h2 className="mt-10 text-4xl font-sourceSans3 font-bold tracking-tight text-charcoal">
           Forgot Password
@@ -26,11 +26,9 @@ export default function ForgotPassword() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form onSubmit={handleSubmit}>
-          <InputField id="email" label="Email address" type="email" autoComplete="email" name='email' placeholder="Email..." value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <div className='mt-6'>
-            <Btn>Send Request</Btn>
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <InputField id="email" label="Email address" type="email" autoComplete="email" required />
+          <Button type="submit" text="Send Request" className="bg-cyan-400"/>
         </form>
 
         <div className="mt-10 flex justify-center text-sm text-coolGray">
