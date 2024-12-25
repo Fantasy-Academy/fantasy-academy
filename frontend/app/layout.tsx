@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <head>
                     <title>Fantasy Academy</title>
                 </head>
-                <body className='bg-blueBlack'>
+                <body className='bg-slate-700'>
                     <Header />
                     {children}
                 </body>
