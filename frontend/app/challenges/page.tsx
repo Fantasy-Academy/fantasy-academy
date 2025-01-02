@@ -37,7 +37,7 @@ const Challenges = () => {
                                 className="absolute top-2 transform bg-white rounded-2xl h-[70%] transition-all duration-300 ease-in-out"
                                 style={{
                                     width: '30.33%',
-                                    transform: `translateX(${tab === 'completed' ? '110%' : tab === 'expired' ? '220%' : '0'})`,
+                                    transform: `translateX(${tab === 'completed' ? '110%' : tab === 'expired' ? '220%' : '2%'})`,
                                 }}
                             />
                             <div

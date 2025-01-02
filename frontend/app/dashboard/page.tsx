@@ -8,7 +8,6 @@ import Achievement from '../../components/common/Achievement';
 export default function Dashboard() {
     const { data: session } = useSession();
 
-
     const skills = [
         { title: 'Skill 1', description: 'Description of skill 1.' },
         { title: 'Skill 2', description: 'Description of skill 2.' },
@@ -20,16 +19,17 @@ export default function Dashboard() {
     return (
         <BackgroundWrapper>
             {/* Full height and centered content */}
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center h-screen">
                 {/* Card container */}
-                <div className="flex flex-col max-w-[860px] mx-auto bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg">
+                <div className="flex flex-col w-full max-w-[860px] mx-auto bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg p-6">
                     {/* Header Section */}
-                    <div className="flex flex-col sm:flex-row text-white">
+                    <div className="flex flex-col sm:flex-row text-white mb-6">
                         <div className="p-4 flex-1">
                             {session ? (
-                                <div className="p-4">
+                                <div>
                                     <h1 className="text-4xl text-white font-bold tracking-wider uppercase font-alexandria leading-10 whitespace-nowrap">
-                                        Welcome back<br /> <span className="capitalize text-emerald-300">{session.user?.name}</span>
+                                        Welcome back<br />
+                                        <span className="capitalize text-emerald-300">{session.user?.name}</span>
                                     </h1>
                                     <div className="pt-2 text-xl">
                                         <h3>Rank #132</h3>
@@ -42,7 +42,7 @@ export default function Dashboard() {
                                 </h1>
                             )}
                         </div>
-                        <div className="flex flex-col bg-blueBlack flex-grow p-6 rounded-2xl m-4 shadow-md text-xl">
+                        <div className="flex flex-col bg-blueBlack flex-grow p-6 rounded-2xl shadow-md text-xl">
                             <h3 className="pb-2.5">
                                 <span className="font-semibold">Season:</span> 1
                             </h3>
@@ -58,23 +58,21 @@ export default function Dashboard() {
                         </div>
                     </div>
                     {/* Skills Section */}
-                    <div className="flex sm:justify-start justify-center">
-                        <TitleContainer
-                            title="Your Skills"
-                            content={
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                                    {skills.map((skill, index) => (
-                                        <div key={index}>
-                                            <Achievement
-                                                title={skill.title}
-                                                description={skill.description}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            }
-                        />
-                    </div>
+                    <TitleContainer
+                        title="Your Skills"
+                        content={
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                {skills.map((skill, index) => (
+                                    <div key={index}>
+                                        <Achievement
+                                            title={skill.title}
+                                            description={skill.description}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        }
+                    />
                 </div>
             </div>
         </BackgroundWrapper>
