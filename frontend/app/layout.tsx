@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </head>
                 <body className='bg-slate-700'>
                     <Header />
-                    {children}
+                    <div className='pt-16'>{children}</div>
                 </body>
             </html>
         </SessionWrapper>

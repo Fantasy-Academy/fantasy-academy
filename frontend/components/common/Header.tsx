@@ -1,10 +1,9 @@
-'use client';
+'use client'; 
 import React from 'react';
 import { Disclosure, Menu } from '@headlessui/react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-
 
 const navigation: { name: string; href: string }[] = [
   { name: 'Home', href: '/home' },
@@ -19,10 +18,10 @@ function classNames(...classes: string[]): string {
 
 export const Header = () => {
   const currentPath = usePathname();
-  const {data : session} = useSession();
+  const { data: session } = useSession();
 
   return (
-    <Disclosure as="nav" className="bg-white fixed top-0 w-full z-50 shadow-md">
+    <Disclosure as="nav" className="bg-gray-800 fixed top-0 w-full z-50 shadow-lg">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
