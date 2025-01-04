@@ -17,9 +17,17 @@ const config: Config = {
       fontFamily: {
         sans: ["Open Sans", "sans-serif"],
         alexandria: ["Alexandria", "sans-serif"],
+        bebasNeue: ["Bebas Neue", "serif"],
+        sourceSans3: ["Source Sans 3", "serif"],
+        nunito: ["Nunito", "serif"]
       },
       colors: {
         blueBlack: '#2A313A',
+        pureWhite: '#FFFFFF',
+        coolGray: '#94A3B8',
+        charcoal: '#3C4858',
+        vibrantCoral: '#FF6F61',
+        goldenYellow: '#FFD700'
       },
     },
   },
