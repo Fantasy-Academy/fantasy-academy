@@ -10,7 +10,7 @@ export default function Dashboard() {
 
     const skills = [
         { title: 'Skill 1', description: 'Description of skill 1.' },
-        { title: 'Skill 2', description: 'Description of skill 2.' },
+        { title: 'Skill 2 wider title.', description: 'Description of skill 2.' },
         { title: 'Skill 3', description: 'Description of skill 3.' },
         { title: 'Skill 4', description: 'Description of skill 4.' },
         { title: 'Skill 5', description: 'Description of skill 5.' },
@@ -21,47 +21,46 @@ export default function Dashboard() {
             {/* Full height and centered content */}
             <div className="flex items-center justify-center h-screen">
                 {/* Card container */}
-                <div className="flex flex-col w-full max-w-[860px] mx-auto bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg p-6">
+                <div className="flex flex-col w-full max-w-[860px] mx-auto p-6">
                     {/* Header Section */}
                     <div className="flex flex-col sm:flex-row text-white mb-6">
-                        <div className="p-4 flex-1">
+                        <div className="p-6 flex-1 bg-white rounded">
                             {session ? (
                                 <div>
-                                    <h1 className="text-4xl text-white font-bold tracking-wider uppercase font-alexandria leading-10 whitespace-nowrap">
-                                        Welcome back<br />
-                                        <span className="capitalize text-emerald-300">{session.user?.name}</span>
+                                    <h1 className="text-5xl text-vibrantCoral font-bold tracking-wider uppercase font-bebasNeue leading-10 whitespace-nowrap">
+                                        {session.user?.name}
                                     </h1>
-                                    <div className="pt-2 text-xl">
+                                    <div className="pt-2 text-xl text-coolGray">
                                         <h3>Rank #132</h3>
                                         <h3>Round Played: 24</h3>
                                     </div>
                                 </div>
                             ) : (
-                                <h1 className="text-4xl text-white font-bold tracking-wider uppercase whitespace-nowrap">
+                                <h1 className="text-4xl text-charcoal font-bold tracking-wider uppercase whitespace-nowrap">
                                     You are not logged in
                                 </h1>
                             )}
                         </div>
-                        <div className="flex flex-col bg-blueBlack flex-grow p-6 rounded-2xl shadow-md text-xl">
-                            <h3 className="pb-2.5">
-                                <span className="font-semibold">Season:</span> 1
+                        <div className="flex flex-col flex-grow p-6 gap-0.5 font-sourceSans3 text-base">
+                            <h3 className="pb-2.5 bg-charcoal px-4 py-2 rounded">
+                                Season: 1
                             </h3>
-                            <h3 className="pb-2.5">
-                                <span className="font-semibold">Points:</span> 1000
+                            <h3 className="pb-2.5 bg-charcoal px-4 py-2 rounded">
+                                Points: 1000
                             </h3>
-                            <h3 className="pb-2.5">
-                                <span className="font-semibold">Current challenges:</span> 6
+                            <h3 className="pb-2.5 bg-charcoal px-4 py-2 rounded">
+                                Current challenges: 6
                             </h3>
-                            <h3 className="pb-2.5">
-                                <span className="font-semibold">Completed challenges:</span> 4
+                            <h3 className="pb-2.5 bg-charcoal px-4 py-2 rounded">
+                                Completed challenges: 4
                             </h3>
                         </div>
                     </div>
                     {/* Skills Section */}
                     <TitleContainer
-                        title="Your Skills"
+                    title=''
                         content={
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            <div className='flex flex-row flex-wrap'>
                                 {skills.map((skill, index) => (
                                     <div key={index}>
                                         <Achievement

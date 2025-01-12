@@ -8,18 +8,18 @@ const TimeLabel: React.FC<TimeLabelProps> = ({ duration, isCompleted }) => {
 
     const labelClasses = (() => {
         if (typeof label === 'number') {
-            return 'text-charcoal';
+            return 'text-vibrantCoral';
         } else if (label === 'COMPLETED') {
             return 'text-pistachio';
         } else if (label === "TIME'S UP") {
-            return 'text-vibrantCoral';
+            return 'text-white';
         }
         return '';
     })();
 
     return (
-        <div className={`px-4 py-2 rounded text-center bg-white ${labelClasses}`}>
-            <p className='font-bebasNeue font-normal not-italic text-xl'>
+        <div className={`px-4 py-2 rounded text-center ${labelClasses}`}>
+            <p className='font-bebasNeue font-normal not-italic text-2xl'>
                 {label}
                 {typeof label === 'number' && label > 0 ? ' h' : ''}
             </p>

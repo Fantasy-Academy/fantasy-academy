@@ -9,7 +9,7 @@ export interface Challenge {
 
 export const challenges: Challenge[] = [
     { id: '1', title: 'Challenge 1', duration: 27, isCompleted: false, description: 'Complete 5 tasks in a week.', guide: 'Focus on prioritizing important tasks each day.' },
-    { id: '2', title: 'Challenge 2', duration: 0, isCompleted: true, description: 'Read a book.', guide: 'Dedicate 30 minutes daily to reading.' },
+    { id: '2', title: 'Challenge of the day 2', duration: 0, isCompleted: true, description: 'Read a book.', guide: 'Dedicate 30 minutes daily to reading.' },
     { id: '3', title: 'Challenge 3', duration: 12, isCompleted: false, description: 'Run 5 km.', guide: 'Start with short distances and increase gradually.' },
     { id: '4', title: 'Challenge 4', duration: 0, isCompleted: true, description: 'Meditate for 10 days.', guide: 'Find a quiet place and focus on breathing for 10 minutes daily.' },
     { id: '5', title: 'Challenge 5', duration: 48, isCompleted: false, description: 'Learn 10 new words.', guide: 'Use flashcards to memorize and review daily.' },

@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import Btn from '../../components/common/Btn';
+import Btn from '../../components/button/Btn';
 import { useSession, signOut } from 'next-auth/react';
 import Achievement from '../../components/common/Achievement';
 import TitleContainer from '../../components/containers/TitleContainer';
@@ -25,19 +25,68 @@ const UserProfile: React.FC = () => {
     ];
 
     return (
-        <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{session?.user?.name}</h2>
-            <ProfileSection title="Rank" items={[userData.rank]} />
-            <ProfileSection title="Skills" items={userData.skills} />
-            <ProfileSection title="Achievements" items={userData.achievements} />
-            <ProfileSection title="Points" items={[userData.points.toString()]} />
-            <ProfileSection title="Challenges" items={userData.challenges} />
-            <Btn
-                type="button"
-                text="Logout"
-                onClick={() => signOut({ callbackUrl: 'http://localhost:3000/login' })}
-            />
-        </div>
+        <BackgroundWrapper>
+            <div className="flex flex-col gap-8 justify-center text-left pb-8 px-4 sm:px-8 max-w-5xl mx-auto mt-8">
+                <div className="p-6 flex-1 bg-white rounded">
+                    {session ? (
+                        <div>
+                            <h1 className="text-5xl text-vibrantCoral font-bold tracking-wider uppercase font-bebasNeue leading-10 whitespace-nowrap">
+                                {session.user?.name}
+                            </h1>
+                            <div className="pt-2 text-xl text-coolGray">
+                                <h3>Rank #132</h3>
+                                <h3>Round Played: 24</h3>
+                            </div>
+                        </div>
+                    ) : (
+                        <h1 className="text-4xl text-charcoal font-bold tracking-wider uppercase whitespace-nowrap">
+                            No user
+                        </h1>
+                    )}
+                </div>
+                <div className="w-full flex flex-col gap-8">
+                    <div>
+                        <hr className='h-1 bg-charcoal' />
+                        <TitleContainer
+                            title="Your Achievements"
+                            content={
+                                <div className="flex flex-row gap-4 flex-wrap">
+                                    {achievements.map((achievement, index) => (
+                                        <div key={index}>
+                                            <Achievement
+                                                title={achievement.title}
+                                                description={achievement.description}
+                                            />
+                                        </div>
+                                    ))}
+                                    <div className='flex flex-col justify-end mb-2'>
+                                        <Btn text="Show more" className='bg-charcoal' />
+                                    </div>
+                                </div>
+                            }
+                        />
+                    </div>
+                    <div>
+                        <hr className='h-1 bg-charcoal' />
+                        <TitleContainer
+                            title="Your Skills"
+                            content={
+                                <div className="flex gap-4 flex-wrap">
+                                    {skills.map((skill, index) => (
+                                        <div key={index}>
+                                            <Achievement
+                                                title={skill.title}
+                                                description={skill.description}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            }
+                        />
+                    </div>
+                </div>
+            </div>
+        </BackgroundWrapper>
     );
 
 };

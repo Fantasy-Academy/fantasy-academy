@@ -1,10 +1,10 @@
 'use client';
 import { signIn } from "next-auth/react";
 import React, { useState } from 'react';
-import InputField from '../InputField';
-import Btn from '../Btn';
+import InputField from '../../inputField/InputField';
+import Btn from '../../button/Btn';
 import LinkButton from '../LinkBtn';
-import {loginValidation} from '../../../utils/loginValidation';
+import { loginValidation } from '../../../utils/loginValidation';
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
@@ -44,7 +44,7 @@ const LoginForm = () => {
     }
 
     return (
-        <form className="space-y-6" onSubmit={handleFormSubmit}>
+        <form onSubmit={handleFormSubmit}>
             <InputField
                 id="email"
                 label="Email address"
@@ -54,6 +54,7 @@ const LoginForm = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
+                placeholder="Email..."
             />
             <div>
                 <div className="flex flex-col gap-2">
@@ -66,15 +67,14 @@ const LoginForm = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="current-password"
                         required
+                        placeholder="Password..."
                     />
                     <LinkButton link="/forgotPassword" text="Forgot password?" />
                 </div>
             </div>
-            {error && <p className="text-red-500">{error}</p>}
-            <div>
-
-                <Btn type="submit" text="Login" className="bg-cyan-400"/>
-
+            {error && <p className="text-vibrantCoral">{error}</p>}
+            <div className='mt-6'>
+                <Btn type="submit" text="Login" className="bg-vibrantCoral" />
             </div>
         </form>
     );

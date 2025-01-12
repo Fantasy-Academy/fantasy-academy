@@ -6,7 +6,7 @@ interface BackgroundLayoutWrapperProps {
 
 const BackgroundLayoutWrapper: React.FC<BackgroundLayoutWrapperProps> = ({ children }) => {
     return (
-        <div className="relative min-h-screen w-full">
+        <div className="relative min-h-screen w-full bg-darkWhite">
             <div className="relative z-10 pt-4">
                 {children}
             </div>
