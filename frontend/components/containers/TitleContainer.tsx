@@ -7,8 +7,8 @@ type ComponentNameProps = {
 
 const TitleContainer: FC<ComponentNameProps> = ({ title, content }) => {
     return (
-        <div className='flex flex-col bg-blueBlack shadow-xl rounded-xl p-6 m-3 w-fit h-fit shadow-md'>
-            <h1 className='font-alexandria text-white text-2xl font-bold pb-1'>{title}</h1>
+        <div className='flex flex-col w-fit h-fit'>
+            <h1 className='font-bebasNeue text-charcoal text-2xl font-bold pb-1'>{title}</h1>
             <div className='flex flex-row flex-wrap justify-center items-center'>
                 {content}
             </div>

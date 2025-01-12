@@ -1,11 +1,11 @@
 'use client';
 import React from 'react';
 import { useParams } from 'next/navigation';
-import TimeLabel from '../../../components/common/timeLabel/TimeLabel';
+import TimeLabel from '../../../components/timeLabel/TimeLabel';
 import BackgroundWrapper from '../../../layouts/BackgroundWrapper';
 import { challenges } from '../../../data/challenges';
 import ChallengeQuestBtns from '../../../components/challenges/ChallengeQuestBtns';
-
+import ChallengeCard from '../../../components/challenges/ChallengeCard';
 
 const ChallengeDetail = () => {
     const { id } = useParams();
@@ -20,44 +20,33 @@ const ChallengeDetail = () => {
             </BackgroundWrapper>
         );
     }
+
     return (
         <BackgroundWrapper>
-            <div className="flex flex-col items-center justify-center min-h-screen px-4">
-                {/* Karta Challenge */}
-                <div className="text-white flex flex-col gap-4 p-4 bg-[#363636]/50 backdrop-blur-md rounded-3xl shadow-lg max-w-[1000px] w-full mx-auto">
-                    {/* IMG Row */}
-                    <div className="flex flex-col md:flex-row bg-blueBlack rounded-xl shadow-md p-4 gap-4">
-                        <div
-                            className="bg-slate-200 rounded flex items-center justify-center text-gray-700 w-full md:w-[450px] h-[225px]"
-                        >
-                            IMG
-                        </div>
-                        <div
-                            className="flex flex-col w-full"
-                            style={{ maxWidth: '472px' }}
-                        >
-                            <h3 className="font-bold text-3xl font-alexandria">{challenge.title}</h3>
-                            <p className="mt-2 text-sm md:text-base">{challenge.description}</p>
-                        </div>
+            <div className="flex items-center justify-center min-h-screen px-12">
+                <div className="flex flex-col items-center justify-center gap-8 w-full max-w-[1100px]">
+                    {/* Karta Challenge */}
+                    <div className="w-full pb-6">
+                        <ChallengeCard
+                            id={challenge.id}
+                            title={challenge.title}
+                            description={challenge.description}
+                            duration={challenge.duration}
+                            isCompleted={challenge.isCompleted}
+                            isTimeUp={challenge.duration === 0 && !challenge.isCompleted}
+                        />
                     </div>
-    
+
                     {/* Guide Row */}
-                    <div className="flex flex-col gap-1">
-                        <h3 className="font-bold text-3xl font-alexandria">Guide</h3>
-                        <p className="text-sm md:text-base">{challenge.guide}</p>
+                    <div className="flex flex-col text-charcoal w-full">
+                        <h3 className="font-bold text-4xl font-bebasNeue">Guide</h3>
+                        <p className="text-base font-nunito">{challenge.guide}</p>
                     </div>
-    
-                    {/* Time Label */}
-                    <div className="flex justify-end">
-                        <div className="inline-flex">
-                            <TimeLabel duration={challenge.duration} isCompleted={challenge.isCompleted} />
-                        </div>
+
+                    {/* ChallengeQuestBtns */}
+                    <div className="w-full">
+                        <ChallengeQuestBtns />
                     </div>
-                </div>
-    
-                {/* ChallengeQuestBtns */}
-                <div className="w-full max-w-[1000px] mx-auto">
-                    <ChallengeQuestBtns />
                 </div>
             </div>
         </BackgroundWrapper>

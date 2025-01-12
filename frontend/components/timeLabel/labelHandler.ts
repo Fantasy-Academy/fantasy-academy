@@ -9,6 +9,6 @@ export const labelHandler = ({ duration, isCompleted }: LabelHandlerProps): stri
     } else if (isCompleted) {
         return 'COMPLETED';
     } else {
-        return 'EXPIRED';
+        return "TIME'S UP";
     }
 };

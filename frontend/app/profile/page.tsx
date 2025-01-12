@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import Btn from '../../components/common/Btn';
+import Btn from '../../components/button/Btn';
 import { useSession, signOut } from 'next-auth/react';
 import Achievement from '../../components/common/Achievement';
 import TitleContainer from '../../components/containers/TitleContainer';
@@ -26,55 +26,64 @@ const UserProfile: React.FC = () => {
 
     return (
         <BackgroundWrapper>
-            <div className="flex flex-col items-start justify-center text-left pb-8 min-h-screen px-4 sm:px-8 max-w-5xl mx-auto">
-                <div className="flex flex-row justify-between mb-8 mt-16 w-full px-4">
+            <div className="flex flex-col gap-8 justify-center text-left pb-8 px-4 sm:px-8 max-w-5xl mx-auto mt-8">
+                <div className="p-6 flex-1 bg-white rounded">
+                    {session ? (
+                        <div>
+                            <h1 className="text-5xl text-vibrantCoral font-bold tracking-wider uppercase font-bebasNeue leading-10 whitespace-nowrap">
+                                {session.user?.name}
+                            </h1>
+                            <div className="pt-2 text-xl text-coolGray">
+                                <h3>Rank #132</h3>
+                                <h3>Round Played: 24</h3>
+                            </div>
+                        </div>
+                    ) : (
+                        <h1 className="text-4xl text-charcoal font-bold tracking-wider uppercase whitespace-nowrap">
+                            No user
+                        </h1>
+                    )}
+                </div>
+                <div className="w-full flex flex-col gap-8">
                     <div>
-                        <h2 className="text-5xl font-bold text-white mb-2 font-alexandria">{session?.user?.name}</h2>
-                        <h3 className="text-white text-lg">Rank #132</h3>
-                        <h3 className="text-white text-lg">Round Played: 24</h3>
-                    </div>
-
-                    <div>
-                        <Btn
-                            type="button"
-                            className='bg-cyan-400'
-                            text="Logout"
-                            onClick={() => signOut({ callbackUrl: 'http://localhost:3000/login' })}
+                        <hr className='h-1 bg-charcoal' />
+                        <TitleContainer
+                            title="Your Achievements"
+                            content={
+                                <div className="flex flex-row gap-4 flex-wrap">
+                                    {achievements.map((achievement, index) => (
+                                        <div key={index}>
+                                            <Achievement
+                                                title={achievement.title}
+                                                description={achievement.description}
+                                            />
+                                        </div>
+                                    ))}
+                                    <div className='flex flex-col justify-end mb-2'>
+                                        <Btn text="Show more" className='bg-charcoal' />
+                                    </div>
+                                </div>
+                            }
                         />
                     </div>
-                </div>
-
-                <div className="space-y-8 w-full">
-                    <TitleContainer
-                        title="Your Achievements"
-                        content={
-                            <div className="flex gap-4 flex-wrap">
-                                {achievements.map((achievement, index) => (
-                                    <div key={index}>
-                                        <Achievement
-                                            title={achievement.title}
-                                            description={achievement.description}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        }
-                    />
-                    <TitleContainer
-                        title="Your Skills"
-                        content={
-                            <div className="flex gap-4 flex-wrap">
-                                {skills.map((skill, index) => (
-                                    <div key={index}>
-                                        <Achievement
-                                            title={skill.title}
-                                            description={skill.description}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        }
-                    />
+                    <div>
+                        <hr className='h-1 bg-charcoal' />
+                        <TitleContainer
+                            title="Your Skills"
+                            content={
+                                <div className="flex gap-4 flex-wrap">
+                                    {skills.map((skill, index) => (
+                                        <div key={index}>
+                                            <Achievement
+                                                title={skill.title}
+                                                description={skill.description}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </BackgroundWrapper>
