@@ -22,61 +22,51 @@ const Challenges = () => {
 
     return (
         <BackgroundWrapper>
-            <div className="flex items-start min-h-screen">
-                <div className="flex flex-col items-center p-4 w-full max-w-[1200px] mx-auto mt-8">
-                    <div className="w-full">
-                        {/* Tabs (Current, Completed, Time's Up) */}
-                        <div className="relative flex justify-between  mb-2 bg-charcoal px-4 py-4 mb-8">
-                            {/* Highlight for active tab */}
-                            <div
-                                className="absolute top-2 transform bg-white shadow-sharp h-[70%] text-charcoal font-regular font-sourceSans3 transition-all duration-300 ease-in-out"
-                                style={{
-                                    width: '30.33%',
-                                    transform: `translateX(${tab === 'completed' ? '109%' : tab === "time's up" ? '216%' : '2%'})`,
-                                }}
-                            />
-                            <div
-                                className={`relative z-10 text-center text-charcoal font-bold font-sourceSans3 cursor-pointer px-4 py-2 flex-1 ${tab === 'current' ? 'font-semibold text-black' : 'font-light text-white'
-                                    }`}
-                                onClick={() => setTab('current')}
-                            >
-                                On The Field
-                            </div>
-                            <div
-                                className={`relative z-10 text-center text-charcoal font-bold font-sourceSans3 cursor-pointer px-4 py-2 flex-1 ${tab === 'completed' ? 'font-semibold text-black' : 'font-light text-white'
-                                    }`}
-                                onClick={() => setTab('completed')}
-                            >
-                                Completed
-                            </div>
-                            <div
-                                className={`relative z-10 text-center text-charcoal font-bold font-sourceSans3 cursor-pointer px-4 py-2 flex-1 ${tab === "time's up" ? 'font-semibold text-black' : 'font-light text-white'
-                                    }`}
-                                onClick={() => setTab("time's up")}
-                            >
-                                Time&apos;s Up
-                            </div>
-                        </div>
+            <div className="min-h-screen py-8">
+                {/* Sticky navigační lišta */}
+                <div className="w-fit mb-8 mx-auto px-8 py-4">
+                    {/* Vnitřní wrapper, který zajistí vycentrování obsahu */}
+                    <div className="max-w-[1200px] mx-auto flex justify-center gap-16 text-lg">
+                        <button
+                            className={`py-2 px-2 transition-colors border-b-4 ${
+                                tab === 'current'
+                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                            }`}
+                            onClick={() => setTab('current')}
+                        >
+                            Current
+                        </button>
+                        <button
+                            className={`py-2 transition-colors border-b-4 ${
+                                tab === 'completed'
+                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                            }`}
+                            onClick={() => setTab('completed')}
+                        >
+                            Completed
+                        </button>
+                        <button
+                            className={`py-2 transition-colors border-b-4 ${
+                                tab === "time's up"
+                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                            }`}
+                            onClick={() => setTab("time's up")}
+                        >
+                            Time's up
+                        </button>
+                    </div>
+                </div>
 
-                        {/* Challenge Cards */}
-                        <div className="p-2">
-                            {filteredChallenges.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-[4px]">
-                                    {filteredChallenges.map((challenge) => (
-                                        <ChallengeCard
-                                            key={challenge.id}
-                                            id={challenge.id}
-                                            title={challenge.title}
-                                            description={challenge.description}
-                                            duration={challenge.duration}
-                                            isCompleted={challenge.isCompleted}
-                                            isTimeUp={challenge.duration === 0 && !challenge.isCompleted}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-center text-gray-700 font-light">No challenges found.</p>
-                            )}
+                {/* Obsah s challenge kartami */}
+                <div className="flex flex-col items-center">
+                    <div className="w-full max-w-[1200px] mx-auto">
+                        <div className="flex flex-col gap-4">
+                            {filteredChallenges.map((challenge) => (
+                                <ChallengeCard key={challenge.id} {...challenge} />
+                            ))}
                         </div>
                     </div>
                 </div>
