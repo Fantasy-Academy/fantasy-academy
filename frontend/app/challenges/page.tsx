@@ -55,7 +55,7 @@ const Challenges = () => {
                             }`}
                             onClick={() => setTab("time's up")}
                         >
-                            Time's up
+                            Time&apos;s up
                         </button>
                     </div>
                 </div>
