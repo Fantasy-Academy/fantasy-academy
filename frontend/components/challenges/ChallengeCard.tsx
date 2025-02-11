@@ -20,51 +20,30 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ id, title, description, d
         router.push(`/challenges/${id}`);
     };
 
-    // Dynamické třídy na základě stavu
-    const titleColor = isTimeUp
-        ? 'text-white' // Pro "TIME'S UP"
-        : isCompleted
-            ? 'text-charcoal' // Pro dokončené výzvy
-            : 'text-vibrantCoral'; // Výchozí barva
-    const descriptionColor = isTimeUp
-        ? 'text-white' // Pro "TIME'S UP"
-        : isCompleted
-            ? 'text-pistachio' // Pro dokončené výzvy
-            : 'text-charcoal'; // Výchozí barva
-    const bgColor = isTimeUp ? 'bg-vibrantCoral' : 'bg-white'; // Pozadí pro "TIME'S UP"
-
     return (
-        <div
-            className={`rounded px-4 py-4 cursor-pointer shadow-none transition-shadow duration-[230ms] hover:shadow-sharp flex flex-col sm:flex-row gap-4 ${bgColor} my-0.5 mx-2`}
-            onClick={handleClick}
-        >
-            {/* Obrazová část */}
+        <div>
+            <hr className="border-0 h-[1px] bg-black"/>
             <div
-                className="bg-slate-200 flex items-center justify-center text-gray-700 w-full sm:w-[200px] h-[150px]"
+                className={`group rounded px-2 py-2 cursor-pointer transition-bg duration-[120ms] hover:bg-vibrantCoral flex flex-row gap-6  mt-3 mx-2 w-full`}
+                onClick={handleClick}
             >
-                img
-            </div>
-
-            {/* Textová část */}
-            <div className="flex flex-col w-full justify-between">
-                <div className="flex flex-col">
-                    {/* Titulek */}
-                    <h3 className={`text-lg sm:text-xl lg:text-2xl font-bold font-sourceSans3 ${titleColor}`}>
+                <div className='flex flex-col gap-4 w-fit'>
+                    <div className="bg-slate-200 flex items-center justify-center text-gray-700 w-full sm:w-[200px] h-[150px]">
+                        img
+                    </div>
+                    <TimeLabel duration={duration} isCompleted={isCompleted} />
+                </div>
+                <div className='flex flex-col'>
+                    <h3 className="font-sourceSans3 text-2xl font-bold text-vibrantCoral group-hover:text-white">
                         {title}
                     </h3>
-                    {/* Popis */}
-                    <p className={`text-sm sm:text-base font-regular font-nunito ${descriptionColor}`}>
+                    <p className='font-sourceSans3 text-md font-normal text-black group-hover:text-white'>
                         {description}
                     </p>
                 </div>
-
-                {/* Časová informace */}
-                <div className="flex justify-end items-center mt-4 sm:mt-2">
-                    <TimeLabel duration={duration} isCompleted={isCompleted} />
-                </div>
             </div>
         </div>
-    );
+    )
 };
 
 export default ChallengeCard;
