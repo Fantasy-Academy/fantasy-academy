@@ -18,7 +18,8 @@ const config: Config = {
         alexandria: ["Alexandria", "sans-serif"],
         bebasNeue: ['Bebas Neue', 'sans-serif'],
         sourceSans3: ["Source Sans 3", "san-serif"],
-        nunito: ["Nunito", "sans-serif"]
+        nunito: ["Nunito", "sans-serif"],
+        caveat: ["Caveat", "sans-serif"]
       },
       colors: {
         blueBlack: '#2A313A',
