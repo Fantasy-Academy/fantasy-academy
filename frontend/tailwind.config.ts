@@ -33,6 +33,7 @@ const config: Config = {
       },
       boxShadow: {
         'sharp': '6px 6px 0px 0px #94A3B8',
+        'main': '6px 6px 0px 0px #3C4858',
       },
     },
   },

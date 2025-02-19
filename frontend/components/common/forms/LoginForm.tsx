@@ -69,10 +69,10 @@ const LoginForm = () => {
                         required
                         placeholder="Password..."
                     />
+                    {error && <p className="text-vibrantCoral">{error}</p>}
                     <LinkButton link="/forgotPassword" text="Forgot password?" />
                 </div>
             </div>
-            {error && <p className="text-vibrantCoral">{error}</p>}
             <div className='mt-6'>
                 <Btn type="submit" text="Login" className="bg-vibrantCoral" />
             </div>

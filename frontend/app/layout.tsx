@@ -15,6 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <body className='bg-darkWhite'>
                     <Header />
                     <div className='pt-16'>{children}</div>
+                    <Footer />
                 </body>
             </html>
         </SessionWrapper>
