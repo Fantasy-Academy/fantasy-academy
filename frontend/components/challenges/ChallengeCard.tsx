@@ -3,21 +3,17 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import TimeLabel from '../timeLabel/TimeLabel';
+import type { ChallengeCard } from '../../types/challengeCard.types';
 
 interface ChallengeCardProps {
-    id: string;
-    title: string;
-    description: string;
-    duration: number;
-    isCompleted: boolean;
-    isTimeUp?: boolean;
+    challengeCard: ChallengeCard
 }
 
-const ChallengeCard: React.FC<ChallengeCardProps> = ({ id, title, description, duration, isCompleted }) => {
+const ChallengeCard: React.FC<ChallengeCardProps> = ({ challengeCard }) => {
     const router = useRouter();
 
     const openModal = () => {
-        router.push(`/challenges?id=${id}`, { scroll: false });
+        router.push(`/challenges?id=${challengeCard.id}`, { scroll: false });
     };
 
     return (
@@ -31,14 +27,14 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ id, title, description, d
                     <div className="bg-slate-200 flex items-center justify-center text-gray-700 w-full sm:w-[200px] h-[150px]">
                         img
                     </div>
-                    <TimeLabel duration={duration} isCompleted={isCompleted} />
+                    <TimeLabel duration={challengeCard.duration} isCompleted={challengeCard.isCompleted} />
                 </div>
                 <div className='flex flex-col'>
                     <h3 className="font-sourceSans3 text-2xl font-bold text-vibrantCoral group-hover:text-white">
-                        {title}
+                        {challengeCard.title}
                     </h3>
                     <p className='font-sourceSans3 text-md font-normal text-black group-hover:text-white'>
-                        {description}
+                        {challengeCard.description}
                     </p>
                 </div>
             </div>

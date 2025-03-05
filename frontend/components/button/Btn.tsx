@@ -1,21 +1,25 @@
 import React from 'react';
+import type { Button as ButtonType } from '../../types/button.types';
 
 interface ButtonProps {
-  type?: 'button' | 'submit' | 'reset';
-  onClick?: () => void;
-  text: string;
-  className?: string;
-  disabled?: boolean;  // <-- Přidáno
+  button?: ButtonType; // Umožňuje, aby button byl volitelný
 }
 
-const Button: React.FC<ButtonProps> = ({ type = 'button', onClick, text, className = '' }) => {
-  const textColorClass = /\btext-[a-zA-Z0-9-]+\b/.test(className) ? '' : 'text-white';
+const Button: React.FC<ButtonProps> = ({ button = {} }) => { // Přidá výchozí hodnotu, aby button nebyl undefined
+  const {
+    type = 'button',
+    onClick,
+    text = 'Default',
+    className = '',
+    disabled = false,
+  } = button; // Bezpečné destrukturování
 
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`flex w-full justify-center hover:scale-[105%] px-6 py-3 text-base font-bold font-sourceSans3 transition-scale duration-[230ms] ${textColorClass} ${className}`}
+      className={`flex w-full justify-center hover:scale-[105%] px-6 py-3 text-base font-bold font-sourceSans3 transition-scale duration-[230ms] ${className}`.trim()}
+      disabled={disabled}
     >
       {text}
     </button>

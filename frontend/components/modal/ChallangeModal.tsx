@@ -11,16 +11,16 @@ interface ChallengeModalProps {
 }
 
 const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose }) => {
-    const [btnColors, setBtnColors] = useState<Record<string, string>>({});
+    const [btnStates, setBtnStates] = useState<Record<string, boolean>>({});
     
     const handleButtonClick = (btnText: string) => {
-        setBtnColors(prev => {
-            const newColors = { ...prev, [btnText]: prev[btnText] === 'bg-goldenYellow' ? 'bg-white' : 'bg-goldenYellow' };
-            return newColors;
-        });
+        setBtnStates(prev => ({
+            ...prev,
+            [btnText]: !prev[btnText] // Přepínání stavu tlačítka
+        }));
     };
 
-    const isAnySelected = Object.values(btnColors).includes('bg-goldenYellow');
+    const isAnySelected = Object.values(btnStates).includes(true);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -43,22 +43,26 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
                         {["A", "B", "C", "Martinez & Chuanez dorez toro", "E", "F", "G", "H", "I", "J"].map((text) => (
                             <Btn 
                                 key={text}
-                                text={text} 
-                                className={`${btnColors[text] || 'bg-white'} text-charcoal py-4 text-base`} 
-                                onClick={() => handleButtonClick(text)} 
+                                button={{
+                                    text: text,
+                                    className: `${btnStates[text] ? 'bg-goldenYellow' : 'bg-white'} text-charcoal py-4 text-base`,
+                                    onClick: () => handleButtonClick(text)
+                                }} 
                             />
                         ))}
                     </div>
                 </div>
                 <div className="mt-6">
                     <Btn 
-                        text="Pick a bet!" 
-                        className={`
-                            ${isAnySelected ? 'bg-vibrantCoral cursor-pointer' : 'bg-coolGray cursor-not-allowed'}
-                            text-white w-full py-4 text-lg font-bold
-                        `} 
-                        onClick={isAnySelected ? () => alert("Bet placed!") : undefined}
-                        disabled={!isAnySelected}
+                        button={{
+                            text: "Pick a bet!", 
+                            className: `
+                                ${isAnySelected ? 'bg-vibrantCoral cursor-pointer' : 'bg-coolGray cursor-not-allowed'}
+                                text-white w-full py-4 text-lg font-bold
+                            `,
+                            onClick: isAnySelected ? () => alert("Bet placed!") : undefined,
+                            disabled: !isAnySelected
+                        }} 
                     />
                 </div>
             </div>
