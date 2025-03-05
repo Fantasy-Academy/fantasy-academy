@@ -40,31 +40,28 @@ const Challenges = () => {
                 <div className="w-fit mb-8 mx-auto px-8 py-4">
                     <div className="max-w-[1200px] mx-auto flex justify-center gap-12 text-lg">
                         <button
-                            className={`py-2 px-4 transition-colors border-b-4 ${
-                                tab === 'current'
-                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                            }`}
+                            className={`py-2 px-4 transition-colors border-b-4 ${tab === 'current'
+                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                }`}
                             onClick={() => setTab('current')}
                         >
                             Current
                         </button>
                         <button
-                            className={`py-2 px-4 transition-colors border-b-4 ${
-                                tab === 'completed'
-                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                            }`}
+                            className={`py-2 px-4 transition-colors border-b-4 ${tab === 'completed'
+                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                }`}
                             onClick={() => setTab('completed')}
                         >
                             Completed
                         </button>
                         <button
-                            className={`py-2 px-4 transition-colors border-b-4 ${
-                                tab === "time's up"
-                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                            }`}
+                            className={`py-2 px-4 transition-colors border-b-4 ${tab === "time's up"
+                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                }`}
                             onClick={() => setTab("time's up")}
                         >
                             Time&apos;s up
@@ -76,7 +73,7 @@ const Challenges = () => {
                     <div className="w-full max-w-[1200px] mx-auto">
                         <div className="flex flex-col gap-4">
                             {filteredChallenges.map((challenge) => (
-                                <ChallengeCard key={challenge.id} {...challenge} />
+                                <ChallengeCard key={challenge.id} challengeCard={challenge} />
                             ))}
                         </div>
                     </div>
