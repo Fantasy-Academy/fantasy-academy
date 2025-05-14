@@ -1,38 +1,51 @@
+'use client';
+import { signIn } from "next-auth/react";
 import React, { useState } from 'react';
-import InputField from '../InputField';
+import InputField from '../../inputField/InputField';
+import Btn from '../../button/Btn';
 import LinkButton from '../LinkBtn';
-import { doCredentialLogin } from '../../../app/actions';
-import Btn from '../Btn';
-import { useRouter } from 'next/navigation';
-
+import { loginValidation } from '../../../utils/loginValidation';
 
 const LoginForm = () => {
-    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     async function handleFormSubmit(e: React.FormEvent) {
         e.preventDefault();
-        try {
-            const formData = new FormData(e.currentTarget as HTMLFormElement);
-            const response = await doCredentialLogin(formData);
 
-            if (!!response.error){
+        // Clear any previous error
+        setError(null);
 
-            }else{
-                router.push('/profile')
-            }
-
-        } catch (error) {
-            console.error(e);
+        // Validate credentials before attempting sign-in
+        const validationError = await loginValidation(email, password);
+        if (validationError) {
+            setError(validationError);
+            return;
         }
-    };
 
-    
+        try {
+            // Call signIn with credentials and disable automatic redirection
+            const result = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            });
+
+            if (result?.error) {
+                setError(result.error); // Display error message if login fails
+            } else {
+                window.location.href = '/profile'; // Redirect manually on success
+            }
+        } catch (err) {
+            console.error('Login failed:', err);
+            setError('An unexpected error occurred. Please try again.');
+        }
+    }
+
 
     return (
-        <form className="space-y-6" onSubmit={handleFormSubmit}>
+        <form onSubmit={handleFormSubmit}>
             <InputField
                 id="email"
                 label="Email address"
@@ -42,6 +55,7 @@ const LoginForm = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
+                placeholder="Email..."
             />
             <div>
                 <div className="flex flex-col gap-2">
@@ -54,14 +68,14 @@ const LoginForm = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="current-password"
                         required
+                        placeholder="Password..."
                     />
+                    {error && <p className="text-vibrantCoral">{error}</p>}
                     <LinkButton link="/forgotPassword" text="Forgot password?" />
                 </div>
             </div>
-            {error && <p className="text-red-500">{error}</p>}
-            <div>
-
-                <Btn text="Login" type="submit" />
+            <div className='mt-6'>
+                <Btn type="submit" text="Login" className="bg-vibrantCoral" />
             </div>
         </form>
     );

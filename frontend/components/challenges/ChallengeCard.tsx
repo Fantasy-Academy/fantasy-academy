@@ -1,29 +1,42 @@
+'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import TimeLabel from '../timeLabel/TimeLabel';
+import type { ChallengeCard } from '../../types/challengeCard.types';
 
 interface ChallengeCardProps {
-    title: string;
-    description: string;
-    duration: number;
-    isActive: boolean;
-    isCompleted: boolean; 
+    challengeCard: ChallengeCard
 }
 
-const ChallengeCard: React.FC<ChallengeCardProps> = ({ title, description, duration, isActive, isCompleted }) => {
+const ChallengeCard: React.FC<ChallengeCardProps> = ({ challengeCard }) => {
+    const router = useRouter();
+
+    const openModal = () => {
+        router.push(`/challenges?id=${challengeCard.id}`, { scroll: false });
+    };
+
     return (
-        <div 
-            className={`container w-full max-w-56 rounded text-white p-4 shadow-lg mx-2 my-4 
-                ${isActive ? 'bg-slate-100' : 'bg-gray-300 opacity-75'}`}
-        >
-            <div className={`h-32 ${isActive ? 'bg-white' : 'bg-gray-400'} rounded`} />
-            <h3 className={`font-bold text-base pt-2 ${isActive ? 'text-black' : 'text-gray-600'}`}>{title}</h3>
-            <p className={`text-sm ${isActive ? 'text-slate-900' : 'text-gray-500'}`}>{description}</p>
-            {isActive && (
-                <div className='flex justify-end mt-2'>
-                    <div className={`rounded-xl px-4 py-2 inline-flex justify-center shadow-lg ${isCompleted ? 'bg-green-500' : 'bg-gray-800'}`}>
-                        <p className='text-white text-sm font-bold'>{isCompleted ? 'Completed' : `${duration} h`}</p>
+        <div>
+            <hr className="border-0 h-[1px] bg-black" />
+            <div
+                className="group rounded px-2 py-2 cursor-pointer transition-bg duration-[120ms] hover:bg-coolGray flex flex-row gap-6 mt-3 mx-2 w-full"
+                onClick={openModal}
+            >
+                <div className='flex flex-col gap-4 w-fit'>
+                    <div className="bg-slate-200 flex items-center justify-center text-gray-700 w-full sm:w-[200px] h-[150px]">
+                        img
                     </div>
+                    <TimeLabel duration={challengeCard.duration} isCompleted={challengeCard.isCompleted} />
                 </div>
-            )}
+                <div className='flex flex-col'>
+                    <h3 className="font-sourceSans3 text-2xl font-bold text-vibrantCoral group-hover:text-white">
+                        {challengeCard.title}
+                    </h3>
+                    <p className='font-sourceSans3 text-md font-normal text-black group-hover:text-white'>
+                        {challengeCard.description}
+                    </p>
+                </div>
+            </div>
         </div>
     );
 };

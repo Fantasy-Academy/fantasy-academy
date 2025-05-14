@@ -25,6 +25,10 @@
     ]
   },
   "include": [
+    "src/components",
+    "src/custom.d.ts",
+    "frontend/types/next-auth.d.ts",
+    "types/**/*.d.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [

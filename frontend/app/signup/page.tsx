@@ -19,14 +19,14 @@ const SignUp = () => {
     return (
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-8 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
-                <h2 className="mt-10 text-2xl font-bold tracking-tight text-gray-900">
+                <h2 className="mt-10 text-4xl font-bold tracking-tight text-charcoal font-sourceSans3">
                     Create New Account
                 </h2>
             </div>
 
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                 <SignupForm handleSubmit={handleSubmit} />
-                <div className="mt-10 flex justify-center text-sm text-gray-500">
+                <div className="mt-10 flex justify-center text-sm text-coolGray">
                     <span className="mr-1">Already have an account?</span>
                     <LinkBtn link="/login" text="Login" />
                 </div>

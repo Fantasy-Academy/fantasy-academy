@@ -8,7 +8,7 @@ interface LinkButtonProps {
 
 const LinkButton: React.FC<LinkButtonProps> = ({ link, text }) => {
     return (
-        <div className="text-sm font-semibold text-gray-800 hover:text-gray-600 underline">
+        <div className="text-sm font-semibold text-charcoal underline">
             <Link href={link}>
                 {text}
             </Link>

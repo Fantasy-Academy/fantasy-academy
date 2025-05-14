@@ -1,37 +1,95 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ChallengeCard from '../../components/challenges/ChallengeCard';
-import Link from 'next/link';
-import { challenges } from '../../data/challenges';
+import BackgroundWrapper from '../../layouts/BackgroundWrapper';
+import { challenges as challengesData } from '../../data/challenges';
+import ChallengeModal from '../../components/modal/ChallangeModal';
 
 const Challenges = () => {
-    const renderChallenges = (isActive: boolean) => {
-        return challenges
-            .filter(challenge => challenge.isActive === isActive)
-            .map(challenge => (
-                <Link key={challenge.id} href={`/challenges/${challenge.id}`}>
-                    <ChallengeCard
-                        title={challenge.title}
-                        description={challenge.description}
-                        duration={challenge.duration}
-                        isActive={challenge.isActive}
-                        isCompleted={challenge.isCompleted}
-                    />
-                </Link>
-            ));
+    const [tab, setTab] = useState<'current' | 'completed' | "time's up">('current');
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const challengeId = searchParams.get('id');
+
+    const filteredChallenges = challengesData.filter((challenge) => {
+        if (tab === 'current') {
+            return challenge.duration > 0 && !challenge.isCompleted;
+        }
+        if (tab === 'completed') {
+            return challenge.isCompleted;
+        }
+        if (tab === "time's up") {
+            return challenge.duration === 0 && !challenge.isCompleted;
+        }
+        return false;
+    });
+
+    // Najdeme challenge podle ID z URL
+    const selectedChallenge = challengesData.find((challenge) => challenge.id === challengeId);
+
+    // Zavření modalu a reset URL
+    const closeModal = () => {
+        router.push('/challenges', { scroll: false });
     };
 
     return (
-        <div className="flex flex-col p-4">
-            <h1 className="text-3xl font-bold text-black text-center">Current Challenges</h1>
-            <div className="container mx-auto flex flex-wrap items-center justify-center md:justify-start">
-                {renderChallenges(true)}
-            </div>
+        <BackgroundWrapper>
+            <div className="min-h-screen py-8">
+                {/* Sticky navigační lišta */}
+                <div className="w-fit mb-8 mx-auto px-8 py-4">
+                    <div className="max-w-[1200px] mx-auto flex justify-center gap-12 text-lg">
+                        <button
+                            className={`py-2 px-4 transition-colors border-b-4 ${tab === 'current'
+                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                }`}
+                            onClick={() => setTab('current')}
+                        >
+                            Current
+                        </button>
+                        <button
+                            className={`py-2 px-4 transition-colors border-b-4 ${tab === 'completed'
+                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                }`}
+                            onClick={() => setTab('completed')}
+                        >
+                            Completed
+                        </button>
+                        <button
+                            className={`py-2 px-4 transition-colors border-b-4 ${tab === "time's up"
+                                ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                }`}
+                            onClick={() => setTab("time's up")}
+                        >
+                            Time&apos;s up
+                        </button>
+                    </div>
+                </div>
 
-            <h1 className="text-3xl font-bold text-black mt-8 text-center">Expired Challenges</h1>
-            <div className="container mx-auto flex flex-wrap items-start justify-center sm:justify-start">
-                {renderChallenges(false)}
+                <div className="flex flex-col items-center">
+                    <div className="w-full max-w-[1200px] mx-auto">
+                        <div className="flex flex-col gap-4">
+                            {filteredChallenges.map((challenge) => (
+                                <ChallengeCard key={challenge.id} challengeCard={challenge} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {selectedChallenge && (
+                    <ChallengeModal
+                        title={selectedChallenge.title}
+                        description={selectedChallenge.description}
+                        duration={selectedChallenge.duration}
+                        isCompleted={selectedChallenge.isCompleted}
+                        onClose={closeModal}
+                    />
+                )}
             </div>
-        </div>
+        </BackgroundWrapper>
     );
 };
 
