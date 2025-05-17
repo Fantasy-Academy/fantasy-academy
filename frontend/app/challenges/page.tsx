@@ -36,7 +36,6 @@ const Challenges = () => {
     return (
         <BackgroundWrapper>
             <div className="min-h-screen py-8">
-                {/* Sticky navigační lišta */}
                 <div className="w-fit mb-8 mx-auto px-8 py-4">
                     <div className="max-w-[1200px] mx-auto flex justify-center gap-12 text-lg">
                         <button

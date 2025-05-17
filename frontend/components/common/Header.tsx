@@ -82,10 +82,7 @@ export const Header = () => {
               <Link
                 href="/login" // Use Link for client-side navigation
               >
-                <Btn
-                  text="Login"
-                  className='bg-charcoal'
-                />
+                <Btn>Login</Btn>
               </Link>
             )}
 
