@@ -1,12 +1,14 @@
 "use client";
 
-import React from 'react';
+import React from 'react'
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import InputField from '../../components/inputField/InputField';
-import Button from '../../components/button/Btn';
+import Btn from '../../components/button/Btn';
 import LinkBtn from '../../components/common/LinkBtn';
 
 export default function ForgotPassword() {
+  const [email, setEmail] = useState("");
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,9 +27,9 @@ export default function ForgotPassword() {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit}>
-          <InputField id="email" label="Email address" type="email" autoComplete="email" required placeholder="Email..." />
+          <InputField id="email" label="Email address" type="email" autoComplete="email" name='email' placeholder="Email..." value={email} onChange={(e) => setEmail(e.target.value)} required />
           <div className='mt-6'>
-            <Button type="submit" text="Send Request" className="bg-vibrantCoral" />
+            <Btn>Send Request</Btn>
           </div>
         </form>
 

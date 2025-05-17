@@ -29,13 +29,7 @@ const Page = () => {
                     {/* Absolutní div obalující tlačítko */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/4 w-fit">
                         <Link href={"/signup"}>
-                            <Btn
-                                button={{
-                                    text: "Join Now!",
-                                    type: "button",
-                                    className: "text-lg md:text-xl bg-goldenYellow text-blueBlack px-5 py-4 md:px-7 md:py-6 rotate-[4deg] shadow-main w-64 md:w-80"
-                                }}
-                            />
+                            <Btn>Join Now!</Btn>
                         </Link>
                     </div>
                 </div>
@@ -82,12 +76,8 @@ const Page = () => {
                 <h1 className="font-bebasNeue md:text-4xl text-blueBlack">Improve your knowledge right now!</h1>
                 <div className="w-fit py-4">
                     <Link href={"/signup"}>
-                        <Btn button={{
-                            text: "Join Now!",
-                            type: "button",
-                            className: "bg-vibrantCoral text-white"
-                        }}
-                        /></Link>
+                        <Btn>Join Now!</Btn>
+                    </Link>
                 </div>
             </div>
         </div>
