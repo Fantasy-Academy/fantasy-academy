@@ -1,6 +1,9 @@
 api_platform:
     title: Fantasy Academy API
     version: 1.0.0
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Api/ApiResource'
     enable_entrypoint: false
     use_symfony_listeners: true
     formats:
