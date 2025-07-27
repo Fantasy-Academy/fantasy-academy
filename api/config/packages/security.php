@@ -27,17 +27,19 @@ return static function (SecurityConfig $securityConfig): void {
         ->stateless(true)
         ->security(false);
 
-    $apiFirewall = $securityConfig->firewall('api')
+    $securityConfig->firewall('api')
         ->pattern('^/api')
         ->stateless(true)
         ->provider('user_provider')
+        ->jwt();
+
+    $securityConfig->firewall('main')
         ->jsonLogin()
             ->checkPath('/api/auth')
             ->usernamePath('email')
             ->passwordPath('password')
             ->successHandler('lexik_jwt_authentication.handler.authentication_success')
             ->failureHandler('lexik_jwt_authentication.handler.authentication_failure');
-
 
     $securityConfig->accessControl()
         ->path('^/api/docs')
