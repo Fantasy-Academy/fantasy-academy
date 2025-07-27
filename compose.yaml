@@ -6,7 +6,7 @@ volumes:
 
 services:
     api:
-        image: ghcr.io/thedevs-cz/php:8.3
+        image: ghcr.io/thedevs-cz/php:8.4
         restart: unless-stopped
         tty: true
         stdin_open: true
