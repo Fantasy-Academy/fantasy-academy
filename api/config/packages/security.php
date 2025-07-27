@@ -40,6 +40,10 @@ return static function (SecurityConfig $securityConfig): void {
 
 
     $securityConfig->accessControl()
+        ->path('^/api/docs')
+        ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
+
+    $securityConfig->accessControl()
         ->path('^/api/auth')
         ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
 
@@ -48,6 +52,6 @@ return static function (SecurityConfig $securityConfig): void {
         ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
 
     $securityConfig->accessControl()
-        ->path('^/')
+        ->path('^/api/user')
         ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
 };

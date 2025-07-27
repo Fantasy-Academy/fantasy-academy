@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Services;
+namespace FantasyAcademy\API\Services\Symfony\EventListener;
 
+use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Message\User\LogUserActivity;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Messenger\MessageBusInterface;
-use FantasyAcademy\API\Entity\User;
-use FantasyAcademy\API\Message\User\LogUserActivity;
 
 #[AsEventListener]
 readonly final class UserActivityListener

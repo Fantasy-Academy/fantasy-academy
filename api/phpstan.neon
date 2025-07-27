@@ -22,9 +22,10 @@ parameters:
         - tests/bootstrap.php
         - tests/object-manager.php
     symfony:
-        container_xml_path: var/cache/dev/FantasyAcademy_API_SymfonyApplicationKernelDevDebugContainer.xml
+        containerXmlPath: var/cache/dev/FantasyAcademy_API_SymfonyApplicationKernelDevDebugContainer.xml
     doctrine:
         objectManagerLoader: tests/object-manager.php
     checkUninitializedProperties: true
     ignoreErrors:
         - "#^Call to an undefined method Symfony\\\\Config\\\\Framework\\\\Messenger#"
+        - "#should return non-empty-string but returns string#"

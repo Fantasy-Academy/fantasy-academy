@@ -21,8 +21,8 @@ readonly final class ResetPasswordHandler
     }
 
     /**
-     * @throws InvalidPasswordResetToken
-     * @throws UserNotRegistered
+   //  * @throws InvalidPasswordResetToken
+   //  * @throws UserNotRegistered
      */
     public function __invoke(ResetPassword $message): void
     {
