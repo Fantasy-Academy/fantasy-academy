@@ -6,16 +6,15 @@ namespace FantasyAcademy\API\Api\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use FantasyAcademy\API\Api\ApiResource\AnswerChallengeRequest;
+use FantasyAcademy\API\Api\ApiResource\AnswerQuestionRequest;
 use FantasyAcademy\API\Entity\User;
-use FantasyAcademy\API\Exceptions\ChallengeExpired;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
- * @implements ProcessorInterface<AnswerChallengeRequest, null>
+ * @implements ProcessorInterface<AnswerQuestionRequest, null>
  */
-readonly final class AnswerChallengeProcessor implements ProcessorInterface
+readonly final class AnswerQuestionProcessor implements ProcessorInterface
 {
     public function __construct(
         // private MessageBusInterface $bus,

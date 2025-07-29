@@ -3,7 +3,7 @@
 use Symfony\Config\NelmioCorsConfig;
 
 return static function (NelmioCorsConfig $corsConfig): void {
-    $corsConfig->defaults()
+    $corsConfig->paths('^/api')
         ->allowOrigin(['*'])
         ->allowHeaders(['*'])
         ->allowMethods(['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'])
