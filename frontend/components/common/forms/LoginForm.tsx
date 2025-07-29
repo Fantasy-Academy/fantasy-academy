@@ -52,6 +52,7 @@ const LoginForm = () => {
                 type="email"
                 name="email"
                 value={email}
+                error=""
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
@@ -65,6 +66,7 @@ const LoginForm = () => {
                         type="password"
                         name="password"
                         value={password}
+                        error=""
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="current-password"
                         required
@@ -75,7 +77,8 @@ const LoginForm = () => {
                 </div>
             </div>
             <div className='mt-6'>
-                <Btn type="submit" text="Login" className="bg-vibrantCoral" />
+                <Btn type="submit">Login</Btn>
+
             </div>
         </form>
     );
