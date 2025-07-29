@@ -82,6 +82,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
       </div>
     </div>
   );
+
 };
 
 export default ChallengeModal;

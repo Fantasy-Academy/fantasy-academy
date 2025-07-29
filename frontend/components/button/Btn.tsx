@@ -7,6 +7,7 @@ interface ButtonProps {
 }
 
 const Btn: React.FC<ButtonProps> = ({ children, type = "button", onClick }) => {
+
   return (
     <button
       type={type}
@@ -14,8 +15,10 @@ const Btn: React.FC<ButtonProps> = ({ children, type = "button", onClick }) => {
       className='flex w-full justify-center hover:scale-[105%] px-6 py-3 text-base font-bold font-sourceSans3 transition-scale duration-[230ms] bg-goldenYellow text-blueBlack'
     >
       {children}
+
     </button>
   );
 };
 
 export default Btn;
+export default Button;

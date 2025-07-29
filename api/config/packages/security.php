@@ -27,10 +27,13 @@ return static function (SecurityConfig $securityConfig): void {
         ->stateless(true)
         ->security(false);
 
-    $apiFirewall = $securityConfig->firewall('api')
+    $securityConfig->firewall('api')
         ->pattern('^/api')
         ->stateless(true)
         ->provider('user_provider')
+        ->jwt();
+
+    $securityConfig->firewall('main')
         ->jsonLogin()
             ->checkPath('/api/auth')
             ->usernamePath('email')
@@ -38,6 +41,9 @@ return static function (SecurityConfig $securityConfig): void {
             ->successHandler('lexik_jwt_authentication.handler.authentication_success')
             ->failureHandler('lexik_jwt_authentication.handler.authentication_failure');
 
+    $securityConfig->accessControl()
+        ->path('^/api/docs')
+        ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
 
     $securityConfig->accessControl()
         ->path('^/api/auth')
@@ -48,6 +54,6 @@ return static function (SecurityConfig $securityConfig): void {
         ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
 
     $securityConfig->accessControl()
-        ->path('^/')
+        ->path('^/api/user')
         ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
 };

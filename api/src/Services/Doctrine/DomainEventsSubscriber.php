@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Services;
+namespace FantasyAcademy\API\Services\Doctrine;
 
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostFlushEventArgs;

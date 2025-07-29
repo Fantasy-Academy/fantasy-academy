@@ -2,13 +2,14 @@
 
 use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 use Symfony\Config\FrameworkConfig;
-use FantasyAcademy\API\Message\Product\ProcessProductImport;
+use FantasyAcademy\API\Services\Symfony\Messenger\UserAwareMiddleware;
 
 return static function (FrameworkConfig $framework): void {
     $messenger = $framework->messenger();
 
     $bus = $messenger->bus('command_bus');
     $bus->middleware()->id('doctrine_transaction');
+    $bus->middleware()->id(UserAwareMiddleware::class);
 
     $messenger->failureTransport('failed');
 

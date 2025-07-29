@@ -78,6 +78,7 @@ const LoginForm = () => {
             </div>
             <div className='mt-6'>
                 <Btn type="submit">Login</Btn>
+
             </div>
         </form>
     );

@@ -60,7 +60,6 @@ const UserProfile: React.FC = () => {
                                         </div>
                                     ))}
                                     <div className='flex flex-col justify-end mb-2'>
-                                        <Btn>Show more</Btn>
                                     </div>
                                 </div>
                             }

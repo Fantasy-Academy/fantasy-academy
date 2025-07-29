@@ -15,6 +15,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleSubmit }) => {
             <InputField id="confirm-password" label="Confirm password" placeholder="Confirm password..." type="password" autoComplete="" required />
             <div className='mt-6'>
                 <Btn type="submit">Sign Up</Btn>
+
             </div>
         </form>
     );
