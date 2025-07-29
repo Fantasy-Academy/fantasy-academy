@@ -25,7 +25,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challengeCard }) => {
             >
                 <div className='flex flex-col gap-4 w-fit'>
                     <div className="bg-slate-200 flex items-center justify-center text-gray-700 w-full sm:w-[200px] h-[150px]">
-                        img
+                        {challengeCard.image}
                     </div>
                     <TimeLabel duration={challengeCard.duration} isCompleted={challengeCard.isCompleted} />
                 </div>
