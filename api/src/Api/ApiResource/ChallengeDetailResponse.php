@@ -5,20 +5,23 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Api\ApiResource;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
-use FantasyAcademy\API\Api\StateProvider\ChallengesProvider;
+use FantasyAcademy\API\Api\StateProvider\ChallengeDetailProvider;
 use Ramsey\Uuid\UuidInterface;
 
 #[ApiResource(
-    shortName: 'Challenges',
+    shortName: 'Challenge detail',
 )]
-#[GetCollection(
-    uriTemplate: '/challenges',
-    provider: ChallengesProvider::class,
+#[Get(
+    uriTemplate: '/challenges/{id}',
+    provider: ChallengeDetailProvider::class,
 )]
-readonly final class ChallengeResponse
+readonly final class ChallengeDetailResponse
 {
+    /**
+     * @param array<Question> $questions
+     */
     public function __construct(
         public UuidInterface $id,
         public string $name,
@@ -33,6 +36,9 @@ readonly final class ChallengeResponse
         public bool $isExpired,
         public bool $isAnswered,
         public bool $isEvaluated,
+        public array $questions,
+        public null|string $hintText,
+        public null|string $hintImage,
     ) {
     }
 }
