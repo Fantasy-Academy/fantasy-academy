@@ -21,7 +21,6 @@ export default function ForgotPassword() {
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
         <h2 className="mt-10 text-4xl font-sourceSans3 font-bold tracking-tight text-charcoal">
-        <h2 className="mt-10 text-4xl font-sourceSans3 font-bold tracking-tight text-charcoal">
           Forgot Password
         </h2>
       </div>
@@ -35,9 +34,10 @@ export default function ForgotPassword() {
         </form>
 
         <div className="mt-10 flex justify-center text-sm text-coolGray">
-        <div className="mt-10 flex justify-center text-sm text-coolGray">
-          <span className="mr-1">Remembered your password?</span>
-          <LinkBtn link="/login" text="Login" />
+          <div className="mt-10 flex justify-center text-sm text-coolGray">
+            <span className="mr-1">Remembered your password?</span>
+            <LinkBtn link="/login" text="Login" />
+          </div>
         </div>
       </div>
     </div>
