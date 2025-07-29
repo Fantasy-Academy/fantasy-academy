@@ -89,7 +89,6 @@ const Challenges = () => {
                 )}
             </div>
         </BackgroundWrapper>
-        </BackgroundWrapper>
     );
 };
 

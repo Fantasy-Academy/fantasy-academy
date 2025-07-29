@@ -28,7 +28,6 @@ export const Header = () => {
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
             {/* Mobile menu button */}
             <Disclosure.Button className="group relative inline-flex items-center justify-center rounded-md p-2 text-charcoal hover:bg-charcoal hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-            <Disclosure.Button className="group relative inline-flex items-center justify-center rounded-md p-2 text-charcoal hover:bg-charcoal hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
               <span className="sr-only">Open main menu</span>
               <div className="flex flex-col space-y-1">
                 <div className="h-0.5 w-6 bg-charcoal group-hover:bg-white transition duration-200"></div>
@@ -49,8 +48,6 @@ export const Header = () => {
                     href={item.href}
                     aria-current={item.href === currentPath ? 'page' : undefined}
                     className={classNames(
-                      item.href === currentPath ? 'bg-vibrantCoral text-white font-semibold' : 'text-charcoal hover:bg-vibrantCoral hover:text-white ',
-                      'rounded px-3 py-2 text-sm font-regular'
                       item.href === currentPath ? 'bg-vibrantCoral text-white font-semibold' : 'text-charcoal hover:bg-vibrantCoral hover:text-white ',
                       'rounded px-3 py-2 text-sm font-regular'
                     )}
@@ -89,12 +86,10 @@ export const Header = () => {
             {/* Profile dropdown - remove user image */}
             <Menu as="div" className="relative ml-3">
               <Menu.Button className="flex text-sm focus:outline-none focus:ring-2 focus:ring-charcoal focus:ring-offset-2 focus:ring-offset-gray-800">
-              <Menu.Button className="flex text-sm focus:outline-none focus:ring-2 focus:ring-charcoal focus:ring-offset-2 focus:ring-offset-gray-800">
                 <span className="sr-only">Open user menu</span>
                 {/* Optional: Add a profile icon or placeholder here */}
               </Menu.Button>
               <Menu.Items
-                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded bg-vibrantCoral py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none"
                 className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded bg-vibrantCoral py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none"
               >
                 <Menu.Item>
@@ -132,8 +127,6 @@ export const Header = () => {
               href={item.href}
               aria-current={item.href === currentPath ? 'page' : undefined}
               className={classNames(
-                item.href === currentPath ? 'bg-vibrantCoral text-white' : 'text-charcoal hover:bg-vibrantCoral hover:text-white',
-                'block rounded px-3 py-2 text-base font-medium'
                 item.href === currentPath ? 'bg-vibrantCoral text-white' : 'text-charcoal hover:bg-vibrantCoral hover:text-white',
                 'block rounded px-3 py-2 text-base font-medium'
               )}

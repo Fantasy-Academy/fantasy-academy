@@ -13,8 +13,6 @@ const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
         <h2 className="mt-10 text-4xl font-bold tracking-tight text-charcoal font-sourceSans3">
           Welcome Back!
-        <h2 className="mt-10 text-4xl font-bold tracking-tight text-charcoal font-sourceSans3">
-          Welcome Back!
         </h2>
       </div>
 

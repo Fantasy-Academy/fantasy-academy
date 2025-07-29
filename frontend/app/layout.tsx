@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react';
 import SessionWrapper from '../components/SessionWrapper';
-import SessionWrapper from '../components/SessionWrapper';
 import '../globals.css';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
