@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Api\ApiResource;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 
 #[ApiResource(
-    shortName: 'Forgotten password change',
+    shortName: 'Edit user profile',
 )]
-#[Post(
-    uriTemplate: '/forgotten-password/change',
+#[Put(
+    uriTemplate: '/me/edit-profile',
     status: 204,
     input: self::class,
     output: false,
     messenger: 'input',
 )]
-readonly final class ChangeForgottenPasswordRequest
+readonly final class EditProfileRequest
 {
     public function __construct(
-        public string $code,
-        public string $newPassword,
+        public string $name,
     ) {}
 }
