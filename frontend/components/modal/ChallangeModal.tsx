@@ -35,7 +35,8 @@ interface Question {
 
 const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose }) => {
   const searchParams = useSearchParams();
-  const id = searchParams.get('id'); const [question, setQuestion] = useState<Question | null>(null);
+  const id = searchParams.get('id');
+  const [question, setQuestion] = useState<Question | null>(null);
   const [hintText, setHintText] = useState<string | null>(null);
   const [selectedChoices, setSelectedChoices] = useState<Record<string, boolean>>({});
   const [textAnswer, setTextAnswer] = useState('');
@@ -59,7 +60,9 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
       }
     };
 
-    fetchChallenge();
+    if (id) {
+      fetchChallenge();
+    }
   }, [id]);
 
   const isAnySelected =
@@ -78,14 +81,47 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
     });
   };
 
-  const handleSubmit = () => {
-    console.log('🚀 Odpověď odeslána');
-    console.log('📦 Stav odpovědi:', {
-      textAnswer,
-      numericAnswer,
-      selectedChoices,
-    });
-    alert('Odpověď odeslána!');
+  const handleSubmit = async () => {
+    if (!question) return;
+
+    const body: any = {
+      questionId: question.id,
+      textAnswer: question.type === 'text' ? textAnswer : null,
+      numericAnswer: question.type === 'numeric' ? Number(numericAnswer) : null,
+      selectedChoiceId:
+        question.type === 'single_select'
+          ? Object.keys(selectedChoices).find((id) => selectedChoices[id])
+          : null,
+      selectedChoiceIds:
+        question.type === 'multi_select'
+          ? Object.keys(selectedChoices).filter((id) => selectedChoices[id])
+          : null,
+      orderedChoiceIds: null, // zatím neřešíme "sort"
+    };
+
+    console.log('📦 Odesílám odpověď:', body);
+
+    try {
+      const res = await fetch('http://localhost:8080/api/questions/answer', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        console.log('✅ Odpověď úspěšně odeslána na server');
+        alert('Odpověď byla uložena.');
+      } else {
+        const err = await res.json();
+        console.error('❌ Chyba při odeslání:', err);
+        alert('Chyba při odeslání odpovědi.');
+      }
+    } catch (error) {
+      console.error('❌ Výjimka při odesílání:', error);
+      alert('Došlo k chybě během komunikace se serverem.');
+    }
   };
 
   return (
@@ -119,10 +155,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
             {question.type === 'text' && (
               <textarea
                 value={textAnswer}
-                onChange={(e) => {
-                  console.log('📝 Změna textu:', e.target.value);
-                  setTextAnswer(e.target.value);
-                }}
+                onChange={(e) => setTextAnswer(e.target.value)}
                 className="w-full border p-2"
                 placeholder="Zadej odpověď"
               />
@@ -132,10 +165,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
               <input
                 type="number"
                 value={numericAnswer}
-                onChange={(e) => {
-                  console.log('🔢 Změna čísla:', e.target.value);
-                  setNumericAnswer(e.target.value);
-                }}
+                onChange={(e) => setNumericAnswer(e.target.value)}
                 className="w-full border p-2"
                 placeholder="Zadej číslo"
               />
