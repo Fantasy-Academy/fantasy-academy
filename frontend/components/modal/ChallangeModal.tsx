@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface ChallengeModalProps {
   title: string;
@@ -9,21 +10,87 @@ interface ChallengeModalProps {
   onClose: () => void;
 }
 
-const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose }) => {
-  const [btnStates, setBtnStates] = useState<Record<string, boolean>>({});
+interface Choice {
+  id: string;
+  text: string;
+  description?: string | null;
+  image?: string | null;
+}
 
-  const handleButtonClick = (btnText: string) => {
-    setBtnStates(prev => ({
-      ...prev,
-      [btnText]: !prev[btnText]
-    }));
+interface Question {
+  id: string;
+  text: string;
+  type: 'text' | 'single_select' | 'multi_select' | 'numeric' | 'sort';
+  image: string | null;
+  choiceConstraint?: {
+    choices: Choice[];
+    minSelections?: number;
+    maxSelections?: number;
+  } | null;
+  numericConstraint?: {
+    min?: number | null;
+    max?: number | null;
+  } | null;
+}
+
+const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose }) => {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id'); const [question, setQuestion] = useState<Question | null>(null);
+  const [hintText, setHintText] = useState<string | null>(null);
+  const [selectedChoices, setSelectedChoices] = useState<Record<string, boolean>>({});
+  const [textAnswer, setTextAnswer] = useState('');
+  const [numericAnswer, setNumericAnswer] = useState('');
+
+  useEffect(() => {
+    console.log('🟢 Modal otevřen pro challenge ID:', id);
+
+    const fetchChallenge = async () => {
+      const res = await fetch(`http://localhost:8080/api/challenges/${id}`);
+      const data = await res.json();
+
+      if (data.questions && data.questions.length > 0) {
+        console.log('📥 Načtena otázka:', data.questions[0]);
+        setQuestion(data.questions[0]);
+      }
+
+      if (data.hintText) {
+        console.log('💡 Nápověda challenge:', data.hintText);
+        setHintText(data.hintText);
+      }
+    };
+
+    fetchChallenge();
+  }, [id]);
+
+  const isAnySelected =
+    Object.values(selectedChoices).some(Boolean) || textAnswer !== '' || numericAnswer !== '';
+
+  const handleSingleSelect = (choiceId: string) => {
+    console.log('🎯 Single choice vybráno:', choiceId);
+    setSelectedChoices({ [choiceId]: true });
   };
 
-  const isAnySelected = Object.values(btnStates).includes(true);
+  const handleMultiSelect = (choiceId: string) => {
+    setSelectedChoices((prev) => {
+      const updated = { ...prev, [choiceId]: !prev[choiceId] };
+      console.log('✅ Multi choice změněn:', updated);
+      return updated;
+    });
+  };
+
+  const handleSubmit = () => {
+    console.log('🚀 Odpověď odeslána');
+    console.log('📦 Stav odpovědi:', {
+      textAnswer,
+      numericAnswer,
+      selectedChoices,
+    });
+    alert('Odpověď odeslána!');
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-darkWhite p-8 rounded-lg shadow-lg w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto relative">
+      <div className="bg-darkWhite p-8 rounded-lg shadow-lg w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto relative mt-14">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-charcoal text-2xl hover:scale-110 transition-transform duration-[140ms]"
@@ -32,42 +99,97 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
         </button>
 
         <div className="flex flex-col pb-4">
-          <div>
-            <h2 className="text-5xl font-bold text-vibrantCoral text-center">{title}</h2>
-            <h3 className="font-bebasNeue text-4xl text-charcoal mt-10">Coach&apos;s Corner</h3>
-            <p className="text-lg text-charcoal">{description}</p>
-          </div>
-          <hr className="border-0 h-[2px] bg-charcoal my-4" />
+          <h2 className="text-5xl font-bold text-vibrantCoral text-center">{title}</h2>
+          <h3 className="font-bebasNeue text-4xl text-charcoal mt-10">Coach&apos;s Corner</h3>
+          <p className="text-lg text-charcoal">{description}</p>
         </div>
 
-        <div className="max-h-[185px] overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
-            {["A", "B", "C", "Martinez & Chuanez dorez toro", "E", "F", "G", "H", "I", "J"].map((text) => {
-              const isSelected = btnStates[text];
-              return (
-                <button
-                  key={text}
-                  onClick={() => handleButtonClick(text)}
-                  type="button"
-                  className={`
-                    w-full text-center py-3 px-4 rounded
-                    transition-all duration-200
-                    font-bold text-base font-sourceSans3
-                    ${isSelected ? 'bg-goldenYellow text-black' : 'bg-white text-charcoal'}
-                    hover:scale-[105%]
-                  `}
-                >
-                  {text}
-                </button>
-              );
-            })}
+        <hr className="border-0 h-[2px] bg-charcoal my-4" />
+
+        {question && (
+          <div className="flex flex-col gap-4">
+            <h4 className="text-2xl font-semibold text-charcoal">{question.text}</h4>
+            {question.image && <img src={question.image} alt="question" className="max-h-64" />}
+            {hintText && (
+              <p className="italic text-md text-gray-600 bg-white p-2 border-l-4 border-vibrantCoral">
+                💡 {hintText}
+              </p>
+            )}
+
+            {question.type === 'text' && (
+              <textarea
+                value={textAnswer}
+                onChange={(e) => {
+                  console.log('📝 Změna textu:', e.target.value);
+                  setTextAnswer(e.target.value);
+                }}
+                className="w-full border p-2"
+                placeholder="Zadej odpověď"
+              />
+            )}
+
+            {question.type === 'numeric' && (
+              <input
+                type="number"
+                value={numericAnswer}
+                onChange={(e) => {
+                  console.log('🔢 Změna čísla:', e.target.value);
+                  setNumericAnswer(e.target.value);
+                }}
+                className="w-full border p-2"
+                placeholder="Zadej číslo"
+              />
+            )}
+
+            {question.type === 'single_select' && question.choiceConstraint?.choices && (
+              <div className="flex flex-col gap-2">
+                {question.choiceConstraint.choices.map((choice) => (
+                  <label key={choice.id} className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="singleSelect"
+                      checked={!!selectedChoices[choice.id]}
+                      onChange={() => handleSingleSelect(choice.id)}
+                    />
+                    <div>
+                      <p className="font-semibold">{choice.text}</p>
+                      {choice.description && <p className="text-sm text-gray-600">{choice.description}</p>}
+                      {choice.image && <img src={choice.image} alt="choice" className="max-h-24 mt-1" />}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {question.type === 'multi_select' && question.choiceConstraint?.choices && (
+              <div className="flex flex-col gap-2">
+                {question.choiceConstraint.choices.map((choice) => (
+                  <label key={choice.id} className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!selectedChoices[choice.id]}
+                      onChange={() => handleMultiSelect(choice.id)}
+                    />
+                    <div>
+                      <p className="font-semibold">{choice.text}</p>
+                      {choice.description && <p className="text-sm text-gray-600">{choice.description}</p>}
+                      {choice.image && <img src={choice.image} alt="choice" className="max-h-24 mt-1" />}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {question.type === 'sort' && (
+              <p className="text-gray-500 italic">Typ "sort" ještě není implementován.</p>
+            )}
           </div>
-        </div>
+        )}
 
         <div className="mt-6">
           <button
             type="button"
-            onClick={isAnySelected ? () => alert("Bet placed!") : undefined}
+            onClick={isAnySelected ? handleSubmit : undefined}
             disabled={!isAnySelected}
             className={`
               w-full py-4 text-lg font-bold text-white text-center
@@ -76,7 +198,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
               ${isAnySelected ? 'bg-vibrantCoral cursor-pointer' : 'bg-coolGray cursor-not-allowed'}
             `}
           >
-            Pick a bet!
+            Submit answer
           </button>
         </div>
       </div>
