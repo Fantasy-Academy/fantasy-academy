@@ -34,7 +34,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challengeCard }) => {
                         {challengeCard.title}
                     </h3>
                     <p className='font-sourceSans3 text-md font-normal text-black group-hover:text-white'>
-                        {challengeCard.description}
+                        {challengeCard.shortDescription}
                     </p>
                 </div>
             </div>

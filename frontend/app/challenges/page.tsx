@@ -8,6 +8,7 @@ import ChallengeModal from '../../components/modal/ChallangeModal';
 type Challenge = {
     id: string;
     name: string;
+    shortDescription: string;
     description: string;
     image: string | null;
     addedAt: string;
@@ -30,16 +31,13 @@ const Challenges = () => {
     useEffect(() => {
         const fetchChallenges = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/challenges', {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`, // pokud vyžaduješ autentizaci
-                    },
-                });
+                const res = await fetch('http://localhost:8080/api/challenges');
 
                 if (!res.ok) throw new Error('Chyba při načítání výzev');
                 const data = await res.json();
 
                 // API vrací `member` pokud je to Hydra (v opačném případě přímo pole)
+                console.log("fetched data:", data);
                 setChallenges(data.member || data);
             } catch (err) {
                 console.error(err);
@@ -82,8 +80,8 @@ const Challenges = () => {
                             <button
                                 key={type}
                                 className={`py-2 px-4 transition-colors border-b-4 ${tab === type
-                                        ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                        : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
                                     }`}
                                 onClick={() => setTab(type as typeof tab)}
                             >
@@ -101,6 +99,7 @@ const Challenges = () => {
                                 <ChallengeCard key={challenge.id} challengeCard={{
                                     id: challenge.id,
                                     title: challenge.name,
+                                    shortDescription: challenge.shortDescription,
                                     description: challenge.description,
                                     image: challenge.image ?? '',
                                     duration: Math.max(Math.floor((new Date(challenge.expiresAt).getTime() - Date.now()) / 60000), 0),
