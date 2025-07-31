@@ -1,26 +1,14 @@
-FROM node:23 AS node_upstream
+FROM node:24 AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Base stage for dev and build
-FROM node_upstream AS base
-
 WORKDIR /app
 
-RUN corepack enable && \
+RUN corepack enable pnpm && \
 	corepack prepare --activate pnpm@latest && \
 	pnpm config -g set store-dir /.pnpm-store
 
-
-
-# Development image
-FROM base AS dev
-
 EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME=localhost
-
-CMD ["sh", "-c", "pnpm install; pnpm dev"]
 
 
 FROM base AS builder
