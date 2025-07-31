@@ -20,8 +20,8 @@ final class Leaderboard
         public string $playerId,
         public string $playerName,
         public int $rank,
-        public int $overallRank,
-        public int $roundsPlayed,
+        public int $points,
+        public int $challengesCompleted,
         public array $skills,
     ) {
     }
