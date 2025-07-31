@@ -39,6 +39,7 @@ services:
         command: ["sh", "-c", "pnpm install && pnpm dev"]
         environment:
             NEXT_PUBLIC_ENTRYPOINT: http://api
+            NEXTAUTH_URL: "http://localhost:3000"
             COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
         depends_on:
             - api
