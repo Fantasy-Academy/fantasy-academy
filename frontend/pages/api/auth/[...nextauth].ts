@@ -1,8 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthConfig } from "next-auth";
 
-export const authOptions: NextAuthConfig = {
+export default NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -10,7 +9,7 @@ export const authOptions: NextAuthConfig = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         const res = await fetch("http://localhost:8080/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -23,29 +22,29 @@ export const authOptions: NextAuthConfig = {
         const data = await res.json();
 
         if (!res.ok || !data.token) {
-          throw new Error(data.message || "Login failed");
+          return null;
         }
 
         return {
           id: data.id,
           name: data.name,
-          email: credentials?.email as string,
+          email: credentials?.email,
           token: data.token,
         };
       },
     }),
   ],
   session: {
-    strategy: "jwt" as const, // ⬅️ důležitá oprava!
+    strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }: { token: any; user?: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.token;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }) {
       session.accessToken = token.accessToken;
       return session;
     },
@@ -53,6 +52,4 @@ export const authOptions: NextAuthConfig = {
   pages: {
     signIn: "/login",
   },
-};
-
-export default NextAuth(authOptions);
+});
