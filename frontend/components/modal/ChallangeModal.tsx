@@ -106,6 +106,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+        
         },
         body: JSON.stringify(body),
       });
