@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\ConsoleCommands;
 
 use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Message\User\AddUser;
 use FantasyAcademy\API\Message\User\RegisterUser;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -36,11 +37,11 @@ final class RegisterUserConsoleCommand extends Command
         /** @var string $plainTextPassword */
         $plainTextPassword = $input->getArgument('password');
 
-        $registerUser = new RegisterUser(
+        $registerUser = new AddUser(
             $email,
             $plainTextPassword,
-            null,
-            [User::ROLE_ADMIN],
+            '',
+            User::ROLE_ADMIN,
         );
 
         $this->messageBus->dispatch(

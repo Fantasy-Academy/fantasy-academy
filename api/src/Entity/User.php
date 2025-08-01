@@ -22,6 +22,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
     use HasEvents;
 
     public const string ROLE_ADMIN = 'ROLE_ADMIN';
+    public const string ROLE_USER = 'ROLE_USER';
 
     #[Immutable]
     #[Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
