@@ -10,10 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Id;
 use JetBrains\PhpStorm\Immutable;
-use Ramsey\Uuid\Doctrine\UuidType;
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`user`')]
@@ -43,7 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
         #[Id]
         #[Immutable]
         #[Column(type: UuidType::NAME, unique: true)]
-        public UuidInterface $id,
+        public Uuid $id,
 
         #[Column(length: 180, unique: true)]
         readonly public string $email,

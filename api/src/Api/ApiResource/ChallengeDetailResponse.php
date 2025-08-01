@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
 use FantasyAcademy\API\Api\StateProvider\ChallengeDetailProvider;
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[ApiResource(
     shortName: 'Challenge detail',
@@ -23,7 +23,7 @@ readonly final class ChallengeDetailResponse
      * @param array<Question> $questions
      */
     public function __construct(
-        public UuidInterface $id,
+        public Uuid $id,
         public string $name,
         public string $shortDescription,
         public string $description,

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Message\User;
 
 use DateTimeImmutable;
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Uid\Uuid;
 
 readonly final class LogUserActivity
 {
     public function __construct(
-        public UuidInterface $userId,
+        public Uuid $userId,
         public DateTimeImmutable $time,
     ) {
     }

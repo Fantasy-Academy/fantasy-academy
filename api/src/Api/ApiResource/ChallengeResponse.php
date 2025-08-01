@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use DateTimeImmutable;
 use FantasyAcademy\API\Api\StateProvider\ChallengesProvider;
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[ApiResource(
     shortName: 'Challenges',
@@ -20,7 +20,7 @@ use Ramsey\Uuid\UuidInterface;
 readonly final class ChallengeResponse
 {
     public function __construct(
-        public UuidInterface $id,
+        public Uuid $id,
         public string $name,
         public string $shortDescription,
         public string $description,

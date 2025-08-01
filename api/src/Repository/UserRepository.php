@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Repository;
 
 use Doctrine\ORM\NoResultException;
-use Ramsey\Uuid\UuidInterface;
 use FantasyAcademy\API\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use FantasyAcademy\API\Exceptions\UserNotFound;
+use Symfony\Component\Uid\Uuid;
 
 readonly final class UserRepository
 {
@@ -46,7 +46,7 @@ readonly final class UserRepository
     /**
      * @throws UserNotFound
      */
-    public function getById(UuidInterface $id): User
+    public function getById(Uuid $id): User
     {
         $user = $this->entityManager->find(User::class, $id);
 

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Services;
 
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Uid\Uuid;
 
 readonly class ProvideIdentity
 {
-    public function next(): UuidInterface
+    public function next(): Uuid
     {
-        return Uuid::uuid7();
+        return Uuid::v7();
     }
 }

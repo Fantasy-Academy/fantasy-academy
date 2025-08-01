@@ -12,8 +12,8 @@ use FantasyAcademy\API\Api\ApiResource\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Api\ApiResource\NumericQuestionConstraint;
 use FantasyAcademy\API\Api\ApiResource\Question;
 use FantasyAcademy\API\Api\ApiResource\QuestionType;
-use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @implements ProviderInterface<ChallengeDetailResponse>

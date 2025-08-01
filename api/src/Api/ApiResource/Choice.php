@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Api\ApiResource;
 
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Uid\Uuid;
 
 readonly final class Choice
 {
     public function __construct(
-        public UuidInterface $id,
+        public Uuid $id,
         public string $text,
         public null|string $description,
         public null|string $image,

@@ -6,8 +6,8 @@ namespace FantasyAcademy\API\Tests\DataFixtures;
 use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Ramsey\Uuid\Uuid;
 use FantasyAcademy\API\Entity\User;
+use Symfony\Component\Uid\Uuid;
 
 final class TestDataFixture extends Fixture
 {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Message;
 
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Uid\Uuid;
 
 interface UserAware
 {
-    public function withUserId(UuidInterface $userId): static;
+    public function withUserId(Uuid $userId): static;
 }

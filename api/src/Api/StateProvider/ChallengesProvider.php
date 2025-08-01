@@ -8,8 +8,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\ArrayPaginator;
 use ApiPlatform\State\ProviderInterface;
 use FantasyAcademy\API\Api\ApiResource\ChallengeResponse;
-use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @implements ProviderInterface<ChallengeResponse>

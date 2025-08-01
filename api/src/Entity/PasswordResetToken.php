@@ -12,8 +12,8 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use JetBrains\PhpStorm\Immutable;
-use Ramsey\Uuid\Doctrine\UuidType;
-use Ramsey\Uuid\UuidInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 class PasswordResetToken
@@ -26,7 +26,7 @@ class PasswordResetToken
         #[Id]
         #[Immutable]
         #[Column(type: UuidType::NAME, unique: true)]
-        public UuidInterface $id,
+        public Uuid $id,
 
         #[ManyToOne]
         #[JoinColumn(nullable: false)]
