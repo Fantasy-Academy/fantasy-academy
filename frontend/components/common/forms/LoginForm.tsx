@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { useSession } from "next-auth/react";
 
 import BackgroundWrapper from '../../../layouts/BackgroundWrapper';
 import InputField from '../../../components/inputField/InputField';
@@ -10,6 +11,7 @@ import LinkButton from '../LinkBtn';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { data: session } = useSession();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -19,18 +21,51 @@ export default function LoginPage() {
         e.preventDefault();
         setError(null);
 
+        console.log("🔐 Pokus o přihlášení:", { email, password });
+
         const res = await signIn('credentials', {
             redirect: false,
             email,
             password,
         });
 
+        console.log("🔁 Výsledek signIn:", res);
+
         if (res?.error) {
             setError('Invalid credentials');
         } else {
-            router.push('/profile'); // nebo "/dashboard", podle toho, jak to máš
+            router.push('/profile');
         }
     };
+
+    useEffect(() => {
+        if (!session?.accessToken) return;
+
+        const fetchData = async () => {
+            try {
+                const res = await fetch("http://localhost:8080/api/protected", {
+                    headers: {
+                        Authorization: `Bearer ${session.accessToken}`,
+                    },
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Server responded with ${res.status}`);
+                }
+
+                const data = await res.json();
+                console.log("Protected data:", data);
+
+                // Můžeš uložit data do stavu nebo contextu
+                // setProtectedData(data);
+            } catch (err) {
+                console.error("Error fetching protected data:", err);
+                // setError("Unauthorized" nebo err.message);
+            }
+        };
+
+        fetchData();
+    }, [session]);
 
     return (
         <BackgroundWrapper>
@@ -51,7 +86,7 @@ export default function LoginPage() {
                         required
                         placeholder="you@example.com"
                         error=""
-                        autoComplete="email" 
+                        autoComplete="email"
                     />
 
                     <div className="mt-4">

@@ -1,36 +1,60 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import type { NextAuthOptions } from "next-auth";
+import type { DefaultSession } from "next-auth";
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const res = await fetch("http://localhost:8080/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: credentials?.email,
-            password: credentials?.password,
-          }),
-        });
+        console.log("🔐 Pokus o přihlášení:", credentials);
 
-        const data = await res.json();
+        try {
+          const loginRes = await fetch("http://localhost:8080/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials?.email,
+              password: credentials?.password,
+            }),
+          });
 
-        if (!res.ok || !data.token) {
+          if (!loginRes.ok) {
+            console.error("❌ Login selhal:", loginRes.status);
+            return null;
+          }
+
+          const { token } = await loginRes.json();
+
+          const meRes = await fetch("http://localhost:8080/api/me", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!meRes.ok) {
+            console.error("❌ /me selhalo:", meRes.status);
+            return null;
+          }
+
+          const user = await meRes.json();
+          console.log("✅ Uživatel načten:", user);
+
+          return {
+            ...user,             // obsahuje id, name, email, ...
+            accessToken: token,  // JWT token
+          };
+        } catch (err) {
+          console.error("❌ Chyba v authorize:", err);
           return null;
         }
-
-        return {
-          id: data.id,
-          name: data.name,
-          email: credentials?.email,
-          token: data.token,
-        };
       },
     }),
   ],
@@ -40,16 +64,20 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.token;
+        token.accessToken = (user as any).accessToken;
+        token.user = user;
       }
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
+      (session as any).accessToken = token.accessToken;
+      session.user = token.user as DefaultSession["user"];
       return session;
     },
   },
   pages: {
     signIn: "/login",
   },
-});
+};
+
+export default NextAuth(authOptions);
