@@ -9,6 +9,7 @@ RUN corepack enable pnpm && \
 	pnpm config -g set store-dir /.pnpm-store
 
 EXPOSE 3000
+EXPOSE 5173
 
 
 FROM base AS builder
