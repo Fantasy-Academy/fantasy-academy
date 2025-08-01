@@ -11,10 +11,10 @@ use FantasyAcademy\API\Api\StateProvider\LoggedUserProvider;
 
 #[ApiResource(
     shortName: 'Logged user info',
-    security: "is_granted('IS_AUTHENTICATED_FULLY')",
 )]
 #[Get(
     uriTemplate: '/me',
+    security: "is_granted('IS_AUTHENTICATED_FULLY')",
     provider: LoggedUserProvider::class,
 )]
 final class LoggedUserResponse

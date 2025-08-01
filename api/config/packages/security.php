@@ -44,7 +44,11 @@ return static function (SecurityConfig $securityConfig): void {
             ->failureHandler('lexik_jwt_authentication.handler.authentication_failure');
 
     $securityConfig->accessControl()
-        ->path('^/api/user')
+        ->path('^/api/me')
+        ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
+
+    $securityConfig->accessControl()
+        ->path('^/api/question/answer')
         ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
 
     $securityConfig->accessControl()
