@@ -9,4 +9,6 @@ use Symfony\Component\Uid\Uuid;
 interface UserAware
 {
     public function withUserId(Uuid $userId): static;
+
+    public function userId(): Uuid;
 }

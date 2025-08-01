@@ -32,11 +32,18 @@ readonly final class UserAwareMiddleware implements MiddlewareInterface
 
             $message = $message->withUserId($user->id);
 
-            // replace the envelope with a new one carrying the updated message and existing stamps
-            /** @var array<StampInterface> $stamps */
-            $stamps = $envelope->all();
+            // re-wrap the message preserving all existing stamps flattened into a single list
+            /** @var StampInterface[][] $stampsByType */
+            $stampsByType = $envelope->all();
 
-            $envelope = Envelope::wrap($message, $stamps);
+            $flattenedStamps = [];
+            foreach ($stampsByType as $stamps) {
+                foreach ($stamps as $stamp) {
+                    $flattenedStamps[] = $stamp;
+                }
+            }
+
+            $envelope = Envelope::wrap($message, $flattenedStamps);
         }
 
         return $stack->next()->handle($envelope, $stack);

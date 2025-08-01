@@ -2,26 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Message;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 
 #[ApiResource(
-    shortName: 'Registration',
+    shortName: 'Forgotten password - request reset code',
 )]
-#[Post(
-    uriTemplate: '/register',
+#[Put(
+    uriTemplate: '/forgotten-password/request-reset-code',
     status: 204,
     input: self::class,
     output: false,
     messenger: 'input',
 )]
-readonly final class RegisterUserRequest
+readonly final class RequestForgottenPasswordResetCode
 {
     public function __construct(
         public string $email,
-        public string $password,
-        public null|string $name,
     ) {}
 }

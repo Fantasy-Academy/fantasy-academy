@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Message\Challenge;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Put;
-use FantasyAcademy\API\Api\Processor\AnswerQuestionProcessor;
 use FantasyAcademy\API\Message\UserAware;
 use FantasyAcademy\API\Message\WithUserId;
 use Symfony\Component\Uid\Uuid;
@@ -22,9 +21,8 @@ use Symfony\Component\Uid\Uuid;
     output: false,
     messenger: 'input',
     read: false,
-    processor: AnswerQuestionProcessor::class,
 )]
-readonly final class AnswerQuestionRequest implements UserAware
+readonly final class AnswerQuestion implements UserAware
 {
     use WithUserId;
 
@@ -39,6 +37,6 @@ readonly final class AnswerQuestionRequest implements UserAware
         public null|Uuid $selectedChoiceId = null,
         public null|array $selectedChoiceIds = [],
         public null|array $orderedChoiceIds = [],
-        public null|string $userId = null,
+        private null|Uuid $userId = null,
     ) {}
 }

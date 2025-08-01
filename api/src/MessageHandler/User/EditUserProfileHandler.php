@@ -22,7 +22,7 @@ readonly final class EditUserProfileHandler
      */
     public function __invoke(EditUserProfile $message): void
     {
-        $user = $this->userRepository->get($message->userEmail);
+        $user = $this->userRepository->getById($message->userId());
 
         $user->editProfile(
             $message->name,
