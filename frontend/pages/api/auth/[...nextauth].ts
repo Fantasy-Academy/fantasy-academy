@@ -4,6 +4,7 @@ import type { NextAuthOptions } from "next-auth";
 import type { DefaultSession } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -47,15 +48,18 @@ export const authOptions: NextAuthOptions = {
           const user = await meRes.json();
           console.log("✅ Uživatel načten:", user);
 
+          // DŮLEŽITÉ: id musí být typu string
           return {
-            ...user,             // obsahuje id, name, email, ...
-            accessToken: token,  // JWT token
+            id: user.id?.toString() ?? user.email,
+            name: user.name ?? user.username ?? user.email,
+            email: user.email,
+            accessToken: token,
           };
         } catch (err) {
           console.error("❌ Chyba v authorize:", err);
           return null;
         }
-      },
+      }
     }),
   ],
   session: {

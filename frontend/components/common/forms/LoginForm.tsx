@@ -36,6 +36,10 @@ export default function LoginPage() {
         } else {
             router.push('/profile');
         }
+        if (res?.error) {
+            console.error("Chyba přihlášení:", res.error);
+            setError(res.error === 'CredentialsSignin' ? 'Invalid credentials' : res.error);
+        }
     };
 
     useEffect(() => {
@@ -66,6 +70,9 @@ export default function LoginPage() {
 
         fetchData();
     }, [session]);
+    console.log("Session", session);
+
+
 
     return (
         <BackgroundWrapper>
