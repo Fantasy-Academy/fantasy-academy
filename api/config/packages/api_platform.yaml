@@ -3,7 +3,7 @@ api_platform:
     version: 1.0.0
     mapping:
         paths:
-            - '%kernel.project_dir%/src/Api/ApiResource'
+            - '%kernel.project_dir%/src/Api/Response'
             - '%kernel.project_dir%/src/Message'
     enable_entrypoint: false
     use_symfony_listeners: true
