@@ -6,11 +6,11 @@ namespace FantasyAcademy\API\Api\StateProvider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use FantasyAcademy\API\Api\ApiResource\LoggedUserResponse;
-use FantasyAcademy\API\Api\ApiResource\PlayerSeasonStatistics;
-use FantasyAcademy\API\Api\ApiResource\PlayerStatistics;
-use FantasyAcademy\API\Api\ApiResource\Skill;
+use FantasyAcademy\API\Api\Response\LoggedUserResponse;
 use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Value\PlayerSeasonStatistics;
+use FantasyAcademy\API\Value\PlayerStatistics;
+use FantasyAcademy\API\Value\Skill;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**

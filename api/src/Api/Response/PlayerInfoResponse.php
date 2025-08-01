@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Api\Response;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
+use FantasyAcademy\API\Value\PlayerSeasonStatistics;
+use FantasyAcademy\API\Value\PlayerStatistics;
 use Symfony\Component\Uid\Uuid;
 
 #[ApiResource(

@@ -2,26 +2,23 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Api\Response;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use DateTimeImmutable;
-use FantasyAcademy\API\Api\StateProvider\ChallengeDetailProvider;
+use FantasyAcademy\API\Api\StateProvider\ChallengesProvider;
 use Symfony\Component\Uid\Uuid;
 
 #[ApiResource(
-    shortName: 'Challenge detail',
+    shortName: 'Challenges',
 )]
-#[Get(
-    uriTemplate: '/challenges/{id}',
-    provider: ChallengeDetailProvider::class,
+#[GetCollection(
+    uriTemplate: '/challenges',
+    provider: ChallengesProvider::class,
 )]
-readonly final class ChallengeDetailResponse
+readonly final class ChallengeResponse
 {
-    /**
-     * @param array<Question> $questions
-     */
     public function __construct(
         public Uuid $id,
         public string $name,
@@ -36,9 +33,6 @@ readonly final class ChallengeDetailResponse
         public bool $isExpired,
         public bool $isAnswered,
         public bool $isEvaluated,
-        public array $questions,
-        public null|string $hintText,
-        public null|string $hintImage,
     ) {
     }
 }

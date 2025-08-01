@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Value;
 
 enum QuestionType: string
 {

@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Value;
 
-readonly final class PlayerSeasonStatistics
+readonly final class PlayerStatistics
 {
     /**
      * @param array<Skill> $skills
      */
     public function __construct(
-        public int $seasonNumber,
         public int $rank,
         public int $challengesAnswered,
         public int $points,

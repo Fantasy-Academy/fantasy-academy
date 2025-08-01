@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Value;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;

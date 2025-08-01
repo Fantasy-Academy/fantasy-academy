@@ -6,12 +6,12 @@ namespace FantasyAcademy\API\Api\StateProvider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use FantasyAcademy\API\Api\ApiResource\ChallengeDetailResponse;
-use FantasyAcademy\API\Api\ApiResource\Choice;
-use FantasyAcademy\API\Api\ApiResource\ChoiceQuestionConstraint;
-use FantasyAcademy\API\Api\ApiResource\NumericQuestionConstraint;
-use FantasyAcademy\API\Api\ApiResource\Question;
-use FantasyAcademy\API\Api\ApiResource\QuestionType;
+use FantasyAcademy\API\Api\Response\ChallengeDetailResponse;
+use FantasyAcademy\API\Value\Choice;
+use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
+use FantasyAcademy\API\Value\NumericQuestionConstraint;
+use FantasyAcademy\API\Value\Question;
+use FantasyAcademy\API\Value\QuestionType;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 

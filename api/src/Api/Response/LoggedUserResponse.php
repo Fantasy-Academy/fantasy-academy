@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\ApiResource;
+namespace FantasyAcademy\API\Api\Response;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
 use FantasyAcademy\API\Api\StateProvider\LoggedUserProvider;
+use FantasyAcademy\API\Value\PlayerSeasonStatistics;
+use FantasyAcademy\API\Value\PlayerStatistics;
 
 #[ApiResource(
     shortName: 'Logged user info',
