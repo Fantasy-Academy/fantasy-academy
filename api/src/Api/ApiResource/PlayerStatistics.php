@@ -11,7 +11,7 @@ readonly final class PlayerStatistics
      */
     public function __construct(
         public int $rank,
-        public int $roundsPlayed,
+        public int $challengesAnswered,
         public int $points,
         public array $skills,
     ) {

@@ -7,12 +7,15 @@ namespace FantasyAcademy\API\Api\ApiResource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
+use FantasyAcademy\API\Api\StateProvider\LoggedUserProvider;
 
 #[ApiResource(
     shortName: 'Logged user info',
+    security: "is_granted('IS_AUTHENTICATED_FULLY')",
 )]
 #[Get(
     uriTemplate: '/me',
+    provider: LoggedUserProvider::class,
 )]
 final class LoggedUserResponse
 {
