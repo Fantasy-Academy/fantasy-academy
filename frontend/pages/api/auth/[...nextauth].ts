@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         console.log("🔐 Pokus o přihlášení:", credentials);
 
         try {
-          const loginRes = await fetch("http://localhost:8080/api/login", {
+          const loginRes = await fetch("http://api/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -32,7 +32,7 @@ export const authOptions: NextAuthOptions = {
 
           const { token } = await loginRes.json();
 
-          const meRes = await fetch("http://localhost:8080/api/me", {
+          const meRes = await fetch("http://api/api/me", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
