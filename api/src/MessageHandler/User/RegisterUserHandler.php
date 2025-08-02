@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\MessageHandler\User;
 
+use FantasyAcademy\API\Exceptions\UserAlreadyRegistered;
+use FantasyAcademy\API\Exceptions\UserNotFound;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use FantasyAcademy\API\Entity\User;
@@ -25,6 +27,14 @@ readonly final class RegisterUserHandler
 
     public function __invoke(RegisterUser $message): void
     {
+        try {
+            $this->userRepository->get($message->email);
+
+            throw new UserAlreadyRegistered();
+        } catch (UserNotFound) {
+            // Totally ok... continue
+        }
+
         $user = new User(
             $this->provideIdentity->next(),
             $message->email,

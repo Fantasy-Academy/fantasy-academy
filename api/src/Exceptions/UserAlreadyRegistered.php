@@ -5,7 +5,17 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Exceptions;
 
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class UserAlreadyRegistered extends UnrecoverableMessageHandlingException
+final class UserAlreadyRegistered extends UnrecoverableMessageHandlingException implements DomainException
 {
+    public function statusCode(): int
+    {
+        return 400;
+    }
+
+    public function toHumanReadableMessage(TranslatorInterface $translator): string
+    {
+        return $translator->trans('user_already_registered', domain: 'exceptions');
+    }
 }
