@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface ChallengeModalProps {
   title: string;
@@ -36,52 +37,62 @@ interface Question {
 const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose }) => {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+
   const [question, setQuestion] = useState<Question | null>(null);
   const [hintText, setHintText] = useState<string | null>(null);
   const [selectedChoices, setSelectedChoices] = useState<Record<string, boolean>>({});
   const [textAnswer, setTextAnswer] = useState('');
   const [numericAnswer, setNumericAnswer] = useState('');
 
+  const { data: session } = useSession();
+  const token = session?.accessToken;
+
   useEffect(() => {
     console.log('🟢 Modal otevřen pro challenge ID:', id);
 
     const fetchChallenge = async () => {
-      const res = await fetch(`http://localhost:8080/api/challenges/${id}`);
-      const data = await res.json();
+      if (!id) return;
+      try {
+        const res = await fetch(`http://localhost:8080/api/challenges/${id}`);
+        const data = await res.json();
 
-      if (data.questions && data.questions.length > 0) {
-        console.log('📥 Načtena otázka:', data.questions[0]);
-        setQuestion(data.questions[0]);
-      }
-
-      if (data.hintText) {
-        console.log('💡 Nápověda challenge:', data.hintText);
-        setHintText(data.hintText);
+        if (data.questions?.length > 0) {
+          console.log('📥 Načtena otázka:', data.questions[0]);
+          setQuestion(data.questions[0]);
+        }
+        if (data.hintText) {
+          console.log('💡 Nápověda challenge:', data.hintText);
+          setHintText(data.hintText);
+        }
+      } catch (err) {
+        console.error("❌ Chyba při načítání challenge:", err);
       }
     };
 
-    if (id) {
-      fetchChallenge();
-    }
+    fetchChallenge();
   }, [id]);
 
   const isAnySelected =
     Object.values(selectedChoices).some(Boolean) || textAnswer !== '' || numericAnswer !== '';
 
   const handleSingleSelect = (choiceId: string) => {
-    console.log('🎯 Single choice vybráno:', choiceId);
     setSelectedChoices({ [choiceId]: true });
   };
 
   const handleMultiSelect = (choiceId: string) => {
-    setSelectedChoices((prev) => {
-      const updated = { ...prev, [choiceId]: !prev[choiceId] };
-      console.log('✅ Multi choice změněn:', updated);
-      return updated;
-    });
+    setSelectedChoices((prev) => ({
+      ...prev,
+      [choiceId]: !prev[choiceId],
+    }));
   };
 
   const handleSubmit = async () => {
+    if (!token) {
+      console.error("❌ Žádný token – uživatel není přihlášen");
+      alert("Musíš být přihlášen.");
+      return;
+    }
+
     if (!question) return;
 
     const body: any = {
@@ -96,32 +107,32 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
         question.type === 'multi_select'
           ? Object.keys(selectedChoices).filter((id) => selectedChoices[id])
           : null,
-      orderedChoiceIds: null, // zatím neřešíme "sort"
+      orderedChoiceIds: null,
     };
 
     console.log('📦 Odesílám odpověď:', body);
 
     try {
-      const res = await fetch('http://localhost:8080/api/questions/answer', {
-        method: 'PUT',
+      const res = await fetch("http://localhost:8080/api/questions/answer", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-        
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       });
 
       if (res.ok) {
-        console.log('✅ Odpověď úspěšně odeslána na server');
-        alert('Odpověď byla uložena.');
+        console.log("✅ Odpověď úspěšně odeslána");
+        alert("Odpověď byla uložena.");
       } else {
         const err = await res.json();
-        console.error('❌ Chyba při odeslání:', err);
-        alert('Chyba při odeslání odpovědi.');
+        console.error("❌ Chyba při odeslání:", err);
+        alert("Chyba při odeslání odpovědi.");
       }
     } catch (error) {
-      console.error('❌ Výjimka při odesílání:', error);
-      alert('Došlo k chybě během komunikace se serverem.');
+      console.error("❌ Výjimka při odesílání:", error);
+      alert("Došlo k chybě během komunikace se serverem.");
     }
   };
 
@@ -184,8 +195,12 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
                     />
                     <div>
                       <p className="font-semibold">{choice.text}</p>
-                      {choice.description && <p className="text-sm text-gray-600">{choice.description}</p>}
-                      {choice.image && <img src={choice.image} alt="choice" className="max-h-24 mt-1" />}
+                      {choice.description && (
+                        <p className="text-sm text-gray-600">{choice.description}</p>
+                      )}
+                      {choice.image && (
+                        <img src={choice.image} alt="choice" className="max-h-24 mt-1" />
+                      )}
                     </div>
                   </label>
                 ))}
@@ -203,8 +218,12 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
                     />
                     <div>
                       <p className="font-semibold">{choice.text}</p>
-                      {choice.description && <p className="text-sm text-gray-600">{choice.description}</p>}
-                      {choice.image && <img src={choice.image} alt="choice" className="max-h-24 mt-1" />}
+                      {choice.description && (
+                        <p className="text-sm text-gray-600">{choice.description}</p>
+                      )}
+                      {choice.image && (
+                        <img src={choice.image} alt="choice" className="max-h-24 mt-1" />
+                      )}
                     </div>
                   </label>
                 ))}

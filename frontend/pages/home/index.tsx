@@ -36,11 +36,10 @@ const Page = () => {
 
                     {/* Prostřední obrázek */}
                     <div className="w-1/3 h-full">
-                        <img
-                            src="/assets/center.jpg"
-                            alt="Center"
-                            className="w-full h-full object-cover"
-                        />
+                        <div className="w-full h-full bg-charcoal"
+                        >
+
+                        </div>
                     </div>
 
                     {/* Pravý obrázek */}

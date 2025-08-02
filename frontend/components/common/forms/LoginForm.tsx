@@ -76,7 +76,7 @@ export default function LoginPage() {
 
     return (
         <BackgroundWrapper>
-            <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="flex items-center justify-center py-6 px-4">
                 <form
                     onSubmit={handleLogin}
                     className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"

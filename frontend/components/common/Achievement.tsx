@@ -10,7 +10,7 @@ const ComponentName: FC<ComponentNameProps> = ({ title, description }) => {
 
     return (
         <div
-            className="group relative w-32 h-40 mx-2 my-1 cursor-pointer [perspective:1000px] my-1"
+            className="group relative w-56 h-80 mx-2 my-1 cursor-pointer [perspective:1000px] my-1"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -23,8 +23,8 @@ const ComponentName: FC<ComponentNameProps> = ({ title, description }) => {
                         isHovered ? 'bg-white' : 'bg-white'
                     }`}
                 >
-                    <div className="rounded-lg bg-gray-100 min-w-28 min-h-28 flex items-center justify-center">
-                        <p>100x100</p>
+                    <div className="rounded-lg bg-gray-100 min-w-54 min-h-64 flex items-center justify-center">
+                        <p>54x64</p>
                     </div>
                     <div className="flex items-center justify-center h-12 w-full">
                         <h1 className="font-sourceSans3 font-bold text-sm text-center leading-4 uppercase">
