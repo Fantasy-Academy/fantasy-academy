@@ -18,7 +18,7 @@ const LoginForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const { nickname, email, password, confirmPassword } = formData;
+        const { name, email, password, confirmPassword } = formData;
 
         if (password !== confirmPassword) {
             alert("Hesla se neshodují.");
