@@ -51,10 +51,10 @@ const LoginForm: React.FC = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <InputField id="name" label="Name" placeholder="Name..." type="text" value={formData.name} onChange={handleChange} required />
-            <InputField id="email" label="Email address" placeholder="Email..." type="email" value={formData.email} onChange={handleChange} required />
-            <InputField id="password" label="Password" placeholder="Password..." type="password" value={formData.password} onChange={handleChange} required />
-            <InputField id="confirmPassword" label="Confirm password" placeholder="Confirm password..." type="password" value={formData.confirmPassword} onChange={handleChange} required />
+            <InputField id="name" name='name' autoComplete='' label="Name" placeholder="Name..." type="text" value={formData.name} onChange={handleChange} required />
+            <InputField id="email" name='email' autoComplete='' label="Email address" placeholder="Email..." type="email" value={formData.email} onChange={handleChange} required />
+            <InputField id="password" name='password' autoComplete='' label="Password" placeholder="Password..." type="password" value={formData.password} onChange={handleChange} required />
+            <InputField id="confirmPassword" name='confirm_password' autoComplete='' label="Confirm password" placeholder="Confirm password..." type="password" value={formData.confirmPassword} onChange={handleChange} required />
             <div className='mt-6'>
                 <Btn type="submit">Sign Up</Btn>
             </div>

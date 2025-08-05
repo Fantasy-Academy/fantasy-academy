@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -48,24 +49,21 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
   const token = session?.accessToken;
 
   useEffect(() => {
-    console.log('🟢 Modal otevřen pro challenge ID:', id);
+    if (!id) return;
 
     const fetchChallenge = async () => {
-      if (!id) return;
       try {
         const res = await fetch(`http://localhost:8080/api/challenges/${id}`);
         const data = await res.json();
 
         if (data.questions?.length > 0) {
-          console.log('📥 Načtena otázka:', data.questions[0]);
           setQuestion(data.questions[0]);
         }
         if (data.hintText) {
-          console.log('💡 Nápověda challenge:', data.hintText);
           setHintText(data.hintText);
         }
       } catch (err) {
-        console.error("❌ Chyba při načítání challenge:", err);
+        console.error('❌ Chyba při načítání challenge:', err);
       }
     };
 
@@ -88,8 +86,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
 
   const handleSubmit = async () => {
     if (!token) {
-      console.error("❌ Žádný token – uživatel není přihlášen");
-      alert("Musíš být přihlášen.");
+      alert('Musíš být přihlášen.');
       return;
     }
 
@@ -110,146 +107,146 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
       orderedChoiceIds: null,
     };
 
-    console.log('📦 Odesílám odpověď:', body);
-
     try {
-      const res = await fetch("http://localhost:8080/api/questions/answer", {
-        method: "PUT",
+      const res = await fetch('http://localhost:8080/api/questions/answer', {
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       });
 
       if (res.ok) {
-        console.log("✅ Odpověď úspěšně odeslána");
-        alert("Odpověď byla uložena.");
+        alert('Odpověď byla uložena.');
       } else {
         const err = await res.json();
-        console.error("❌ Chyba při odeslání:", err);
-        alert("Chyba při odeslání odpovědi.");
+        console.error('❌ Chyba při odeslání:', err);
+        alert('Chyba při odeslání odpovědi.');
       }
     } catch (error) {
-      console.error("❌ Výjimka při odesílání:", error);
-      alert("Došlo k chybě během komunikace se serverem.");
+      console.error('❌ Výjimka při odesílání:', error);
+      alert('Došlo k chybě během komunikace se serverem.');
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-darkWhite p-8 rounded-lg shadow-lg w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto relative mt-14">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="relative w-[95%] max-w-2xl">
+        {/* Zavírací tlačítko pevně vůči modal boxu */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-charcoal text-2xl hover:scale-110 transition-transform duration-[140ms]"
+          className="absolute top-4 right-4 z-10 text-charcoal text-2xl hover:scale-110 transition-transform duration-[140ms]"
         >
           ✖
         </button>
 
-        <div className="flex flex-col pb-4">
-          <h2 className="text-5xl font-bold text-vibrantCoral text-center">{title}</h2>
-          <h3 className="font-bebasNeue text-4xl text-charcoal mt-10">Coach&apos;s Corner</h3>
-          <p className="text-lg text-charcoal">{description}</p>
-        </div>
-
-        <hr className="border-0 h-[2px] bg-charcoal my-4" />
-
-        {question && (
-          <div className="flex flex-col gap-4">
-            <h4 className="text-2xl font-semibold text-charcoal">{question.text}</h4>
-            {question.image && <img src={question.image} alt="question" className="max-h-64" />}
-            {hintText && (
-              <p className="italic text-md text-gray-600 bg-white p-2 border-l-4 border-vibrantCoral">
-                💡 {hintText}
-              </p>
-            )}
-
-            {question.type === 'text' && (
-              <textarea
-                value={textAnswer}
-                onChange={(e) => setTextAnswer(e.target.value)}
-                className="w-full border p-2"
-                placeholder="Zadej odpověď"
-              />
-            )}
-
-            {question.type === 'numeric' && (
-              <input
-                type="number"
-                value={numericAnswer}
-                onChange={(e) => setNumericAnswer(e.target.value)}
-                className="w-full border p-2"
-                placeholder="Zadej číslo"
-              />
-            )}
-
-            {question.type === 'single_select' && question.choiceConstraint?.choices && (
-              <div className="flex flex-col gap-2">
-                {question.choiceConstraint.choices.map((choice) => (
-                  <label key={choice.id} className="flex items-start gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="singleSelect"
-                      checked={!!selectedChoices[choice.id]}
-                      onChange={() => handleSingleSelect(choice.id)}
-                    />
-                    <div>
-                      <p className="font-semibold">{choice.text}</p>
-                      {choice.description && (
-                        <p className="text-sm text-gray-600">{choice.description}</p>
-                      )}
-                      {choice.image && (
-                        <img src={choice.image} alt="choice" className="max-h-24 mt-1" />
-                      )}
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {question.type === 'multi_select' && question.choiceConstraint?.choices && (
-              <div className="flex flex-col gap-2">
-                {question.choiceConstraint.choices.map((choice) => (
-                  <label key={choice.id} className="flex items-start gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={!!selectedChoices[choice.id]}
-                      onChange={() => handleMultiSelect(choice.id)}
-                    />
-                    <div>
-                      <p className="font-semibold">{choice.text}</p>
-                      {choice.description && (
-                        <p className="text-sm text-gray-600">{choice.description}</p>
-                      )}
-                      {choice.image && (
-                        <img src={choice.image} alt="choice" className="max-h-24 mt-1" />
-                      )}
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {question.type === 'sort' && (
-              <p className="text-gray-500 italic">Typ "sort" ještě není implementován.</p>
-            )}
+        {/* Obsah modalu */}
+        <div className="bg-darkWhite p-8 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
+          <div className="flex flex-col pb-4">
+            <h2 className="text-5xl font-bold text-vibrantCoral text-center">{title}</h2>
+            <h3 className="font-bebasNeue text-4xl text-charcoal mt-10">Coach&apos;s Corner</h3>
+            <p className="text-lg text-charcoal">{description}</p>
           </div>
-        )}
 
-        <div className="mt-6">
-          <button
-            type="button"
-            onClick={isAnySelected ? handleSubmit : undefined}
-            disabled={!isAnySelected}
-            className={`
-              w-full py-4 text-lg font-bold text-white text-center
-              transition-all duration-200
-              font-sourceSans3
-              ${isAnySelected ? 'bg-vibrantCoral cursor-pointer' : 'bg-coolGray cursor-not-allowed'}
-            `}
-          >
-            Submit answer
-          </button>
+          <hr className="border-0 h-[2px] bg-charcoal my-4" />
+
+          {question && (
+            <div className="flex flex-col gap-4">
+              <h4 className="text-2xl font-semibold text-charcoal">{question.text}</h4>
+              {question.image && <img src={question.image} alt="question" className="max-h-64" />}
+              {hintText && (
+                <p className="italic text-md text-gray-600 bg-white p-2 border-l-4 border-vibrantCoral">
+                  💡 {hintText}
+                </p>
+              )}
+
+              {question.type === 'text' && (
+                <textarea
+                  value={textAnswer}
+                  onChange={(e) => setTextAnswer(e.target.value)}
+                  className="w-full border p-2"
+                  placeholder="Zadej odpověď"
+                />
+              )}
+
+              {question.type === 'numeric' && (
+                <input
+                  type="number"
+                  value={numericAnswer}
+                  onChange={(e) => setNumericAnswer(e.target.value)}
+                  className="w-full border p-2"
+                  placeholder="Zadej číslo"
+                />
+              )}
+
+              {question.type === 'single_select' && question.choiceConstraint?.choices && (
+                <div className="flex flex-col gap-2">
+                  {question.choiceConstraint.choices.map((choice) => (
+                    <label key={choice.id} className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="singleSelect"
+                        checked={!!selectedChoices[choice.id]}
+                        onChange={() => handleSingleSelect(choice.id)}
+                      />
+                      <div>
+                        <p className="font-semibold">{choice.text}</p>
+                        {choice.description && (
+                          <p className="text-sm text-gray-600">{choice.description}</p>
+                        )}
+                        {choice.image && (
+                          <img src={choice.image} alt="choice" className="max-h-24 mt-1" />
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {question.type === 'multi_select' && question.choiceConstraint?.choices && (
+                <div className="flex flex-col gap-2">
+                  {question.choiceConstraint.choices.map((choice) => (
+                    <label key={choice.id} className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedChoices[choice.id]}
+                        onChange={() => handleMultiSelect(choice.id)}
+                      />
+                      <div>
+                        <p className="font-semibold">{choice.text}</p>
+                        {choice.description && (
+                          <p className="text-sm text-gray-600">{choice.description}</p>
+                        )}
+                        {choice.image && (
+                          <img src={choice.image} alt="choice" className="max-h-24 mt-1" />
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {question.type === 'sort' && (
+                <p className="text-gray-500 italic">Typ "sort" ještě není implementován.</p>
+              )}
+            </div>
+          )}
+
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={isAnySelected ? handleSubmit : undefined}
+              disabled={!isAnySelected}
+              className={`
+                w-full py-4 text-lg font-bold text-white text-center
+                transition-all duration-200 font-sourceSans3
+                ${isAnySelected ? 'bg-vibrantCoral cursor-pointer' : 'bg-coolGray cursor-not-allowed'}
+              `}
+            >
+              Submit answer
+            </button>
+          </div>
         </div>
       </div>
     </div>
