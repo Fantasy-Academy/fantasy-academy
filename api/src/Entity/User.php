@@ -33,10 +33,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
     public string $password = '';
 
     #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
-    #[Column(nullable: true)]
-    public null|string $name = null;
-
-    #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
     #[Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     public null|DateTimeImmutable $lastActivity = null;
 
@@ -53,12 +49,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
         readonly public DateTimeImmutable $registeredAt,
 
         #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
+        #[Column(nullable: true)]
+        public null|string $name = null,
+
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(options: ['default' => true])]
         public bool $confirmed = true,
 
         /** @var array<string> */
         #[Column(type: Types::JSON)]
-        private array $roles = [],
+        readonly private array $roles = [],
     ) {
     }
 

@@ -39,6 +39,7 @@ readonly final class RegisterUserHandler
             $this->provideIdentity->next(),
             $message->email,
             $this->clock->now(),
+            name: $message->name,
             roles: [User::ROLE_USER],
         );
 
