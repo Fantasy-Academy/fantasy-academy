@@ -7,7 +7,7 @@ import Btn from '../button/Btn';
 import { useSession, signOut } from 'next-auth/react';
 
 const navigation: { name: string; href: string }[] = [
-  { name: 'Home', href: '/home' },
+  { name: 'Home', href: '/' },
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Challenges', href: '/challenges' },
   { name: 'Leaderboard', href: '/leaderboard' },

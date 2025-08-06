@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import Btn from "../../components/button/Btn";
+import Btn from "../components/button/Btn";
 
 const Page = () => {
     const [scrollY, setScrollY] = useState(0);
