@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Btn from '../../components/button/Btn';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Achievement from '../../components/common/Achievement';
 import TitleContainer from '../../components/containers/TitleContainer';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
@@ -23,7 +23,7 @@ const UserProfile: React.FC = () => {
         { title: 'Skill 4', description: 'Description of skill 4.' },
         { title: 'Skill 5', description: 'Description of skill 5.' },
     ];
-
+    console.log("🔍 Session:", session);
     return (
         <BackgroundWrapper>
             <div className="flex flex-col gap-8 justify-center text-left pb-8 px-4 sm:px-8 max-w-5xl mx-auto mt-8">

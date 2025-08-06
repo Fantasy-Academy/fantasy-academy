@@ -48,11 +48,11 @@ export const authOptions: NextAuthOptions = {
           const user = await meRes.json();
           console.log("✅ Uživatel načten:", user);
 
-          // DŮLEŽITÉ: id musí být typu string
           return {
             id: user.id?.toString() ?? user.email,
-            name: user.name ?? user.username ?? user.email,
+            name: user.name,
             email: user.email,
+            image: null, // přidej pokud máš obrázky
             accessToken: token,
           };
         } catch (err) {
@@ -69,13 +69,18 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.accessToken = (user as any).accessToken;
-        token.user = user;
+        token.name = user.name;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
+      session.user = {
+        name: token.name,
+        email: token.email,
+        image: null,
+      };
       (session as any).accessToken = token.accessToken;
-      session.user = token.user as DefaultSession["user"];
       return session;
     },
   },
