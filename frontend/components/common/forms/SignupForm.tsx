@@ -1,8 +1,14 @@
+'use client';
+
 import React, { useState } from 'react';
+import { signIn } from 'next-auth/react'; // ← přidat
+import { useRouter } from 'next/navigation'; // ← přidat
 import InputField from '../../inputField/InputField';
 import Btn from '../../button/Btn';
 
 const SignupForm: React.FC = () => {
+    const router = useRouter();
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -24,20 +30,30 @@ const SignupForm: React.FC = () => {
             alert("Hesla se neshodují.");
             return;
         }
+
         const payload = { name, email, password };
         console.log("📦 Odesílám data k registraci:", payload);
-        
+
         try {
             const res = await fetch('http://localhost:8080/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify(payload),
             });
 
             if (res.ok) {
-                alert("✅ Uživatelský účet byl úspěšně vytvořen.");
-                setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+                // ✅ Registrace OK → přihlásit uživatele
+                const loginRes = await signIn('credentials', {
+                    redirect: false,
+                    email,
+                    password,
+                });
 
+                if (loginRes?.ok) {
+                    router.push('/dashboard'); // nebo jinam dle potřeby
+                } else {
+                    alert("Registrace proběhla, ale přihlášení selhalo.");
+                }
             } else {
                 const error = await res.json();
                 console.error("❌ Server error:", error);
@@ -54,11 +70,11 @@ const SignupForm: React.FC = () => {
             <InputField
                 id="name"
                 name="name"
-                autoComplete=""
                 label="Name"
                 placeholder="Name..."
                 type="text"
                 value={formData.name}
+                autoComplete=''
                 onChange={handleChange}
                 required
             />
@@ -87,12 +103,12 @@ const SignupForm: React.FC = () => {
             <InputField
                 id="confirmPassword"
                 name="confirmPassword"
-                autoComplete=""
                 label="Confirm password"
                 placeholder="Confirm password..."
                 type="password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                autoComplete=''
                 required
             />
             <div className="mt-6">
