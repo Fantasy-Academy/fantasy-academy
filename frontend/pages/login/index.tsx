@@ -13,10 +13,10 @@ const Login = () => {
         </h2>
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+      <div className="sm:mx-auto sm:w-full sm:max-w-sm mt-10">
         <LoginForm />
 
-        <div className="mt-10 flex justify-center text-sm text-coolGray">
+        <div className="flex w-fit h-fit justify-center text-sm text-coolGray mx-auto mt-10">
           <span className="mr-1">Don&apos;t have an account?</span>
           <LinkBtn link="/signup" text="Sign Up" />
         </div>
