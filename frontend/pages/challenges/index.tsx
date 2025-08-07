@@ -28,22 +28,19 @@ const Challenges = () => {
     const searchParams = useSearchParams();
     const challengeId = searchParams.get('id');
 
+    // ✅ Funkce pro znovunačtení výzev
+    const fetchChallenges = async () => {
+        try {
+            const res = await fetch('http://localhost:8080/api/challenges');
+            if (!res.ok) throw new Error('Chyba při načítání výzev');
+            const data = await res.json();
+            setChallenges(data.member || data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
-        const fetchChallenges = async () => {
-            try {
-                const res = await fetch('http://localhost:8080/api/challenges');
-
-                if (!res.ok) throw new Error('Chyba při načítání výzev');
-                const data = await res.json();
-
-                // API vrací `member` pokud je to Hydra (v opačném případě přímo pole)
-                console.log("fetched data:", data);
-                setChallenges(data.member || data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
         fetchChallenges();
     }, []);
 
@@ -67,8 +64,17 @@ const Challenges = () => {
     const selectedChallenge = challenges.find((challenge) => challenge.id === challengeId);
 
     const closeModal = () => {
-        router.push('/challenges', { scroll: false });
+        router.replace('/challenges', { scroll: false });
     };
+
+    // ✅ Zavolá se po úspěšném odeslání odpovědi z modalu
+    const handleSubmitSuccess = () => {
+        router.replace('/challenges', { scroll: false }); // použijeme replace místo push
+        fetchChallenges(); // obnoví challenge list
+        closeModal(); // zavře modal
+    };
+
+
 
     return (
         <BackgroundWrapper>
@@ -96,15 +102,21 @@ const Challenges = () => {
                     <div className="w-full max-w-[1200px] mx-auto">
                         <div className="flex flex-col gap-4">
                             {filteredChallenges.map((challenge) => (
-                                <ChallengeCard key={challenge.id} challengeCard={{
-                                    id: challenge.id,
-                                    title: challenge.name,
-                                    shortDescription: challenge.shortDescription,
-                                    description: challenge.description,
-                                    image: challenge.image ?? '',
-                                    duration: Math.max(Math.floor((new Date(challenge.expiresAt).getTime() - Date.now()) / 60000), 0),
-                                    isCompleted: challenge.isAnswered,
-                                }} />
+                                <ChallengeCard
+                                    key={challenge.id}
+                                    challengeCard={{
+                                        id: challenge.id,
+                                        title: challenge.name,
+                                        shortDescription: challenge.shortDescription,
+                                        description: challenge.description,
+                                        image: challenge.image ?? '',
+                                        duration: Math.max(
+                                            Math.floor((new Date(challenge.expiresAt).getTime() - Date.now()) / 60000),
+                                            0
+                                        ),
+                                        isCompleted: challenge.isAnswered,
+                                    }}
+                                />
                             ))}
                         </div>
                     </div>
@@ -115,9 +127,13 @@ const Challenges = () => {
                     <ChallengeModal
                         title={selectedChallenge.name}
                         description={selectedChallenge.description}
-                        duration={Math.max(Math.floor((new Date(selectedChallenge.expiresAt).getTime() - Date.now()) / 60000), 0)}
+                        duration={Math.max(
+                            Math.floor((new Date(selectedChallenge.expiresAt).getTime() - Date.now()) / 60000),
+                            0
+                        )}
                         isCompleted={selectedChallenge.isAnswered}
                         onClose={closeModal}
+                        onSubmitSuccess={handleSubmitSuccess} // ✅ zde přidáno
                     />
                 )}
             </div>

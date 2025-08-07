@@ -1,4 +1,5 @@
-'use client';
+// ChallengeModal.tsx
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -10,6 +11,7 @@ interface ChallengeModalProps {
   duration: number;
   isCompleted: boolean;
   onClose: () => void;
+  onSubmitSuccess?: () => void;
 }
 
 interface Choice {
@@ -35,7 +37,7 @@ interface Question {
   } | null;
 }
 
-const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose }) => {
+const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onClose, onSubmitSuccess }) => {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
 
@@ -46,7 +48,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
   const [numericAnswer, setNumericAnswer] = useState('');
 
   const { data: session } = useSession();
-  const token = session?.accessToken;
+  const token = (session as any)?.accessToken;
 
   useEffect(() => {
     if (!id) return;
@@ -105,7 +107,10 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
           ? Object.keys(selectedChoices).filter((id) => selectedChoices[id])
           : null,
       orderedChoiceIds: null,
+      isAnswered: true,
     };
+
+    console.log("📤 Odesílám odpověď:", body);
 
     try {
       const res = await fetch('http://localhost:8080/api/questions/answer', {
@@ -119,6 +124,8 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
 
       if (res.ok) {
         alert('Odpověď byla uložena.');
+        if (onSubmitSuccess) onSubmitSuccess();
+        onClose();
       } else {
         const err = await res.json();
         console.error('❌ Chyba při odeslání:', err);
@@ -133,15 +140,12 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="relative w-[95%] max-w-2xl">
-        {/* Zavírací tlačítko pevně vůči modal boxu */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 text-charcoal text-2xl hover:scale-110 transition-transform duration-[140ms]"
         >
           ✖
         </button>
-
-        {/* Obsah modalu */}
         <div className="bg-darkWhite p-8 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
           <div className="flex flex-col pb-4">
             <h2 className="text-5xl font-bold text-vibrantCoral text-center">{title}</h2>
@@ -150,6 +154,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
           </div>
 
           <hr className="border-0 h-[2px] bg-charcoal my-4" />
+
 
           {question && (
             <div className="flex flex-col gap-4">
@@ -232,7 +237,6 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ title, description, onC
               )}
             </div>
           )}
-
           <div className="mt-6">
             <button
               type="button"
