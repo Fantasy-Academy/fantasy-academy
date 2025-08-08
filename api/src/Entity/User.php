@@ -6,17 +6,18 @@ namespace FantasyAcademy\API\Entity;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Table;
 use JetBrains\PhpStorm\Immutable;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity]
-#[ORM\Table(name: '`user`')]
+#[Entity]
+#[Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityWithEvents
 {
     use HasEvents;

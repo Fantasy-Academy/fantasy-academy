@@ -25,6 +25,7 @@ final class TestDataFixture extends Fixture
             Uuid::fromString(self::USER_1_ID),
             self::USER_1_EMAIL,
             $date,
+            'User 1',
             true,
         );
         $manager->persist($user1);
@@ -33,6 +34,7 @@ final class TestDataFixture extends Fixture
             Uuid::fromString(self::USER_2_ID),
             self::USER_2_EMAIL,
             $date,
+            'User 2',
             true,
         );
         $manager->persist($user2);
