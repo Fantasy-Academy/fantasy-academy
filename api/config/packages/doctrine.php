@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
+use FantasyAcademy\API\Doctrine\UuidArrayDoctrineType;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -14,6 +15,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             'url' => '%env(resolve:DATABASE_URL)%',
             'types' => [
                 UuidType::NAME => UuidType::class,
+                UuidArrayDoctrineType::NAME => UuidArrayDoctrineType::class,
                 NumericQuestionConstraintDoctrineType::NAME => NumericQuestionConstraintDoctrineType::class,
                 ChoiceQuestionConstraintDoctrineType::NAME => ChoiceQuestionConstraintDoctrineType::class,
             ],

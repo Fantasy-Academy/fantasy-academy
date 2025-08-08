@@ -8,6 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
@@ -28,6 +29,7 @@ class Question
         public Uuid $id,
 
         #[ManyToOne]
+        #[JoinColumn(nullable: false)]
         readonly public Challenge $challenge,
 
         #[Column(type: Types::TEXT)]

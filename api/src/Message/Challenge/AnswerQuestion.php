@@ -35,8 +35,8 @@ readonly final class AnswerQuestion implements UserAware
         public null|string $textAnswer = null,
         public null|float $numericAnswer = null,
         public null|Uuid $selectedChoiceId = null,
-        public null|array $selectedChoiceIds = [],
-        public null|array $orderedChoiceIds = [],
+        public null|array $selectedChoiceIds = null,
+        public null|array $orderedChoiceIds = null,
         private null|Uuid $userId = null,
     ) {}
 }
