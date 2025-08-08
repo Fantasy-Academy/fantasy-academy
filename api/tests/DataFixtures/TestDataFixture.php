@@ -13,20 +13,24 @@ use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
 use FantasyAcademy\API\Value\QuestionType;
 use Psr\Clock\ClockInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class TestDataFixture extends Fixture
 {
     public function __construct(
         readonly private ClockInterface $clock,
+        readonly private UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
+    public const string USER_PASSWORD = 'pass';
+
     public const string USER_1_ID = '00000000-0000-0000-0001-000000000001';
-    public const string USER_1_EMAIL = 'user1@example.com';
+    public const string USER_1_EMAIL = 'admin@example.com';
 
     public const string USER_2_ID = '00000000-0000-0000-0001-000000000002';
-    public const string USER_2_EMAIL = 'user2@example.com';
+    public const string USER_2_EMAIL = 'user@example.com';
 
     public const string CURRENT_CHALLENGE_1_ID = '00000000-0000-0000-0002-000000000001';
     public const string CURRENT_CHALLENGE_2_ID = '00000000-0000-0000-0002-000000000002';
@@ -68,8 +72,14 @@ final class TestDataFixture extends Fixture
             $registeredAt,
             'User 1',
             true,
+            [User::ROLE_ADMIN],
         );
+
+        $hashedPassword = $this->passwordHasher->hashPassword($user1, self::USER_PASSWORD);
+        $user1->changePassword($hashedPassword);
+
         $manager->persist($user1);
+
 
         $user2 = new User(
             Uuid::fromString(self::USER_2_ID),
@@ -77,7 +87,12 @@ final class TestDataFixture extends Fixture
             $registeredAt,
             'User 2',
             true,
+            [User::ROLE_USER],
         );
+
+        $hashedPassword = $this->passwordHasher->hashPassword($user2, self::USER_PASSWORD);
+        $user2->changePassword($hashedPassword);
+
         $manager->persist($user2);
     }
 
