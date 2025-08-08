@@ -19,8 +19,8 @@ readonly final class ChoiceQuestionConstraint
      */
     public function __construct(
         public array $choices,
-        public null|int $minSelections,
-        public null|int $maxSelections,
+        public null|int $minSelections = null,
+        public null|int $maxSelections = null,
     ) {}
 
     /**

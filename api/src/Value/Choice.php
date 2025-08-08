@@ -19,8 +19,8 @@ readonly final class Choice
     public function __construct(
         public Uuid $id,
         public string $text,
-        public null|string $description,
-        public null|string $image,
+        public null|string $description = null,
+        public null|string $image = null,
     ) {}
 
     /**
