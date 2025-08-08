@@ -8,8 +8,8 @@ namespace FantasyAcademy\API\Value;
  * @phpstan-import-type ChoiceArray from Choice
  * @phpstan-type ChoiceQuestionConstraintArray array{
  *     choices: array<ChoiceArray>,
- *     minSelections: null|int,
- *     maxSelections: null|int,
+ *     min_selections: null|int,
+ *     max_selections: null|int,
  * }
  */
 readonly final class ChoiceQuestionConstraint
@@ -33,8 +33,8 @@ readonly final class ChoiceQuestionConstraint
                 callback: fn (array $choiceData): Choice => Choice::fromArray($choiceData),
                 array: $data['choices'],
             ),
-            minSelections: $data['minSelections'],
-            maxSelections: $data['maxSelections'],
+            minSelections: $data['min_selections'],
+            maxSelections: $data['max_selections'],
         );
     }
 
@@ -48,8 +48,8 @@ readonly final class ChoiceQuestionConstraint
                 callback: fn (Choice $choice): array => $choice->toArray(),
                 array: $this->choices,
             ),
-            'minSelections' => $this->minSelections,
-            'maxSelections' => $this->maxSelections,
+            'min_selections' => $this->minSelections,
+            'max_selections' => $this->maxSelections,
         ];
     }
 }

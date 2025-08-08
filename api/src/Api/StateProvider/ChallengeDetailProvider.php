@@ -6,89 +6,91 @@ namespace FantasyAcademy\API\Api\StateProvider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Api\Response\ChallengeDetailResponse;
-use FantasyAcademy\API\Value\Choice;
-use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
-use FantasyAcademy\API\Value\NumericQuestionConstraint;
+use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Exceptions\ChallengeNotFound;
 use FantasyAcademy\API\Value\Question;
-use FantasyAcademy\API\Value\QuestionType;
+use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
 /**
+ * @phpstan-import-type ChallengeDetailResponseRow from ChallengeDetailResponse
+ * @phpstan-import-type QuestionRow from Question
+ *
  * @implements ProviderInterface<ChallengeDetailResponse>
  */
 readonly final class ChallengeDetailProvider implements ProviderInterface
 {
     public function __construct(
         private Security $security,
+        private Connection $database,
+        private ClockInterface $clock,
     ) {}
 
+    /**
+     * @param array{id: Uuid} $uriVariables
+     */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ChallengeDetailResponse
     {
+        /** @var null|User $user */
         $user = $this->security->getUser();
-        $answeredAt = null;
 
-        if ($user !== null) {
-            $answeredAt = new \DateTimeImmutable();
+        $challengeId = $uriVariables['id'];
+
+        return $this->getChallengeDetail($challengeId, $user?->id);
+    }
+
+    private function getChallengeDetail(Uuid $challengeId, null|Uuid $userId): ChallengeDetailResponse
+    {
+        $query = <<<SQL
+SELECT challenge.*, player_challenge_answer.answered_at
+FROM challenge
+LEFT JOIN player_challenge_answer ON challenge.id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
+WHERE challenge.id = :challengeId
+SQL;
+
+        /** @var false|ChallengeDetailResponseRow $rows */
+        $row = $this->database
+            ->executeQuery($query, [
+                'challengeId' => $challengeId->toString(),
+                'userId' => $userId?->toString(),
+            ])
+            ->fetchAssociative();
+
+        if ($row === false) {
+            throw new ChallengeNotFound();
         }
 
-        $questions = [
-            new Question(
-                id: Uuid::fromString('0c9c7063-49bf-41b6-85ab-543f7b36412f'),
-                text: 'Some random question?',
-                type: QuestionType::MultiSelect,
-                image: 'https://placecats.com/800/600',
-                numericConstraint: null,
-                choiceConstraint: new ChoiceQuestionConstraint(
-                    choices: [
-                        new Choice(
-                            id: Uuid::fromString('0a2c6f08-3851-49db-8af7-01ea54f07a80'),
-                            text: 'Some choice',
-                            description: 'I dont know some description',
-                            image: 'https://placecats.com/400/300',
-                        ),
-                        new Choice(
-                            id: Uuid::fromString('0a2c6f08-3851-49db-8af7-01ea54f07a82'),
-                            text: 'Other choice',
-                            description: 'I dont know some description',
-                            image: 'https://placecats.com/400/300',
-                        ),
-                    ],
-                    minSelections: 1,
-                    maxSelections: 2,
-                ),
-            ),
-            new Question(
-                id: Uuid::fromString('0c9c7063-49bf-41b6-85ab-543f7b3641af'),
-                text: 'Some other question?',
-                type: QuestionType::Numeric,
-                image: 'https://placecats.com/800/600',
-                numericConstraint: new NumericQuestionConstraint(
-                    min: 1,
-                    max: 20,
-                ),
-                choiceConstraint: null,
-            ),
-        ];
-
-        return new ChallengeDetailResponse(
-            id: Uuid::fromString('52a9de01-5f68-4c65-8443-ff04e1fe2642'),
-            name: 'Name of the challenge',
-            shortDescription: 'Short description',
-            description: 'Description of the challenge',
-            image: 'https://placecats.com/800/600',
-            addedAt: new \DateTimeImmutable('2025-06-06 12:00:00'),
-            startsAt: new \DateTimeImmutable('2025-07-29 12:00:00'),
-            expiresAt: new \DateTimeImmutable('2025-09-06 12:00:00'),
-            answeredAt: $answeredAt,
-            isStarted: true,
-            isExpired: false,
-            isAnswered: $user !== null,
-            isEvaluated: false,
-            questions: $questions,
-            hintText: 'Some kind of hint',
-            hintImage: 'https://placecats.com/800/600'
+        return ChallengeDetailResponse::fromDatabaseRow(
+            $row,
+            $this->clock->now(),
+            $this->getQuestions($challengeId, $userId),
         );
+    }
+
+    /**
+     * @return array<QuestionRow>
+     */
+    private function getQuestions(Uuid $challengeId, null|Uuid $userId): array
+    {
+        $query = <<<SQL
+SELECT question.*
+FROM question
+LEFT JOIN player_challenge_answer ON question.challenge_id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
+LEFT JOIN player_answered_question ON player_answered_question.challenge_answer_id = player_challenge_answer.id AND player_answered_question.question_id = question.id
+WHERE question.challenge_id = :challengeId
+SQL;
+
+        /** @var false|ChallengeDetailResponseRow $rows */
+        $row = $this->database
+            ->executeQuery($query, [
+                'challengeId' => $challengeId->toString(),
+                'userId' => $userId?->toString(),
+            ])
+            ->fetchAssociative();
+
+        return [];
     }
 }

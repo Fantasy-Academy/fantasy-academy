@@ -11,6 +11,24 @@ use FantasyAcademy\API\Api\StateProvider\ChallengeDetailProvider;
 use FantasyAcademy\API\Value\Question;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-import-type QuestionRow from Question
+ * @phpstan-type ChallengeDetailResponseRow array{
+ *     id: string,
+ *     name: string,
+ *     short_description: string,
+ *     description: string,
+ *     image: null|string,
+ *     added_at: string,
+ *     starts_at: string,
+ *     expires_at: string,
+ *     max_points: int,
+ *     evaluated_at: null|string,
+ *     answered_at: null|string,
+ *     hint_text: null|string,
+ *     hint_image: null|string,
+ * }
+ */
 #[ApiResource(
     shortName: 'Challenge detail',
 )]
@@ -28,6 +46,7 @@ readonly final class ChallengeDetailResponse
         public string $name,
         public string $shortDescription,
         public string $description,
+        public int $maxPoints,
         public null|string $image,
         public DateTimeImmutable $addedAt,
         public DateTimeImmutable $startsAt,
@@ -41,5 +60,39 @@ readonly final class ChallengeDetailResponse
         public null|string $hintText,
         public null|string $hintImage,
     ) {
+    }
+
+    /**
+     * @param ChallengeDetailResponseRow $row
+     * @param array<QuestionRow> $questions
+     */
+    public static function fromDatabaseRow(array $row, DateTimeImmutable $now, array $questions): self
+    {
+        $answeredAt = $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null;
+        $startsAt = new DateTimeImmutable($row['starts_at']);
+        $expiresAt = new DateTimeImmutable($row['expires_at']);
+
+        return new self(
+            id: Uuid::fromString($row['id']),
+            name: $row['name'],
+            shortDescription: $row['short_description'],
+            description: $row['description'],
+            maxPoints: $row['max_points'],
+            image: $row['image'],
+            addedAt: new DateTimeImmutable($row['added_at']),
+            startsAt: $startsAt,
+            expiresAt: $expiresAt,
+            answeredAt: $answeredAt,
+            isStarted: $now->getTimestamp() > $startsAt->getTimestamp(),
+            isExpired: $now->getTimestamp() > $expiresAt->getTimestamp(),
+            isAnswered: $answeredAt !== null,
+            isEvaluated: $row['evaluated_at'] !== null,
+            questions: array_map(
+                callback: fn (array $row): Question => Question::fromRow($row),
+                array: $questions,
+            ),
+            hintText: $row['hint_text'],
+            hintImage: $row['hint_image'],
+        );
     }
 }
