@@ -38,10 +38,13 @@ class Challenge
         #[Column(nullable: true)]
         readonly public null|string $image,
 
-        #[Column(type: Types::DATETIME_IMMUTABLE)]
+        #[Column]
+        readonly public DateTimeImmutable $addedAt,
+
+        #[Column]
         readonly public DateTimeImmutable $startsAt,
 
-        #[Column(type: Types::DATETIME_IMMUTABLE)]
+        #[Column]
         readonly public DateTimeImmutable $expiresAt,
 
         #[Column]

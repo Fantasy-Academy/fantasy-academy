@@ -10,6 +10,21 @@ use DateTimeImmutable;
 use FantasyAcademy\API\Api\StateProvider\ChallengesProvider;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-type ChallengeResponseRow array{
+ *     id: string,
+ *     name: string,
+ *     short_description: string,
+ *     description: string,
+ *     image: null|string,
+ *     added_at: string,
+ *     starts_at: string,
+ *     expires_at: string,
+ *     max_points: int,
+ *     evaluated_at: null|string,
+ *     answered_at: null|string,
+ * }
+ */
 #[ApiResource(
     shortName: 'Challenges',
 )]
@@ -24,6 +39,7 @@ readonly final class ChallengeResponse
         public string $name,
         public string $shortDescription,
         public string $description,
+        public int $maxPoints,
         public null|string $image,
         public DateTimeImmutable $addedAt,
         public DateTimeImmutable $startsAt,
@@ -34,5 +50,32 @@ readonly final class ChallengeResponse
         public bool $isAnswered,
         public bool $isEvaluated,
     ) {
+    }
+
+    /**
+     * @param ChallengeResponseRow $row
+     */
+    public static function fromDatabaseRow(array $row, DateTimeImmutable $now): self
+    {
+        $answeredAt = $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null;
+        $startsAt = new DateTimeImmutable($row['starts_at']);
+        $expiresAt = new DateTimeImmutable($row['expires_at']);
+
+        return new self(
+            id: Uuid::fromString($row['id']),
+            name: $row['name'],
+            shortDescription: $row['short_description'],
+            description: $row['description'],
+            maxPoints: $row['max_points'],
+            image: $row['image'],
+            addedAt: new DateTimeImmutable($row['added_at']),
+            startsAt: $startsAt,
+            expiresAt: $expiresAt,
+            answeredAt: $answeredAt,
+            isStarted: $now->getTimestamp() > $startsAt->getTimestamp(),
+            isExpired: $now->getTimestamp() > $expiresAt->getTimestamp(),
+            isAnswered: $answeredAt !== null,
+            isEvaluated: $row['evaluated_at'] !== null,
+        );
     }
 }

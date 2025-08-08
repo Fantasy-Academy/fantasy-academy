@@ -22,7 +22,8 @@ readonly final class PlayerChallengeAnswerRepository
 
     public function find(Uuid $userId, Uuid $challengeId): null|PlayerChallengeAnswer
     {
-        return $this->entityManager->createQueryBuilder()
+        /** @var null|PlayerChallengeAnswer $row */
+        $row = $this->entityManager->createQueryBuilder()
             ->select('player_challenge_answer')
             ->from(PlayerChallengeAnswer::class, 'player_challenge_answer')
             ->where('player_challenge_answer.user = :userId')
@@ -31,5 +32,7 @@ readonly final class PlayerChallengeAnswerRepository
             ->setParameter('challengeId', $challengeId)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $row;
     }
 }
