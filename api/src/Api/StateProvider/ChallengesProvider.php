@@ -46,27 +46,8 @@ readonly final class ChallengesProvider implements ProviderInterface
                 isAnswered: $user !== null,
                 isEvaluated: false,
             ),
-            new ChallengeResponse(
-                id: Uuid::fromString('52a9de01-5f68-4c65-8443-ff04e1fe264a'),
-                name: 'Name of the other challenge',
-                shortDescription: 'Short description',
-                description: 'Description of the challenge',
-                image: 'https://placecats.com/800/600',
-                addedAt: new \DateTimeImmutable('2025-06-06 12:00:00'),
-                startsAt: new \DateTimeImmutable('2025-07-29 12:00:00'),
-                expiresAt: new \DateTimeImmutable('2025-09-06 12:00:00'),
-                answeredAt: $answeredAt,
-                isStarted: true,
-                isExpired: false,
-                isAnswered: $user !== null,
-                isEvaluated: false,
-            ),
         ];
 
-        return new ArrayPaginator(
-            $items,
-            0,
-            count($items),
-        );
+        return $items;
     }
 }

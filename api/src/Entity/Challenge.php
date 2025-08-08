@@ -16,6 +16,10 @@ use Symfony\Component\Uid\Uuid;
 #[Entity]
 class Challenge
 {
+    #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
+    #[Column(nullable: true)]
+    public null|DateTimeImmutable $evaluatedAt = null;
+
     public function __construct(
         #[Id]
         #[Immutable]
