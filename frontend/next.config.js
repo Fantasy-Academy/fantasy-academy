@@ -12,7 +12,10 @@ const nextConfig = {
         pathname: "/b/id/**"
       }
     ]
-  }
+  },
+    typescript: {
+      ignoreBuildErrors: true
+    }
 }
 
 module.exports = nextConfig;

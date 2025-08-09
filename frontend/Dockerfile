@@ -24,7 +24,7 @@ RUN pnpm install --frozen-lockfile && \
 
 
 # Production image, copy all the files and run next
-FROM node_upstream AS prod
+FROM base AS prod
 
 WORKDIR /app
 
