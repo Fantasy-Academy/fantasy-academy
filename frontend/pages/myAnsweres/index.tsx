@@ -201,11 +201,11 @@ const MyAnswersPage: React.FC = () => {
           </p>
 
           {status === 'loading' && (
-            <div className="p-4 text-gray-600">Verifing…</div>
+            <div className="p-4 text-gray-600">Verifing...</div>
           )}
 
           {loading && (
-            <div className="p-4 text-gray-600">Načítám…</div>
+            <div className="p-4 text-gray-600">Loading...</div>
           )}
 
           {error && (
