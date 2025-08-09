@@ -1,80 +1,260 @@
 'use client';
-import React, { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
-import TitleContainer from '../../components/containers/TitleContainer';
-import Achievement from '../../components/common/Achievement';
+
+/** --- Pomocný progress bar: postup k dalšímu tieru podle bodů --- */
+const TierProgressBar: React.FC<{ points: number }> = ({ points }) => {
+  const tiers = [
+    { name: 'Bronze',   min: 0,    max: 299 },
+    { name: 'Silver',   min: 300,  max: 599 },
+    { name: 'Gold',     min: 600,  max: 999 },
+    { name: 'Platinum', min: 1000, max: Infinity },
+  ];
+
+  const { current, next } = useMemo(() => {
+    const t = tiers.findLast(t => points >= t.min) ?? tiers[0];
+    const idx = tiers.findIndex(x => x.name === t.name);
+    const nextT = tiers[idx + 1] ?? tiers[idx];
+    return { current: t, next: nextT };
+  }, [points]);
+
+  const bandSize = current.max === Infinity ? 1 : (current.max - current.min + 1);
+  const inBand   = current.max === Infinity ? 1 : Math.max(0, Math.min(points - current.min, bandSize));
+  const pct      = current.max === Infinity ? 100 : Math.round((inBand / bandSize) * 100);
+
+  return (
+    <div className="w-full">
+      <div className="flex items-end justify-between mb-1">
+        <div className="text-sm text-coolGray">
+          Tier: <span className="text-charcoal font-semibold">{current.name}</span>
+        </div>
+        <div className="text-sm text-coolGray">
+          {current.name !== 'Platinum' ? (
+            <>
+              Next: <span className="text-charcoal font-semibold">{next.name}</span> •{' '}
+              <span className="text-charcoal font-semibold">{Math.max(0, next.min - points)} pts</span> to go
+            </>
+          ) : (
+            <span className="text-charcoal font-semibold">Max Tier</span>
+          )}
+        </div>
+      </div>
+      <div className="h-2 w-full rounded bg-gray-200 overflow-hidden">
+        <div
+          className="h-full bg-vibrantCoral transition-[width] duration-500 ease-out"
+          style={{ width: `${pct}%` }}
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        />
+      </div>
+    </div>
+  );
+};
+
+/** --- Typy podle API --- */
+type PlayerSkill = { name: string; percentage: number; percentageChange: number | null };
+type PlayerStatistics = { rank: number; challengesAnswered: number; points: number; skills: PlayerSkill[] };
+type LoggedUserInfo = {
+  id: string;
+  name: string;
+  email: string;
+  availableChallenges: number;     // z API, ale v UI nepoužijeme
+  completedChallenges: number;
+  registeredAt: string;
+  overallStatistics: PlayerStatistics;
+};
+
+type ChallengeItem = {
+  id: string;
+  isAnswered: boolean;
+  isExpired?: boolean;
+  expiresAt: string;
+};
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const accessToken = (session as any)?.accessToken as string | undefined;
 
+  const [me, setMe] = useState<LoggedUserInfo | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+
+  // Počítadla z /api/challenges (FE definice dostupnosti = neexpirované & neodpovězené)
+  const [counts, setCounts] = useState({ available: 0, completed: 0, expired: 0 });
+
+  // Redirect pro nepřihlášené
   useEffect(() => {
-    // pokud uživatel není přihlášen a session už je načtena, přesměrování
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
+    if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
 
-  const skills = [
-    { title: 'Skill 1', description: 'Description of skill 1.' },
-    { title: 'Skill 2 wider title.', description: 'Description of skill 2.' },
-    { title: 'Skill 3', description: 'Description of skill 3.' },
-    { title: 'Skill 4', description: 'Description of skill 4.' },
-    { title: 'Skill 5', description: 'Description of skill 5.' },
-  ];
+  // Načtení profilu
+  useEffect(() => {
+    const loadMe = async () => {
+      if (!accessToken || status !== 'authenticated') return;
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('http://localhost:8080/api/me', {
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.detail || `Failed to load /api/me (${res.status})`);
+        }
+        const data = (await res.json()) as LoggedUserInfo;
+        setMe(data);
+      } catch (e: any) {
+        setError(e?.message || 'Nepodařilo se načíst profil.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadMe();
+  }, [accessToken, status]);
+
+  // Načtení /api/challenges pro reálné počty
+  useEffect(() => {
+    const loadCounts = async () => {
+      if (!accessToken || status !== 'authenticated') return;
+      try {
+        const res = await fetch('http://localhost:8080/api/challenges', {
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok) return;
+
+        const payload = await res.json();
+        const list: ChallengeItem[] = Array.isArray(payload) ? payload : payload.member ?? [];
+        const now = Date.now();
+
+        let available = 0, completed = 0, expired = 0;
+        for (const ch of list) {
+          const isCompleted = !!ch.isAnswered;
+          const isExpired = typeof ch.isExpired === 'boolean'
+            ? ch.isExpired
+            : new Date(ch.expiresAt).getTime() <= now;
+
+          if (isCompleted) completed++;
+          else if (isExpired) expired++;
+          else available++; // naše definice „available“
+        }
+
+        setCounts({ available, completed, expired });
+      } catch {
+        // mlčky ignorujeme – UI stejně ukáže ostatní metriky
+      }
+    };
+    loadCounts();
+  }, [accessToken, status]);
+
+  // Skeleton
+  const Skeleton = () => (
+    <div className="animate-pulse space-y-4">
+      <div className="h-6 bg-gray-200 rounded w-1/3" />
+      <div className="h-10 bg-gray-200 rounded w-2/3" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="h-20 bg-gray-100 rounded" />
+        <div className="h-20 bg-gray-100 rounded" />
+        <div className="h-20 bg-gray-100 rounded" />
+        <div className="h-20 bg-gray-100 rounded" />
+      </div>
+      <div className="h-2 bg-gray-200 rounded w-full" />
+    </div>
+  );
 
   return (
     <BackgroundWrapper>
-      <div className="flex items-center justify-center min-h-screen px-4">
-        <div className="flex flex-col w-full max-w-[860px] mx-auto py-6 gap-6">
+      {/* Výška tak, aby se stránka vešla na jednu obrazovku bez scrollu */}
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4"> 
+        <div className="flex flex-col w-full max-w-[1000px] mx-auto py-8 gap-6">
+          <section className="bg-white rounded-xl shadow-md p-6 sm:p-8">
+            {status === 'loading' && <Skeleton />}
+            {status === 'authenticated' && loading && <Skeleton />}
+            {status === 'authenticated' && error && <p className="text-vibrantCoral">{error}</p>}
 
-          <div className="flex flex-col lg:flex-row text-white gap-6">
-
-            <div className="p-6 flex-1 bg-white rounded w-full">
-              {session ? (
-                <div>
-                  <h3
-                    className="text-sm text-gray-400 mt-2 truncate overflow-hidden whitespace-nowrap"
-                    title={session.accessToken}
-                  >
-                    Access token: {session.accessToken}
-                  </h3>
-                  <h1 className="text-3xl sm:text-5xl text-vibrantCoral font-bold tracking-wider uppercase font-bebasNeue leading-tight">
-                    {session.user?.name}
-                  </h1>
-                  <div className="pt-3 text-base sm:text-xl text-coolGray">
-                    <h3>Rank #132</h3>
-                    <h3>Round Played: 24</h3>
+            {status === 'authenticated' && !loading && !error && (
+              <div className="flex flex-col gap-6">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                    <img src="" alt="profile picture" className="w-full h-full object-cover" />
                   </div>
-                  <div className='flex flex-row w-full justify-between text-center wrap text-base text-charcoal sm:text-lg '>
-                    <div className='flex flex-col'>
-                      <h3 className='font-bold'>Season</h3>
-                      <p>1</p>
-                    </div>
-                    <div className='flex flex-col'>
-                      <h3 className='font-bold'>Points</h3>
-                      <p>1000</p>
-                    </div>
-                    <div className='flex flex-col'>
-                      <h3 className='font-bold'>Current Challenges</h3>
-                      <p>6</p>
-                    </div>
-                    <div className='flex flex-col'>
-                      <h3 className='font-bold'>Completed Challenges</h3>
-                      <p>4</p>
-                    </div>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-3xl sm:text-5xl text-vibrantCoral font-bold tracking-wider uppercase font-bebasNeue leading-tight truncate">
+                      {me?.name ?? session?.user?.name ?? 'User'}
+                    </h1>
+                    <p className="text-coolGray">
+                      Member since:{' '}
+                      <span className="text-charcoal font-semibold">
+                        {me?.registeredAt ? new Date(me.registeredAt).toLocaleDateString() : '—'}
+                      </span>
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <h1 className="text-2xl sm:text-4xl text-charcoal font-bold tracking-wider uppercase">
-                  Loading...
-                </h1>
-              )}
-            </div>
-          </div>
+
+                {/* Stat karty */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Global Rank</p>
+                    <p className="text-2xl text-charcoal font-bold mt-1">
+                      #{me?.overallStatistics?.rank ?? '—'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Points</p>
+                    <p className="text-2xl text-charcoal font-bold mt-1">
+                      {me?.overallStatistics?.points ?? '—'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Rounds Played</p>
+                    <p className="text-2xl text-charcoal font-bold mt-1">
+                      {me?.overallStatistics?.challengesAnswered ?? '—'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Completed</p>
+                    <p className="text-2xl text-charcoal font-bold mt-1">
+                      {me?.completedChallenges ?? '—'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress k dalšímu tieru */}
+                {typeof me?.overallStatistics?.points === 'number' && (
+                  <div className="mt-2">
+                    <TierProgressBar points={me.overallStatistics.points} />
+                  </div>
+                )}
+
+                {/* Informace o challengích – použij FE spočítané hodnoty */}
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white border rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Available Challenges</p>
+                    <p className="text-xl text-charcoal font-semibold">{counts.available}</p>
+                    {counts.expired > 0 && (
+                      <p className="text-xs text-coolGray mt-1">Expired (unanswered): {counts.expired}</p>
+                    )}
+                  </div>
+                  <div className="bg-white border rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Completed Challenges</p>
+                    <p className="text-xl text-charcoal font-semibold">{counts.completed}</p>
+                  </div>
+                  <div className="bg-white border rounded-lg p-4">
+                    <p className="text-sm text-coolGray">Your Email</p>
+                    <p className="text-xl text-charcoal font-semibold truncate">
+                      {me?.email ?? session?.user?.email ?? '—'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
         </div>
       </div>
     </BackgroundWrapper>
