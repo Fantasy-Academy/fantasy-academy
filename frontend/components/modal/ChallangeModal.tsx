@@ -29,7 +29,6 @@ type Question = {
   image: string | null;
   choiceConstraint?: ChoiceConstraint;
   numericConstraint?: NumericConstraint;
-  // nové z API – nepoužíváme zde, ale nevadí
   answeredAt?: string | null;
   answer?: {
     textAnswer?: string | null;
@@ -63,8 +62,8 @@ type ChallengeDetail = {
 type ChallengeModalProps = {
   challengeId: string;
   onClose: () => void;
-  onSubmitSuccess: () => void; // zavolá se -> parent udělá refetch a zavře modal
-  apiBase?: string; // default http://localhost:8080
+  onSubmitSuccess: () => void;
+  apiBase?: string;
 };
 
 const ChallangeModal: React.FC<ChallengeModalProps> = ({
@@ -80,14 +79,18 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Lokální odpovědi
-  const [textAnswer, setTextAnswer] = useState("");
-  const [numericAnswer, setNumericAnswer] = useState<string>("");
+  // answers
+  const [textAnswer, setTextAnswer] = useState('');
+  const [numericAnswer, setNumericAnswer] = useState<string>(''); // ← správně
   const [singleChoiceId, setSingleChoiceId] = useState<string | null>(null);
   const [multiChoiceIds, setMultiChoiceIds] = useState<string[]>([]);
+
+  // sort state
+  const [orderedChoiceIds, setOrderedChoiceIds] = useState<string[]>([]);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   const [submitting, setSubmitting] = useState(false);
 
-  // Načti detail challenge kvůli otázce/otázkám
   useEffect(() => {
     const load = async () => {
       if (!challengeId) return;
@@ -117,6 +120,17 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
 
   const question = useMemo(() => challenge?.questions?.[0], [challenge]);
 
+  // init sort order when question arrives
+  useEffect(() => {
+    if (question?.type === "sort" && question.choiceConstraint?.choices) {
+      const initial =
+        question.answer?.orderedChoiceIds?.length
+          ? question.answer.orderedChoiceIds
+          : question.choiceConstraint.choices.map((c) => c.id);
+      setOrderedChoiceIds(initial);
+    }
+  }, [question]);
+
   const isAnySelected = useMemo(() => {
     if (!question) return false;
     switch (question.type) {
@@ -129,18 +143,55 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
       case "multi_select":
         return multiChoiceIds.length > 0;
       case "sort":
-        // sort zatím neimplementováno
-        return false;
+        return (
+          Array.isArray(orderedChoiceIds) &&
+          orderedChoiceIds.length === (question.choiceConstraint?.choices?.length || 0)
+        );
       default:
         return false;
     }
-  }, [question, textAnswer, numericAnswer, singleChoiceId, multiChoiceIds]);
+  }, [question, textAnswer, numericAnswer, singleChoiceId, multiChoiceIds, orderedChoiceIds]);
 
   const toggleMulti = (id: string) => {
     setMultiChoiceIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
+
+  // sort helpers
+  const moveItem = (id: string, delta: number) => {
+    setOrderedChoiceIds((prev) => {
+      const idx = prev.indexOf(id);
+      if (idx === -1) return prev;
+      const newIdx = Math.max(0, Math.min(prev.length - 1, idx + delta));
+      const copy = [...prev];
+      const [item] = copy.splice(idx, 1);
+      copy.splice(newIdx, 0, item);
+      return copy;
+    });
+  };
+  const onDragStart = (id: string) => setDraggingId(id);
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
+  const onDrop = (targetId: string) => {
+    if (!draggingId || draggingId === targetId) return;
+    setOrderedChoiceIds((prev) => {
+      const from = prev.indexOf(draggingId);
+      const to = prev.indexOf(targetId);
+      if (from === -1 || to === -1) return prev;
+      const copy = [...prev];
+      const [moved] = copy.splice(from, 1);
+      copy.splice(to, 0, moved);
+      return copy;
+    });
+    setDraggingId(null);
+  };
+
+  // 🔁 MOVE THIS HOOK ABOVE EARLY RETURNS (fixes the error)
+  const choiceById: Record<string, Choice> = useMemo(() => {
+    const map: Record<string, Choice> = {};
+    question?.choiceConstraint?.choices?.forEach((c) => (map[c.id] = c));
+    return map;
+  }, [question]);
 
   const handleSubmit = async () => {
     if (!token) {
@@ -155,7 +206,7 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
       numericAnswer: question.type === "numeric" ? Number(numericAnswer) : null,
       selectedChoiceId: question.type === "single_select" ? singleChoiceId : null,
       selectedChoiceIds: question.type === "multi_select" ? multiChoiceIds : null,
-      orderedChoiceIds: null as string[] | null, // sort zatím neřešíme
+      orderedChoiceIds: question.type === "sort" ? orderedChoiceIds : null,
     };
 
     try {
@@ -175,8 +226,6 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
         alert("Chyba při odesílání odpovědi.");
         return;
       }
-
-      // Úspěch -> rodič refetchne seznam a modal zavře
       onSubmitSuccess();
     } catch (e) {
       console.error("❌ Výjimka při odesílání:", e);
@@ -186,7 +235,7 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
     }
   };
 
-  // UI
+  // ✅ Early returns are AFTER all hooks
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -194,7 +243,6 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
       </div>
     );
   }
-
   if (error || !challenge) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -303,9 +351,66 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
                   </div>
                 )}
 
-              {question.type === "sort" && (
-                <p className="text-gray-500 italic">Typ „sort“ ještě není implementován.</p>
-              )}
+              {question.type === "sort" &&
+                question.choiceConstraint?.choices &&
+                orderedChoiceIds.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-coolGray">
+                      Sort correctly options down below ↑/↓.
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {orderedChoiceIds.map((id, idx) => {
+                        const c = choiceById[id];
+                        if (!c) return null;
+                        const isDragging = draggingId === id;
+                        return (
+                          <div
+                            key={id}
+                            draggable
+                            onDragStart={() => onDragStart(id)}
+                            onDragOver={onDragOver}
+                            onDrop={() => onDrop(id)}
+                            className={`flex items-center justify-between gap-3 rounded border p-3 bg-white ${isDragging ? "opacity-60" : "opacity-100"
+                              }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="w-6 text-center font-bold text-charcoal">
+                                {idx + 1}
+                              </span>
+                              <span className="cursor-grab select-none" title="Drag to reorder">
+                                ⋮⋮
+                              </span>
+                              <div>
+                                <p className="font-semibold">{c.text}</p>
+                                {c.description && (
+                                  <p className="text-sm text-gray-600">{c.description}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => moveItem(id, -1)}
+                                className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                                aria-label="Move up"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveItem(id, +1)}
+                                className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                                aria-label="Move down"
+                              >
+                                ↓
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
             </div>
           )}
 
@@ -314,11 +419,10 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
               type="button"
               onClick={isAnySelected ? handleSubmit : undefined}
               disabled={!isAnySelected || submitting}
-              className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${
-                isAnySelected && !submitting
+              className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${isAnySelected && !submitting
                   ? "bg-vibrantCoral cursor-pointer"
                   : "bg-coolGray cursor-not-allowed"
-              }`}
+                }`}
             >
               {submitting ? "Odesílám…" : "Submit answer"}
             </button>
