@@ -10,7 +10,19 @@ use DateTimeImmutable;
 use FantasyAcademy\API\Api\StateProvider\LoggedUserProvider;
 use FantasyAcademy\API\Value\PlayerSeasonStatistics;
 use FantasyAcademy\API\Value\PlayerStatistics;
+use Symfony\Component\Uid\Uuid;
 
+/**
+ * @phpstan-type LoggedUserResponseRow array{
+ *     id: string,
+ *     name: null|string,
+ *     email: string,
+ *     registered_at: string,
+ *     points: int,
+ *     challenges_answered: int,
+ *     rank: null|int,
+ * }
+ */
 #[ApiResource(
     shortName: 'Logged user info',
 )]
@@ -25,14 +37,42 @@ final class LoggedUserResponse
      * @param array<PlayerSeasonStatistics> $seasonsStatistics
      */
     public function __construct(
-        public string $id,
+        public Uuid $id,
         public string $name,
         public string $email,
-        public int $availableChallenges,
-        public int $completedChallenges,
         public DateTimeImmutable $registeredAt,
+        public int $availableChallenges,
         public PlayerStatistics $overallStatistics,
         public array $seasonsStatistics,
     ) {
+    }
+
+    /**
+     * @param LoggedUserResponseRow $data
+     */
+    public static function fromArray(array $data, int $availableChallenges): self
+    {
+        return new self(
+            id: Uuid::fromString($data['id']),
+            name: $data['name'] ?? '-',
+            email: $data['email'],
+            registeredAt: new DateTimeImmutable($data['registered_at']),
+            availableChallenges: $availableChallenges,
+            overallStatistics: new PlayerStatistics(
+                rank: $data['rank'],
+                challengesAnswered: $data['challenges_answered'],
+                points: $data['points'],
+                skills: [],
+            ),
+            seasonsStatistics: [
+                new PlayerSeasonStatistics(
+                    seasonNumber: 1,
+                    rank: $data['rank'],
+                    challengesAnswered: $data['challenges_answered'],
+                    points: $data['points'],
+                    skills: [],
+                ),
+            ],
+        );
     }
 }
