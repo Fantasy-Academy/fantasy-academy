@@ -11,7 +11,7 @@ readonly final class PlayerSeasonStatistics
      */
     public function __construct(
         public int $seasonNumber,
-        public int $rank,
+        public null|int $rank,
         public int $challengesAnswered,
         public int $points,
         public array $skills,

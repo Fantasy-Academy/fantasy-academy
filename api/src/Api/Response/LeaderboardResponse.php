@@ -16,7 +16,7 @@ use Symfony\Component\Uid\Uuid;
  *     player_name: string,
  *     rank: int,
  *     points: int,
- *     challenges_completed: int,
+ *     challenges_answered: int,
  *     skills: array<PlayerSkill>
  * }
  */
@@ -38,7 +38,7 @@ final class LeaderboardResponse
         public bool $isMyself,
         public int $rank,
         public int $points,
-        public int $challengesCompleted,
+        public int $challengesAnswered,
         public array $skills,
     ) {
     }
@@ -54,7 +54,7 @@ final class LeaderboardResponse
             isMyself: $data['player_id'] === $userId?->toString(),
             rank: $data['rank'],
             points: $data['points'],
-            challengesCompleted: $data['challenges_completed'],
+            challengesAnswered: $data['challenges_answered'],
             skills: [], // TODO
         );
     }

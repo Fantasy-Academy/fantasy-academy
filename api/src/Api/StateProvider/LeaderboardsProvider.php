@@ -45,7 +45,7 @@ SELECT
   u.id   AS player_id,
   u.name AS player_name,
   COALESCE(SUM(pca.points), 0) AS points,
-  COUNT(pca.id) AS challenges_completed,
+  COUNT(pca.id) AS challenges_answered,
   ROW_NUMBER() OVER (
     ORDER BY COALESCE(SUM(pca.points), 0) DESC, u.name ASC
   ) AS rank
