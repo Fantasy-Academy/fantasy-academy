@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Value;
 
-readonly final class Skill
+enum Skill
 {
-    public function __construct(
-        public string $name,
-        public int $percentage,
-        public null|int $percentageChange,
-    ) {
-    }
 }

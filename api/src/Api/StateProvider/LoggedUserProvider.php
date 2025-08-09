@@ -10,7 +10,7 @@ use FantasyAcademy\API\Api\Response\LoggedUserResponse;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Value\PlayerSeasonStatistics;
 use FantasyAcademy\API\Value\PlayerStatistics;
-use FantasyAcademy\API\Value\Skill;
+use FantasyAcademy\API\Value\PlayerSkill;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -37,26 +37,26 @@ readonly final class LoggedUserProvider implements ProviderInterface
             overallStatistics: new PlayerStatistics(
                 rank: 3,
                 challengesAnswered: 4,
-                points: 2000,
+                points: 0,
                 skills: [
-                    new Skill(
+                    new PlayerSkill(
                         name: 'Some skill',
                         percentage: 50,
-                        percentageChange: 2,
+                        percentageChange: 0,
                     ),
                 ],
             ),
             seasonsStatistics: [
                 new PlayerSeasonStatistics(
                     seasonNumber: 1,
-                    rank: 3,
+                    rank: 0,
                     challengesAnswered: 4,
-                    points: 2000,
+                    points: 0,
                     skills: [
-                        new Skill(
+                        new PlayerSkill(
                             name: 'Some skill',
                             percentage: 50,
-                            percentageChange: 2,
+                            percentageChange: 0,
                         ),
                     ],
                 ),

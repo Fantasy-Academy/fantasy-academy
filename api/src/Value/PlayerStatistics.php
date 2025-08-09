@@ -7,7 +7,7 @@ namespace FantasyAcademy\API\Value;
 readonly final class PlayerStatistics
 {
     /**
-     * @param array<Skill> $skills
+     * @param array<PlayerSkill> $skills
      */
     public function __construct(
         public int $rank,
