@@ -66,7 +66,7 @@ readonly final class ChallengeDetailResponse
      * @param ChallengeDetailResponseRow $row
      * @param array<QuestionRow> $questions
      */
-    public static function fromDatabaseRow(array $row, DateTimeImmutable $now, array $questions): self
+    public static function fromArray(array $row, DateTimeImmutable $now, array $questions): self
     {
         $answeredAt = $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null;
         $startsAt = new DateTimeImmutable($row['starts_at']);
@@ -88,7 +88,7 @@ readonly final class ChallengeDetailResponse
             isAnswered: $answeredAt !== null,
             isEvaluated: $row['evaluated_at'] !== null,
             questions: array_map(
-                callback: fn (array $row): Question => Question::fromRow($row),
+                callback: fn (array $row): Question => Question::fromArray($row),
                 array: $questions,
             ),
             hintText: $row['hint_text'],

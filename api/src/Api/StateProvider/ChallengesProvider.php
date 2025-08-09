@@ -56,7 +56,7 @@ SQL;
             ->fetchAllAssociative();
 
         return array_map(
-            callback: fn (array $row): ChallengeResponse => ChallengeResponse::fromDatabaseRow($row, $this->clock->now()),
+            callback: fn (array $row): ChallengeResponse => ChallengeResponse::fromArray($row, $this->clock->now()),
             array: $rows,
         );
     }

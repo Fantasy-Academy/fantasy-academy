@@ -30,13 +30,14 @@ readonly final class ChallengeDetailProvider implements ProviderInterface
     ) {}
 
     /**
-     * @param array{id: Uuid} $uriVariables
+     * @param array{id?: Uuid} $uriVariables
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ChallengeDetailResponse
     {
         /** @var null|User $user */
         $user = $this->security->getUser();
 
+        assert(isset($uriVariables['id']));
         $challengeId = $uriVariables['id'];
 
         return $this->getChallengeDetail($challengeId, $user?->id);
@@ -51,7 +52,7 @@ LEFT JOIN player_challenge_answer ON challenge.id = player_challenge_answer.chal
 WHERE challenge.id = :challengeId
 SQL;
 
-        /** @var false|ChallengeDetailResponseRow $rows */
+        /** @var false|ChallengeDetailResponseRow $row */
         $row = $this->database
             ->executeQuery($query, [
                 'challengeId' => $challengeId->toString(),
@@ -63,7 +64,7 @@ SQL;
             throw new ChallengeNotFound();
         }
 
-        return ChallengeDetailResponse::fromDatabaseRow(
+        return ChallengeDetailResponse::fromArray(
             $row,
             $this->clock->now(),
             $this->getQuestions($challengeId, $userId),
@@ -76,21 +77,21 @@ SQL;
     private function getQuestions(Uuid $challengeId, null|Uuid $userId): array
     {
         $query = <<<SQL
-SELECT question.*
+SELECT question.*, player_answered_question.*
 FROM question
 LEFT JOIN player_challenge_answer ON question.challenge_id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
 LEFT JOIN player_answered_question ON player_answered_question.challenge_answer_id = player_challenge_answer.id AND player_answered_question.question_id = question.id
 WHERE question.challenge_id = :challengeId
 SQL;
 
-        /** @var false|ChallengeDetailResponseRow $rows */
-        $row = $this->database
+        /** @var array<QuestionRow> $rows */
+        $rows = $this->database
             ->executeQuery($query, [
                 'challengeId' => $challengeId->toString(),
                 'userId' => $userId?->toString(),
             ])
-            ->fetchAssociative();
+            ->fetchAllAssociative();
 
-        return [];
+        return $rows;
     }
 }

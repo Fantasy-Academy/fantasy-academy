@@ -55,7 +55,7 @@ readonly final class ChallengeResponse
     /**
      * @param ChallengeResponseRow $row
      */
-    public static function fromDatabaseRow(array $row, DateTimeImmutable $now): self
+    public static function fromArray(array $row, DateTimeImmutable $now): self
     {
         $answeredAt = $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null;
         $startsAt = new DateTimeImmutable($row['starts_at']);
