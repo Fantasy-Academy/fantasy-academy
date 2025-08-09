@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Table;
+use FantasyAcademy\API\Events\UserRegistered;
 use JetBrains\PhpStorm\Immutable;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -61,6 +62,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
         #[Column(type: Types::JSON)]
         readonly private array $roles = [],
     ) {
+        $this->recordThat(
+            new UserRegistered($id),
+        );
     }
 
     public function changePassword(string $hashedPassword): void

@@ -6,5 +6,6 @@ use Symfony\Config\FrameworkConfig;
 return static function (FrameworkConfig $framework): void {
     $messenger = $framework->messenger();
 
-    $messenger->routing(SendEmailMessage::class)->senders(['sync']);
+    $messenger->transport('async')
+        ->dsn('sync://');
 };

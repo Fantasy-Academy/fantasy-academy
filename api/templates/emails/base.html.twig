@@ -1,0 +1,31 @@
+{% apply inky_to_html|inline_css(source('@styles/foundation-emails.css')) %}
+    <container>
+        <row class="collapse">
+            <columns small="6" valign="middle">
+                <a href="https://fantasy-academy.com" style="text-decoration:none;">
+                    <img src="{{ email.image('@images/logo.jpg', 'image/jpeg', 'logo.jpg') }}"
+                         alt="Fantasy Academy"
+                         width="70" height="70">
+                </a>
+            </columns>
+
+            <columns small="6" valign="middle">
+                <p class="text-right" style="margin:0; font-weight:700;">
+                    <a href="https://fantasy-academy.com" style="color:inherit; text-decoration:none; font-size:20px;">Fantasy Academy</a>
+                </p>
+            </columns>
+        </row>
+    </container>
+
+    <spacer size="16"></spacer>
+
+    <container>
+        <row>
+            <columns small="12" large="12">
+                {% block content %}{% endblock %}
+            </columns>
+        </row>
+    </container>
+
+    <spacer size="16"></spacer>
+{% endapply %}

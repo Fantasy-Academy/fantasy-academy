@@ -1,0 +1,47 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+    <h3 style="margin-top:0;">Welcome to Fantasy Academy, {{ userName|default('Manager') }}!</h3>
+
+    <p>
+        You’ve just joined a passionate community of aspiring Fantasy Premier League pros —
+        people who live for the thrill of the game and the art of building a winning squad.
+    </p>
+
+    <callout class="secondary">
+        <p style="margin:0;">
+            At <strong>Fantasy Academy</strong>, we believe that FPL success isn’t luck —
+            it’s a skill you can learn, train, and master.
+            Here, you’ll find weekly challenges, expert insights, and tools designed to sharpen
+            your decision-making and give you the edge over your rivals.
+        </p>
+    </callout>
+
+    <spacer size="12"></spacer>
+
+    <h5>What’s next?</h5>
+    <ul>
+        <li>Complete your first <strong>Challenge</strong> to start your training.</li>
+        <li>Join the <strong>Community League</strong> to test your skills.</li>
+        <li>Track your progress as you climb the Academy ranks.</li>
+    </ul>
+
+    <spacer size="8"></spacer>
+
+    <button href="{{ dashboardUrl|default('https://fantasy-academy.com') }}" class="large expanded radius">
+        Start My Journey
+    </button>
+
+    <spacer size="12"></spacer>
+
+    <p>
+        This is your moment — the start of your rise from a casual manager to an FPL tactician
+        with the skills to outthink the competition.
+        Let’s make it happen.
+    </p>
+
+    <p style="margin-bottom:0;">
+        See you in the Academy,<br>
+        <strong>The Fantasy Academy Team</strong>
+    </p>
+{% endblock %}
