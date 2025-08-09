@@ -3,38 +3,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 
-// --- Typy podle API ---
-type Skill = {
+// --- Typy podle /api/leaderboards ---
+type PlayerSkill = {
   name: string;
   percentage: number;
   percentageChange: number | null;
 };
 
-type PlayerStatistics = {
-  rank: number;                    // celkové umístění
-  challengesAnswered: number;      // počet odehraných kol
-  points: number;                  // body — použijeme pro badge Rank (Gold/Silver…)
-  skills: Skill[];
-};
-
-type PlayerSeasonStatistics = {
-  seasonNumber: number;
-  rank: number;
-  challengesAnswered: number;
-  points: number;
-  skills: Skill[];
-};
-
-type PlayerInfo = {
-  id: string;
+type LeaderboardEntry = {
+  playerId: string;
+  playerName: string;
   isMyself: boolean;
-  name: string;                    // použijeme jako „Nickname“
-  registeredAt: string;
-  overallStatistics: PlayerStatistics;
-  seasonsStatistics: PlayerSeasonStatistics[];
+  rank: number;                // celkové umístění
+  points: number;              // pro badge tier
+  challengesCompleted: number; // odehraná kola
+  skills: PlayerSkill[];
 };
 
-// --- Pomocná funkce: mapování bodů na badge (pokud nemáš z backu) ---
+type HydraCollection<T> = {
+  member: T[];
+  totalItems?: number;
+  view?: unknown;
+  search?: unknown;
+};
+
+// mapování bodů -> badge (pokud nechceš, můžeš místo toho zobrazovat přímo `rank`)
 function getTierFromPoints(points: number): 'Bronze' | 'Silver' | 'Gold' | 'Platinum' {
   if (points >= 1000) return 'Platinum';
   if (points >= 600) return 'Gold';
@@ -42,73 +35,65 @@ function getTierFromPoints(points: number): 'Bronze' | 'Silver' | 'Gold' | 'Plat
   return 'Bronze';
 }
 
-// --- PROPS: dodej pole hráčských ID, které chceš načíst ---
-type UserTableProps = {
-  playerIds: string[]; // např. ['52a9de01-5f68-4c65-8443-ff04e1fe2642', ...]
-  apiBase?: string;    // default 'http://localhost:8080'
+type LeaderboardTableProps = {
+  apiBase?: string; // default 'http://localhost:8080'
 };
 
-const UserTable: React.FC<UserTableProps> = ({ playerIds, apiBase = 'http://localhost:8080' }) => {
+const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ apiBase = 'http://localhost:8080' }) => {
   const { data: session } = useSession();
   const accessToken = (session as any)?.accessToken as string | undefined;
 
-  const [users, setUsers] = useState<PlayerInfo[]>([]);
+  const [rows, setRows] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState<string | null>(null);
 
-  // Pokud budeš mít někdy endpoint /api/leaderboard, stačí nahradit fetch níže jedním voláním.
-  // TODO: pokud existuje např. GET /api/leaderboard, zavolej ho místo Promise.all na jednotlivé hráče.
-
   useEffect(() => {
     const load = async () => {
-      if (!accessToken) return;                 // čekáme na session
-      if (!playerIds || playerIds.length === 0) {
-        setUsers([]);
-        return;
-      }
+      if (!accessToken) return; // čekáme na session/token
 
       setLoading(true);
       setError(null);
       try {
-        const resArr = await Promise.all(
-          playerIds.map(id =>
-            fetch(`${apiBase}/api/player/${id}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-              },
-            })
-          )
-        );
+        const res = await fetch(`${apiBase}/api/leaderboards`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
-        const failed = resArr.find(r => !r.ok);
-        if (failed) {
-          const errPayload = await failed.json().catch(() => ({}));
-          throw new Error(errPayload?.detail || `Failed to fetch player ${failed.url} (${failed.status})`);
+        if (!res.ok) {
+          const errPayload = await res.json().catch(() => ({}));
+          throw new Error(errPayload?.detail || `Failed to fetch leaderboards (${res.status})`);
         }
 
-        const data = (await Promise.all(resArr.map(r => r.json()))) as PlayerInfo[];
-        setUsers(data);
+        const data = await res.json();
+        const list: LeaderboardEntry[] = Array.isArray(data)
+          ? data
+          : (data as HydraCollection<LeaderboardEntry>).member ?? [];
+
+        setRows(list);
       } catch (e: any) {
-        setError(e?.message || 'Nepodařilo se načíst hráče.');
+        setError(e?.message || 'Nepodařilo se načíst leaderboard.');
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [playerIds, apiBase, accessToken]);
+  }, [apiBase, accessToken]);
 
-  const rows = useMemo(
+  const mapped = useMemo(
     () =>
-      users.map(u => ({
-        nickname: u.name,
-        rankBadge: getTierFromPoints(u.overallStatistics?.points ?? 0),
-        roundsPlayed: u.overallStatistics?.challengesAnswered ?? 0,
-        overallPlacement: u.overallStatistics?.rank ?? '-',
+      rows.map((u) => ({
+        id: u.playerId,
+        nickname: u.playerName,
+        rankBadge: getTierFromPoints(u.points ?? 0),
+        roundsPlayed: u.challengesCompleted ?? 0,
+        overallPlacement: u.rank ?? '-',
+        isMyself: u.isMyself,
       })),
-    [users]
+    [rows]
   );
 
   return (
@@ -122,37 +107,40 @@ const UserTable: React.FC<UserTableProps> = ({ playerIds, apiBase = 'http://loca
             <div className="flex-1 text-left">Overall Placement</div>
           </div>
 
-          {loading && (
-            <div className="p-4 text-center text-gray-600">Načítám…</div>
+          {loading && <div className="p-4 text-center text-gray-600">Načítám…</div>}
+
+          {error && <div className="p-4 text-center text-red-600">{error}</div>}
+
+          {!loading && !error && mapped.length === 0 && (
+            <div className="p-4 text-center text-gray-600">Zatím žádná data v leaderboardu.</div>
           )}
 
-          {error && (
-            <div className="p-4 text-center text-red-600">{error}</div>
-          )}
-
-          {!loading && !error && rows.length === 0 && (
-            <div className="p-4 text-center text-gray-600">Žádní hráči k zobrazení.</div>
-          )}
-
-          {!loading && !error && rows.map((user, index) => (
-            <div
-              key={`${user.nickname}-${index}`}
-              className={`flex justify-between p-4 border-b ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
-            >
-              <div className="flex-1">{user.nickname}</div>
-              <div className="flex-1">
-                <span className="inline-block px-2 py-1 text-xs rounded bg-gray-200">
-                  {user.rankBadge}
-                </span>
+          {!loading &&
+            !error &&
+            mapped.map((user, index) => (
+              <div
+                key={user.id}
+                className={`flex justify-between p-4 border-b ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+              >
+                <div className="flex-1">
+                  <span className={user.isMyself ? 'font-semibold' : ''}>{user.nickname}</span>
+                  {user.isMyself && (
+                    <span className="ml-2 text-xs px-2 py-0.5 rounded bg-gray-200">You</span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <span className="inline-block px-2 py-1 text-xs rounded bg-gray-200">
+                    {user.rankBadge}
+                  </span>
+                </div>
+                <div className="flex-1">{user.roundsPlayed}</div>
+                <div className="flex-1">{user.overallPlacement}</div>
               </div>
-              <div className="flex-1">{user.roundsPlayed}</div>
-              <div className="flex-1">{user.overallPlacement}</div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default UserTable;
+export default LeaderboardTable;
