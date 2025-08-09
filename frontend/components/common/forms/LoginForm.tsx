@@ -14,55 +14,89 @@ const LoginForm: React.FC = () => {
     password: '',
   });
 
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined, general: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { email, password } = formData;
+    let newErrors: typeof errors = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Please fill Email';
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = 'Please fill Password';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
 
     const res = await signIn('credentials', {
       redirect: false,
-      email,
-      password,
+      email: formData.email,
+      password: formData.password,
     });
 
+    setLoading(false);
+
     if (res?.ok) {
-      router.push('/dashboard'); // nebo jiná cílová stránka
+      router.push('/dashboard');
     } else {
-      alert("Přihlášení selhalo. Zkontroluj údaje.");
+      setErrors({ general: 'Incorrect password or email.' });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <InputField
-        id="email"
-        name="email"
-        label="Email address"
-        placeholder="Email..."
-        type="email"
-        value={formData.email}
-        autoComplete="email"
-        onChange={handleChange}
-        required
-      />
-      <InputField
-        id="password"
-        name="password"
-        label="Password"
-        placeholder="Password..."
-        type="password"
-        value={formData.password}
-        autoComplete="current-password"
-        onChange={handleChange}
-        required
-      />
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="mb-4">
+        <InputField
+          id="email"
+          name="email"
+          label="Email address"
+          placeholder="Email..."
+          type="email"
+          value={formData.email}
+          autoComplete="email"
+          onChange={handleChange}
+          required
+        />
+        {errors.email && <p className="mt-1 text-sm text-vibrantCoral">{errors.email}</p>}
+      </div>
+
+      <div className="mb-4">
+        <InputField
+          id="password"
+          name="password"
+          label="Password"
+          placeholder="Password..."
+          type="password"
+          value={formData.password}
+          autoComplete="current-password"
+          onChange={handleChange}
+          required
+        />
+        {errors.password && <p className="mt-1 text-sm text-vibrantCoral">{errors.password}</p>}
+      </div>
+
+      {errors.general && (
+        <p className="mb-4 text-sm text-vibrantCoral">{errors.general}</p>
+      )}
+
       <div className="mt-6">
-        <Btn type="submit">Log In</Btn>
+        <Btn type="submit">
+          {loading ? 'Verifing...' : 'Log In'}
+        </Btn>
       </div>
     </form>
   );

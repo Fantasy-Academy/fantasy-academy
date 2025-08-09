@@ -76,7 +76,6 @@ const UserProfile: React.FC = () => {
                                     <img src="" alt="profile picture" className="w-full h-full object-cover" />
                                 </div>
 
-                                {/* 🔹 Přidáno flex-1 pro roztáhnutí na plnou šířku */}
                                 <div className="flex flex-col flex-1">
                                     <h1 className="text-5xl text-vibrantCoral font-bold tracking-wider uppercase font-bebasNeue leading-10">
                                         {me?.name ?? session.user?.name ?? 'User'}
