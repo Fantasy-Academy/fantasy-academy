@@ -10,6 +10,7 @@ const navigation: { name: string; href: string }[] = [
   { name: 'Home', href: '/' },
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Challenges', href: '/challenges' },
+  { name: 'My Answeres', href: '/myAnsweres' },
   { name: 'Leaderboard', href: '/leaderboard' },
 ];
 
