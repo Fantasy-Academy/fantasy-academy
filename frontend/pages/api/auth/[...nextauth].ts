@@ -1,7 +1,13 @@
+// pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
-import type { DefaultSession } from "next-auth";
+
+const API_BASE = (
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "http://localhost:8080"
+).replace(/\/+$/, "");
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -9,14 +15,12 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email:    { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("🔐 Pokus o přihlášení:", credentials);
-
         try {
-          const loginRes = await fetch("http://api/api/login", {
+          const loginRes = await fetch(`${API_BASE}/api/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -26,40 +30,39 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!loginRes.ok) {
-            console.error("❌ Login selhal:", loginRes.status);
+            console.error("❌ Login failed:", loginRes.status);
             return null;
           }
 
           const { token } = await loginRes.json();
 
-          const meRes = await fetch("http://api/api/me", {
+          const meRes = await fetch(`${API_BASE}/api/me`, {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           });
 
           if (!meRes.ok) {
-            console.error("❌ /me selhalo:", meRes.status);
+            console.error("❌ /me failed:", meRes.status);
             return null;
           }
 
           const user = await meRes.json();
-          console.log("✅ Uživatel načten:", user);
 
           return {
             id: user.id?.toString() ?? user.email,
             name: user.name,
             email: user.email,
-            image: null, // přidej pokud máš obrázky
+            image: null,
             accessToken: token,
           };
         } catch (err) {
-          console.error("❌ Chyba v authorize:", err);
+          console.error("❌ authorize error:", err);
           return null;
         }
-      }
+      },
     }),
   ],
   session: {
@@ -76,12 +79,19 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       session.user = {
-        name: token.name,
-        email: token.email,
+        name: token.name as string | undefined,
+        email: token.email as string | undefined,
         image: null,
       };
-      (session as any).accessToken = token.accessToken;
+      (session as any).accessToken = token.accessToken as string | undefined;
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/dashboard`;
+      }
+      if (url.startsWith(baseUrl)) return url;
+      return baseUrl;
     },
   },
   pages: {
