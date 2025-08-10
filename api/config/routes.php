@@ -10,6 +10,6 @@ return static function (RoutingConfigurator $routingConfigurator): void {
     $routingConfigurator->add('auth', '/api/login')
         ->methods(['POST']);
 
-    $routingConfigurator->add('swagger_ui', '/')
-        ->controller('api_platform.swagger_ui.action');
+    $routingConfigurator->add('logout', '/logout')
+        ->methods(['GET']);
 };

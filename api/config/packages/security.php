@@ -43,6 +43,22 @@ return static function (SecurityConfig $securityConfig): void {
             ->successHandler('lexik_jwt_authentication.handler.authentication_success')
             ->failureHandler('lexik_jwt_authentication.handler.authentication_failure');
 
+    $adminFirewall = $securityConfig->firewall('admin');
+    $adminFirewall
+        ->pattern('^/(?!api)')
+        ->provider('user_provider')
+        ->formLogin()
+            ->loginPath('login')
+            ->checkPath('login')
+            ->enableCsrf(true)
+            ->defaultTargetPath('/admin'); // where to go after successful login
+
+    $adminFirewall
+        ->logout()
+            ->path('logout')
+            ->target('/')
+            ->invalidateSession(true);
+
     $securityConfig->accessControl()
         ->path('^/api/me')
         ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
@@ -50,6 +66,15 @@ return static function (SecurityConfig $securityConfig): void {
     $securityConfig->accessControl()
         ->path('^/api/question/answer')
         ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
+
+
+    $securityConfig->accessControl()
+        ->path('^/$')
+        ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
+
+    $securityConfig->accessControl()
+        ->path('^/admin')
+        ->roles(['ROLE_ADMIN']); // require admin role for the admin area
 
     $securityConfig->accessControl()
         ->path('^/')
