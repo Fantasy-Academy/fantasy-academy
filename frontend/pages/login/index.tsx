@@ -16,9 +16,12 @@ const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-sm mt-10">
         <LoginForm />
 
-        <div className="flex w-fit h-fit justify-center text-sm text-coolGray mx-auto mt-10">
-          <span className="mr-1">Don&apos;t have an account?</span>
-          <LinkBtn link="/signup" text="Sign Up" />
+        <div className="flex flex-col w-fit h-fit justify-center text-sm text-coolGray mx-auto mt-10 text-center gap-2">
+          <LinkBtn link="/forgotPassword" text="Forgot Password" />
+          <div className='flex'>
+            <span className="mr-1">Don&apos;t have an account?</span>
+            <LinkBtn link="/signup" text="Sign Up" />
+          </div>
         </div>
       </div>
     </div>
