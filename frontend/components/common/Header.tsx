@@ -72,7 +72,7 @@ export const Header = () => {
                 <Link
                   href=""
                   className=" text-vibrantCoral hover:bg-charcoal hover:text-white rounded px-3 py-2 text-sm font-medium"
-                  onClick={() => signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/login` })}>
+                  onClick={() => signOut({ callbackUrl: 'https://fantasy-academy.com/login' })}>
                   Logout
                 </Link>
               </div>
