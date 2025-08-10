@@ -14,6 +14,7 @@ FROM base AS build
 
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_BACKEND_URL="https://backend.fantasy-academy.com"
+ENV NEXT_PUBLIC_GTAG_CODE="G-BV7SPNRT08"
 
 COPY --link pnpm-lock.yaml package.json ./
 RUN pnpm fetch
