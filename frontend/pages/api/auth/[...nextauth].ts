@@ -2,7 +2,12 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
+import type { DefaultSession } from "next-auth";
 
+// API_BASE je primárně BACKEND_URL (pro server side), fallback na NEXT_PUBLIC_BACKEND_URL
+// Lokálně máš:
+// BACKEND_URL="http://api" (Docker service)
+// NEXT_PUBLIC_BACKEND_URL="http://localhost:8080" (pro browser)
 const API_BASE = (
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
@@ -20,6 +25,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
+          // 1) login -> získat token
           const loginRes = await fetch(`${API_BASE}/api/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -36,6 +42,7 @@ export const authOptions: NextAuthOptions = {
 
           const { token } = await loginRes.json();
 
+          // 2) /api/me -> data uživatele
           const meRes = await fetch(`${API_BASE}/api/me`, {
             method: "GET",
             headers: {
@@ -53,7 +60,7 @@ export const authOptions: NextAuthOptions = {
 
           return {
             id: user.id?.toString() ?? user.email,
-            name: user.name,
+            name: user.name ?? user.username ?? user.email,
             email: user.email,
             image: null,
             accessToken: token,
@@ -71,19 +78,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = (user as any).accessToken;
-        token.name = user.name;
-        token.email = user.email;
+        (token as any).accessToken = (user as any).accessToken;
+        token.name = user.name ?? token.name;
+        token.email = user.email ?? token.email;
       }
       return token;
     },
     async session({ session, token }) {
+      (session as any).accessToken = (token as any).accessToken as string | undefined;
       session.user = {
         name: token.name as string | undefined,
         email: token.email as string | undefined,
         image: null,
-      };
-      (session as any).accessToken = token.accessToken as string | undefined;
+      } as DefaultSession["user"];
       return session;
     },
     async redirect({ url, baseUrl }) {
