@@ -15,6 +15,8 @@ type LoggedUserInfo = {
     registeredAt: string; overallStatistics: PlayerStatistics;
 };
 
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+
 const UserProfile: React.FC = () => {
     const { data: session, status } = useSession();
     const accessToken = (session as any)?.accessToken as string | undefined;
@@ -28,7 +30,7 @@ const UserProfile: React.FC = () => {
             if (!accessToken) return;
             setLoading(true); setError(null);
             try {
-                const res = await fetch('http://localhost:8080/api/me', {
+                const res = await fetch(`${API_BASE}/api/me`, {
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
                 });
                 if (!res.ok) {

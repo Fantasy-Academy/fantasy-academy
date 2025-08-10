@@ -97,7 +97,7 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiBase}/api/challenges/${challengeId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/challenges/${challengeId}`, {
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -211,7 +211,7 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
 
     try {
       setSubmitting(true);
-      const res = await fetch(`${apiBase}/api/questions/answer`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/questions/answer`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -420,8 +420,8 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
               onClick={isAnySelected ? handleSubmit : undefined}
               disabled={!isAnySelected || submitting}
               className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${isAnySelected && !submitting
-                  ? "bg-vibrantCoral cursor-pointer"
-                  : "bg-coolGray cursor-not-allowed"
+                ? "bg-vibrantCoral cursor-pointer"
+                : "bg-coolGray cursor-not-allowed"
                 }`}
             >
               {submitting ? "Odesílám…" : "Submit answer"}

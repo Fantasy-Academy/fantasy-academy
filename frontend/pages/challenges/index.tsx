@@ -23,7 +23,7 @@ type Challenge = {
     isEvaluated: boolean;
 };
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const Challenges = () => {
     const [tab, setTab] = useState<'current' | 'completed' | "time's up">('current');
@@ -36,7 +36,7 @@ const Challenges = () => {
     const token = (session as any)?.accessToken as string | undefined;
 
     const fetchChallenges = useCallback(async () => {
-        if (!token) return; // počkej na token
+        if (!token) return;
         try {
             const res = await fetch(`${API_BASE}/api/challenges`, {
                 method: 'GET',
@@ -55,7 +55,6 @@ const Challenges = () => {
         }
     }, [token]);
 
-    // načti po získání tokenu a kdykoliv se změní
     useEffect(() => {
         if (status === 'authenticated') {
             fetchChallenges();
@@ -84,7 +83,6 @@ const Challenges = () => {
     };
 
     const handleSubmitSuccess = async () => {
-        // Optimisticky označ jako zodpovězené (pro okamžitý přesun)
         if (challengeId) {
             setChallenges((prev) =>
                 prev.map((c) =>
@@ -92,12 +90,10 @@ const Challenges = () => {
                 )
             );
         }
-        // A hned nato refetch ze serveru, aby se stavy srovnaly podle DB
         await fetchChallenges();
         closeModal();
     };
 
-    // Pomocná funkce pro formátování
     function formatDuration(ms: number) {
         if (ms <= 0) return 'Expired';
 

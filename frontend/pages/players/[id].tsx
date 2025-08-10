@@ -23,15 +23,17 @@ type PlayerInfo = {
   }>;
 };
 
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+
 const PlayerProfilePage: React.FC = () => {
   const { data: session } = useSession();
   const accessToken = (session as any)?.accessToken as string | undefined;
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const id = searchParams.get('id') || ''; // díky Link /players/<id> funguje i bez ?id=..., viz fallback níž
+  const id = searchParams.get('id') || '';
 
-  // fallback pro /players/<id> bez query: vytáhneme z pathname
+  // fallback pro /players/<id> bez query
   const fallbackId =
     typeof window !== 'undefined'
       ? window.location.pathname.split('/').filter(Boolean).pop() ?? ''
@@ -48,7 +50,7 @@ const PlayerProfilePage: React.FC = () => {
       if (!accessToken || !playerId) return;
       setLoading(true); setError(null);
       try {
-        const res = await fetch(`http://localhost:8080/api/player/${playerId}`, {
+        const res = await fetch(`${API_BASE}/api/player/${playerId}`, {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         });
         if (!res.ok) {

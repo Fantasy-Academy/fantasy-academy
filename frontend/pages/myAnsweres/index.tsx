@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
 
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+
 /** ===== Typy podle OpenAPI ===== */
 type Choice = { id: string; text: string; description?: string | null; image?: string | null };
 
@@ -141,7 +143,7 @@ const MyAnswersPage: React.FC = () => {
 
       try {
         // 1) seznam challengí
-        const listRes = await fetch('http://localhost:8080/api/challenges', {
+        const listRes = await fetch(`${API_BASE}/api/challenges`, {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
@@ -159,7 +161,7 @@ const MyAnswersPage: React.FC = () => {
         // 2) detaily pro zodpovězené
         const detailResArr = await Promise.all(
           completedIds.map((id) =>
-            fetch(`http://localhost:8080/api/challenges/${id}`, {
+            fetch(`${API_BASE}/api/challenges/${id}`, {
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${accessToken}`,
