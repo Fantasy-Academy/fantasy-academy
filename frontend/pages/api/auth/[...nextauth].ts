@@ -4,10 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
 import type { DefaultSession } from "next-auth";
 
-// API_BASE je primárně BACKEND_URL (pro server side), fallback na NEXT_PUBLIC_BACKEND_URL
-// Lokálně máš:
-// BACKEND_URL="http://api" (Docker service)
-// NEXT_PUBLIC_BACKEND_URL="http://localhost:8080" (pro browser)
+// Prefer server BACKEND_URL (např. "http://api" v docker-compose),
+// fallback na veřejné NEXT_PUBLIC_BACKEND_URL, a nakonec lokál.
 const API_BASE = (
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
@@ -15,7 +13,12 @@ const API_BASE = (
 ).replace(/\/+$/, "");
 
 export const authOptions: NextAuthOptions = {
-  debug: true,
+  // DŮLEŽITÉ pro produkci (podepisování JWT/cookies)
+  secret: process.env.NEXTAUTH_SECRET,
+
+  // debug jen mimo produkci
+  debug: process.env.NODE_ENV !== "production",
+
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -58,8 +61,9 @@ export const authOptions: NextAuthOptions = {
 
           const user = await meRes.json();
 
+          // NextAuth vyžaduje string id
           return {
-            id: user.id?.toString() ?? user.email,
+            id: user.id?.toString?.() ?? user.email,
             name: user.name ?? user.username ?? user.email,
             email: user.email,
             image: null,
@@ -72,14 +76,16 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+
   session: {
     strategy: "jwt",
   },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         (token as any).accessToken = (user as any).accessToken;
-        token.name = user.name ?? token.name;
+        token.name  = user.name  ?? token.name;
         token.email = user.email ?? token.email;
       }
       return token;
@@ -93,6 +99,7 @@ export const authOptions: NextAuthOptions = {
       } as DefaultSession["user"];
       return session;
     },
+    // Po přihlášení pošli uživatele na /dashboard, pokud není explicitní callbackUrl
     async redirect({ url, baseUrl }) {
       if (url === baseUrl || url === `${baseUrl}/`) {
         return `${baseUrl}/dashboard`;
@@ -101,6 +108,7 @@ export const authOptions: NextAuthOptions = {
       return baseUrl;
     },
   },
+
   pages: {
     signIn: "/login",
   },
