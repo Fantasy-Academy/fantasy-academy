@@ -1,16 +1,56 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="{{ app.request.locale }}" data-turbo="false">
+<head>
+    <meta charset="UTF-8">
+    <title>{% apply spaceless %}{% block title %}{% endblock %}{% endapply %} | Fantasy Academy</title>
 
-        {% block javascripts %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
+    {% block meta_viewport %}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {% endblock %}
+
+    <meta name="turbo-prefetch" content="false">
+    <meta name="turbo-refresh-method" content="morph">
+
+    <meta name="description" content="{% apply spaceless %}{% block meta_description %}{% endblock %}{% endapply %}">
+    <meta name="keywords" content="{% apply spaceless %}{% block meta_keywords %}{% endblock %}{% endapply %}">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{{ asset('android-chrome-192x192.png') }}">
+    <meta name="theme-color" content="#ffffff">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+
+    {% block importmap %}
+        {{ importmap('app') }}
+    {% endblock %}
+
+    {% block custom_styles %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+        <main>
+
+            {% for label, messages in app.flashes %}
+                <div class="container mt-3">
+                    {% for message in messages %}
+                        <div class="alert-dismissible mb-0 fade show alert alert-{{ label }}" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            {% block full_content %}
+                <section class="container px-3 pt-2 pt-md-3 pt-lg-4">
+                    {% block content %}{% endblock %}
+                </section>
+            {% endblock %}
+        </main>
+
     </body>
 </html>

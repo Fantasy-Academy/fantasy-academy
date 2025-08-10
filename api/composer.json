@@ -36,6 +36,7 @@
         "runtime/frankenphp-symfony": "^0.2",
         "sentry/sentry-symfony": "^5.0",
         "symfony/asset": "7.*",
+        "symfony/asset-mapper": "7.*",
         "symfony/config": "^7.0",
         "symfony/console": "^7.0",
         "symfony/dependency-injection": "^7.0",
@@ -100,7 +101,8 @@
         "phpstan": "vendor/bin/phpstan --memory-limit=-1 analyse",
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+            "assets:install %PUBLIC_DIR%": "symfony-cmd",
+            "importmap:install": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"
