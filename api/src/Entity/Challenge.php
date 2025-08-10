@@ -57,31 +57,31 @@ class Challenge
         readonly public null|string $hintImage,
 
         #[Column]
-        readonly public int $skillAnalytical,
+        readonly public float $skillAnalytical,
 
         #[Column]
-        readonly public int $skillStrategicPlanning,
+        readonly public float $skillStrategicPlanning,
 
         #[Column]
-        readonly public int $skillAdaptability,
+        readonly public float $skillAdaptability,
 
         #[Column]
-        readonly public int $skillPremierLeagueKnowledge,
+        readonly public float $skillPremierLeagueKnowledge,
 
         #[Column]
-        readonly public int $skillRiskManagement,
+        readonly public float $skillRiskManagement,
 
         #[Column]
-        readonly public int $skillDecisionMakingUnderPressure,
+        readonly public float $skillDecisionMakingUnderPressure,
 
         #[Column]
-        readonly public int $skillFinancialManagement,
+        readonly public float $skillFinancialManagement,
 
         #[Column]
-        readonly public int $skillLongTermVision,
+        readonly public float $skillLongTermVision,
 
         #[Column]
-        readonly public int $skillDiscipline,
+        readonly public float $skillDiscipline,
     ) {
     }
 }

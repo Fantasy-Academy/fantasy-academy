@@ -51,7 +51,7 @@ return static function (SecurityConfig $securityConfig): void {
             ->loginPath('login')
             ->checkPath('login')
             ->enableCsrf(true)
-            ->defaultTargetPath('/admin'); // where to go after successful login
+            ->defaultTargetPath('/admin/import-challenges');
 
     $adminFirewall
         ->logout()

@@ -20,7 +20,7 @@ final class LoginController extends AbstractController
     public function __invoke(#[CurrentUser] null|User $user): Response
     {
         if ($user !== null) {
-            return $this->redirectToRoute('admin');
+            return $this->redirectToRoute('import_challenges');
         }
 
         // get the login error if there is one

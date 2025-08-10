@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}" data-turbo="false">
+<head>
+    <meta charset="UTF-8">
+    <title>{% apply spaceless %}{% block title %}{% endblock %}{% endapply %} | Fantasy Academy</title>
+
+    {% block meta_viewport %}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    {% endblock %}
+
+    <meta name="turbo-prefetch" content="false">
+    <meta name="turbo-refresh-method" content="morph">
+
+    <meta name="description" content="{% apply spaceless %}{% block meta_description %}{% endblock %}{% endapply %}">
+    <meta name="keywords" content="{% apply spaceless %}{% block meta_keywords %}{% endblock %}{% endapply %}">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{{ asset('android-chrome-192x192.png') }}">
+    <meta name="theme-color" content="#ffffff">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+
+    {% block importmap %}
+        {{ importmap('app') }}
+    {% endblock %}
+
+    {% block custom_styles %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <main>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    {% set current_route = app.request.attributes.get('_route') %}
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link {{ current_route == 'import_challenges' ? 'active' }}" href="{{ path('import_challenges') }}">Import challenges</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ current_route == 'import_results' ? 'active' }}" href="#">Import results</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-lg-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('logout') }}">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        {% for label, messages in app.flashes %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert-dismissible mb-0 fade show alert alert-{{ label }}" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {% block full_content %}
+            <section class="container p-4 mt-4 rounded shadow" style="background: rgba(255, 255, 255, .9)">
+                {% block content %}{% endblock %}
+            </section>
+        {% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+</body>
+</html>
