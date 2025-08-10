@@ -113,7 +113,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
         {loading && <div className="px-6 py-4 text-center text-gray-600">Načítám…</div>}
         {error && <div className="px-6 py-4 text-center text-vibrantCoral">{error}</div>}
         {!loading && !error && mapped.length === 0 && (
-          <div className="px-6 py-4 text-center text-gray-600">Zatím žádná data v leaderboardu.</div>
+          <div className="px-6 py-4 text-center text-gray-600">No records.</div>
         )}
 
         {!loading &&
