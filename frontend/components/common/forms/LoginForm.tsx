@@ -34,13 +34,12 @@ const LoginForm: React.FC = () => {
     setLoading(true);
     try {
       const res = await signIn('credentials', {
-        redirect: false,
+        redirect: true,
         email: formData.email,
         password: formData.password,
       });
 
       if (res?.ok) {
-        // 🔄 hned obnov session v klientu (fix pro produkci bez refresh)
         try { await update(); } catch {}
         router.replace('/dashboard');
       } else {

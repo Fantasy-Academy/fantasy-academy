@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email:    { label: "Email", type: "email" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         (token as any).accessToken = (user as any).accessToken;
-        token.name  = user.name  ?? token.name;
+        token.name = user.name ?? token.name;
         token.email = user.email ?? token.email;
       }
       return token;
@@ -99,13 +99,8 @@ export const authOptions: NextAuthOptions = {
       } as DefaultSession["user"];
       return session;
     },
-    // Po přihlášení pošli uživatele na /dashboard, pokud není explicitní callbackUrl
-    async redirect({ url, baseUrl }) {
-      if (url === baseUrl || url === `${baseUrl}/`) {
-        return `${baseUrl}/dashboard`;
-      }
-      if (url.startsWith(baseUrl)) return url;
-      return baseUrl;
+    async redirect({ baseUrl }) {
+      return `${baseUrl}/dashboard`;
     },
   },
 

@@ -76,21 +76,17 @@ const SignupForm: React.FC = () => {
         return;
       }
 
-      // ✅ přihlášení bez redirectu
       const loginRes = await signIn('credentials', {
-        redirect: false,
+        redirect: true,
         email,
         password,
       });
 
       if (loginRes?.ok) {
-        // ✅ okamžitě obnov session, ať UI hned ví, že jsi přihlášen
         try {
           await update();
         } catch {
-          // ignore – fallback níž
         }
-        // a potom přesměruj
         router.replace('/dashboard');
       } else {
         setErrors({ general: 'Registrace proběhla, ale přihlášení selhalo.' });
