@@ -1,9 +1,9 @@
 'use client';
-'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import TimeLabel from '../timeLabel/TimeLabel';
 import type { ChallengeCard } from '../../types/challengeCard.types';
+import Image from 'next/image';
 
 interface ChallengeCardProps {
     challengeCard: ChallengeCard
@@ -25,7 +25,13 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challengeCard }) => {
             >
                 <div className='flex flex-col gap-4 w-fit'>
                     <div className="bg-slate-200 flex items-center justify-center text-gray-700 w-full sm:w-[200px] h-[150px]">
-                        {challengeCard.image}
+                        <Image
+                            src={challengeCard.image}
+                            alt={challengeCard.title}
+                            width={200}
+                            height={150}
+                            className="object-cover w-full h-full"
+                        />
                     </div>
                     <TimeLabel duration={challengeCard.duration} isCompleted={challengeCard.isCompleted} />
                 </div>
