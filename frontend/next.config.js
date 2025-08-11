@@ -18,6 +18,12 @@ const nextConfig = {
         hostname: "placecats.com",
         port: "",
         pathname: "/**"
+      },
+      {
+        protocol: "https",
+        hostname: "img.fantasy-academy.com",
+        port: "",
+        pathname: "/**"
       }
     ]
   },
