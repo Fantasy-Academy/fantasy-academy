@@ -274,7 +274,10 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
             <h2 className="text-3xl font-bold text-vibrantCoral text-center">
               {challenge.name}
             </h2>
-            <p className="text-base text-charcoal mt-4">{challenge.description}</p>
+            <div
+              className="text-base text-charcoal mt-4"
+              dangerouslySetInnerHTML={{ __html: challenge.description }}
+            />
           </div>
 
           <hr className="border-0 h-[2px] bg-charcoal/10 my-4" />
@@ -284,9 +287,10 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
               <h4 className="text-xl font-semibold text-charcoal">{question.text}</h4>
 
               {challenge.hintText && (
-                <p className="italic text-sm text-gray-600 bg-gray-50 p-2 border-l-4 border-vibrantCoral">
-                  💡 {challenge.hintText}
-                </p>
+                <div
+                  className="italic text-sm text-gray-600 bg-gray-50 p-2 border-l-4 border-vibrantCoral"
+                  dangerouslySetInnerHTML={{ __html: `💡 ${challenge.hintText}` }}
+                />
               )}
 
               {question.type === "text" && (

@@ -39,9 +39,10 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challengeCard }) => {
                     <h3 className="font-sourceSans3 text-2xl font-bold text-vibrantCoral group-hover:text-white">
                         {challengeCard.title}
                     </h3>
-                    <p className='font-sourceSans3 text-md font-normal text-black group-hover:text-white'>
-                        {challengeCard.shortDescription}
-                    </p>
+                    <div
+                        className='font-sourceSans3 text-md font-normal text-black group-hover:text-white'
+                        dangerouslySetInnerHTML={{ __html: challengeCard.shortDescription }}
+                    />
                 </div>
             </div>
         </div>
