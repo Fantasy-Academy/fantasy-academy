@@ -53,7 +53,7 @@ const TierProgressBar: React.FC<TierProgressBarProps> = ({ points, className }) 
           {next ? <span className="text-coolGray"> → {next.tier}</span> : <span className="text-pistachio ml-2">Max tier reached</span>}
         </div>
         <div className="text-sm text-charcoal">
-          {next ? (<><span className="font-medium">{pct}%</span><span className="text-coolGray ml-2">({toNext} pts to {next.tier})</span></>) : (<span className="font-medium">100%</span>)}
+          {next ? (<><span className="font-medium">{pct}%</span><span className="text-coolGray ml-2">({toNext} FAP to {next.tier})</span></>) : (<span className="font-medium">100%</span>)}
         </div>
       </div>
 

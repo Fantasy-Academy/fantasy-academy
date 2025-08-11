@@ -234,7 +234,7 @@ const MyAnswersPage: React.FC = () => {
                     </p>
                   </div>
                   {typeof ch.maxPoints === 'number' && (
-                    <span className="ml-auto inline-block text-sm px-2 py-1 rounded bg-gray-100">Max {ch.maxPoints} pts</span>
+                    <span className="ml-auto inline-block text-sm px-2 py-1 rounded bg-gray-100">Max {ch.maxPoints} FAP</span>
                   )}
                 </div>
 

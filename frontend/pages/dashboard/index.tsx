@@ -40,7 +40,7 @@ const TierProgressBar: React.FC<{ points: number }> = ({ points }) => {
           {current.name !== 'Platinum' ? (
             <>
               Next: <span className="text-charcoal font-semibold">{next.name}</span> •{' '}
-              <span className="text-charcoal font-semibold">{Math.max(0, next.min - points)} pts</span> to go
+              <span className="text-charcoal font-semibold">{Math.max(0, next.min - points)} FAP</span> to go
             </>
           ) : (
             <span className="text-charcoal font-semibold">Max Tier</span>
