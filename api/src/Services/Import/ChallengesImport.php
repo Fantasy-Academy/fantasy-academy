@@ -238,7 +238,7 @@ readonly final class ChallengesImport
         return $challenge;
     }
 
-    private function makePercentage(int|float|string $number): float
+    private function makePercentage(null|int|float|string $number): float
     {
         $number = (float) $number;
 
