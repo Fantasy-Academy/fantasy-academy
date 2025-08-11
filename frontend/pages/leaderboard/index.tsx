@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import Head from "next/head";
+
 
 type PlayerSkill = { name: string; percentage: number; percentageChange: number | null };
 type LeaderboardEntry = {
@@ -93,6 +95,9 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
 
   return (
     <section className="px-4 py-8">
+      <Head>
+        <title>Leaderboard | Fantasy Academy</title>
+      </Head>
       <div className="mx-auto w-full max-w-[1200px] bg-white rounded-xl shadow-md overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 flex items-end justify-between">
           <h2 className="font-bebasNeue tracking-wider text-3xl text-charcoal uppercase">
@@ -121,9 +126,8 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           mapped.map((user, index) => (
             <div
               key={user.id}
-              className={`grid grid-cols-4 gap-4 px-6 py-4 border-t ${
-                index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-              }`}
+              className={`grid grid-cols-4 gap-4 px-6 py-4 border-t ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                }`}
             >
               <div className="flex items-center">
                 <Link

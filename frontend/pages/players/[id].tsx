@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
+import Head from "next/head";
 
 type PlayerSkill = { name: string; percentage: number; percentageChange: number | null };
 type PlayerStatistics = { rank: number; challengesAnswered: number; points: number; skills: PlayerSkill[] };
@@ -43,7 +44,7 @@ const PlayerProfilePage: React.FC = () => {
 
   const [player, setPlayer] = useState<PlayerInfo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -70,6 +71,9 @@ const PlayerProfilePage: React.FC = () => {
 
   return (
     <BackgroundWrapper>
+      <Head>
+        <title>Player | Fantasy Academy</title>
+      </Head>
       <div className="max-w-5xl mx-auto px-4 sm:px-8 py-8">
         <button
           onClick={() => router.back()}

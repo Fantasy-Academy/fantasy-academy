@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import InputField from '../../components/inputField/InputField';
 import Btn from '../../components/button/Btn';
+import Head from "next/head";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
@@ -140,6 +141,9 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <Head>
+        <title>Forgot password | Fantasy Academy</title>
+      </Head>
       <div className="w-full max-w-md bg-white rounded shadow p-6">
         <h1 className="text-2xl font-bold text-charcoal mb-1">Forgot Password</h1>
         <p className="text-coolGray mb-6">

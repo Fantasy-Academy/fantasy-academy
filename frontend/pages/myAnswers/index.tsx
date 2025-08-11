@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
+import Head from "next/head";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
@@ -202,6 +203,9 @@ const MyAnswersPage: React.FC = () => {
 
   return (
     <BackgroundWrapper>
+      <Head>
+        <title>My answers | Fantasy Academy</title>
+      </Head>
       <div className="min-h-screen py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="font-bebasNeue text-5xl text-charcoal mb-2">My Answers</h1>

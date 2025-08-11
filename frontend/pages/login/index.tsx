@@ -3,10 +3,14 @@
 import React from 'react';
 import LoginForm from '../../components/common/forms/LoginForm';
 import LinkBtn from '../../components/common/LinkBtn';
+import Head from "next/head";
 
 const Login = () => {
   return (
     <div className="flex flex-1 flex-col justify-center px-6 lg:px-8 py-12">
+      <Head>
+        <title>Login | Fantasy Academy</title>
+      </Head>
       <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center">
         <h2 className="mt-4 text-4xl font-bold tracking-tight text-charcoal font-sourceSans3">
           Welcome Back!

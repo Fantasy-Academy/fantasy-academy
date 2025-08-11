@@ -6,6 +6,7 @@ import Achievement from '../../components/common/Achievement';
 import TitleContainer from '../../components/containers/TitleContainer';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
 import TierProgressBar from '../../components/common/TierProgressBar';
+import Head from "next/head";
 
 type PlayerSkill = { name: string; percentage: number; percentageChange: number | null };
 type PlayerStatistics = { rank: number; challengesAnswered: number; points: number; skills: PlayerSkill[] };
@@ -60,6 +61,9 @@ const UserProfile: React.FC = () => {
 
     return (
         <BackgroundWrapper>
+            <Head>
+                <title>Profile | Fantasy Academy</title>
+            </Head>
             <div className="flex flex-col gap-8 justify-center text-left pb-8 px-4 sm:px-8 max-w-5xl mx-auto mt-8">
                 <div className="p-6 flex-1 bg-white rounded">
                     {!session && (

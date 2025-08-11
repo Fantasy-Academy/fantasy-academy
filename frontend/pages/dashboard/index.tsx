@@ -4,13 +4,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
+import Head from "next/head";
+
 
 /** --- Pomocný progress bar: postup k dalšímu tieru podle bodů --- */
 const TierProgressBar: React.FC<{ points: number }> = ({ points }) => {
   const tiers = [
-    { name: 'Bronze',   min: 0,    max: 299 },
-    { name: 'Silver',   min: 300,  max: 599 },
-    { name: 'Gold',     min: 600,  max: 999 },
+    { name: 'Bronze', min: 0, max: 299 },
+    { name: 'Silver', min: 300, max: 599 },
+    { name: 'Gold', min: 600, max: 999 },
     { name: 'Platinum', min: 1000, max: Infinity },
   ];
 
@@ -22,11 +24,14 @@ const TierProgressBar: React.FC<{ points: number }> = ({ points }) => {
   }, [points]);
 
   const bandSize = current.max === Infinity ? 1 : (current.max - current.min + 1);
-  const inBand   = current.max === Infinity ? 1 : Math.max(0, Math.min(points - current.min, bandSize));
-  const pct      = current.max === Infinity ? 100 : Math.round((inBand / bandSize) * 100);
+  const inBand = current.max === Infinity ? 1 : Math.max(0, Math.min(points - current.min, bandSize));
+  const pct = current.max === Infinity ? 100 : Math.round((inBand / bandSize) * 100);
 
   return (
     <div className="w-full">
+      <Head>
+        <title>Dashboard | Fantasy Academy</title>
+      </Head>
       <div className="flex items-end justify-between mb-1">
         <div className="text-sm text-coolGray">
           Tier: <span className="text-charcoal font-semibold">{current.name}</span>
@@ -85,7 +90,7 @@ export default function Dashboard() {
 
   const [me, setMe] = useState<LoggedUserInfo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [counts, setCounts] = useState({ available: 0, completed: 0, expired: 0 });
 
   useEffect(() => {
@@ -167,7 +172,7 @@ export default function Dashboard() {
 
   return (
     <BackgroundWrapper>
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4"> 
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4">
         <div className="flex flex-col w-full max-w-[1000px] mx-auto py-8 gap-6">
           <section className="bg-white rounded-xl shadow-md p-6 sm:p-8">
             {status === 'loading' && <Skeleton />}

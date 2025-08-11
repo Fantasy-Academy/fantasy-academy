@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import ChallengeCard from '../../components/challenges/ChallengeCard';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
 import ChallengeModal from '../../components/modal/ChallangeModal';
+import Head from "next/head";
+
 
 type Challenge = {
     id: string;
@@ -112,6 +114,9 @@ const Challenges = () => {
 
     return (
         <BackgroundWrapper>
+            <Head>
+                <title>Challenges | Fantasy Academy</title>
+            </Head>
             <div className="min-h-screen py-8">
                 {/* Tab Navigation */}
                 <div className="w-fit mb-8 mx-auto px-8 py-4">
@@ -120,8 +125,8 @@ const Challenges = () => {
                             <button
                                 key={type}
                                 className={`py-2 px-4 transition-colors border-b-4 ${tab === type
-                                        ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                        : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
+                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
+                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
                                     }`}
                                 onClick={() => setTab(type as typeof tab)}
                             >
