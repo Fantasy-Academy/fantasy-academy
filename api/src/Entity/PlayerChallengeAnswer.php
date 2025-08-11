@@ -17,6 +17,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use FantasyAcademy\API\Exceptions\ChallengeExpired;
 use FantasyAcademy\API\Exceptions\NotEnoughChoices;
 use FantasyAcademy\API\Exceptions\TooManyChoices;
+use FantasyAcademy\API\Value\QuestionType;
 use JetBrains\PhpStorm\Immutable;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -75,16 +76,8 @@ class PlayerChallengeAnswer
             throw new ChallengeExpired();
         }
 
-        $minSelections = $question->choiceConstraint?->minSelections;
-        $maxSelections = $question->choiceConstraint?->maxSelections;
-        $selectedChoicesCount = count($selectedChoiceIds ?? []);
-
-        if ($minSelections !== null && $selectedChoicesCount < $minSelections) {
-            throw new NotEnoughChoices($selectedChoicesCount);
-        }
-
-        if ($maxSelections !== null && $selectedChoicesCount > $maxSelections) {
-            throw new TooManyChoices($selectedChoicesCount);
+        if ($question->type === QuestionType::MultiSelect) {
+            $this->validateMultiSelectAnswer($question, $selectedChoiceIds);
         }
 
         $existingAnswer = $this->answerForQuestion($question);
@@ -123,5 +116,26 @@ class PlayerChallengeAnswer
             array: $this->answeredQuestions->toArray(),
             callback: fn ($answeredQuestion): bool => $answeredQuestion->question->id->equals($question->id)
         );
+    }
+
+    /**
+     * @param null|array<Uuid> $selectedChoiceIds
+     *
+     * @throws NotEnoughChoices
+     * @throws TooManyChoices
+     */
+    private function validateMultiSelectAnswer(Question $question, null|array $selectedChoiceIds): void
+    {
+        $minSelections = $question->choiceConstraint?->minSelections;
+        $maxSelections = $question->choiceConstraint?->maxSelections;
+        $selectedChoicesCount = count($selectedChoiceIds ?? []);
+
+        if ($minSelections !== null && $selectedChoicesCount < $minSelections) {
+            throw new NotEnoughChoices($selectedChoicesCount);
+        }
+
+        if ($maxSelections !== null && $selectedChoicesCount > $maxSelections) {
+            throw new TooManyChoices($selectedChoicesCount);
+        }
     }
 }
