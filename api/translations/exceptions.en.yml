@@ -1,2 +1,4 @@
 challenge_expired: "Challenge already expired"
 user_already_registered: "This email is already registered!"
+too_many_choices: "Too many choices! Only %count% allowed."
+not_enough_choices: "Not enough choices! At least %count% required."

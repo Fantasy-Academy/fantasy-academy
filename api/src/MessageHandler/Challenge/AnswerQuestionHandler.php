@@ -6,6 +6,8 @@ namespace FantasyAcademy\API\MessageHandler\Challenge;
 
 use FantasyAcademy\API\Entity\PlayerChallengeAnswer;
 use FantasyAcademy\API\Exceptions\ChallengeExpired;
+use FantasyAcademy\API\Exceptions\NotEnoughChoices;
+use FantasyAcademy\API\Exceptions\TooManyChoices;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Message\Challenge\AnswerQuestion;
 use FantasyAcademy\API\Repository\PlayerChallengeAnswerRepository;
@@ -30,6 +32,8 @@ readonly final class AnswerQuestionHandler
     /**
      * @throws UserNotFound
      * @throws ChallengeExpired
+     * @throws TooManyChoices
+     * @throws NotEnoughChoices
      */
     public function __invoke(AnswerQuestion $message): void
     {

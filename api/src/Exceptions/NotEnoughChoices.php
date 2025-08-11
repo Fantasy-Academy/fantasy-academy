@@ -7,8 +7,14 @@ namespace FantasyAcademy\API\Exceptions;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class ChallengeExpired extends UnrecoverableMessageHandlingException implements DomainException
+final class NotEnoughChoices extends UnrecoverableMessageHandlingException implements DomainException
 {
+    public function __construct(
+        readonly private int $count,
+    ) {
+        parent::__construct();
+    }
+
     public function statusCode(): int
     {
         return 422;
@@ -16,6 +22,6 @@ final class ChallengeExpired extends UnrecoverableMessageHandlingException imple
 
     public function toHumanReadableMessage(TranslatorInterface $translator): string
     {
-        return $translator->trans('challenge_expired', domain: 'exceptions');
+        return $translator->trans('not_enough_choices', parameters: ['%count%' => $this->count], domain: 'exceptions');
     }
 }

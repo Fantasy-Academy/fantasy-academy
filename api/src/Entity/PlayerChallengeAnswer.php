@@ -15,6 +15,8 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use FantasyAcademy\API\Exceptions\ChallengeExpired;
+use FantasyAcademy\API\Exceptions\NotEnoughChoices;
+use FantasyAcademy\API\Exceptions\TooManyChoices;
 use JetBrains\PhpStorm\Immutable;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -54,6 +56,10 @@ class PlayerChallengeAnswer
     /**
      * @param null|array<Uuid> $orderedChoiceIds
      * @param null|array<Uuid> $selectedChoiceIds
+     *
+     * @throws ChallengeExpired
+     * @throws NotEnoughChoices
+     * @throws TooManyChoices
      */
     public function answerQuestion(
         DateTimeImmutable $answeredAt,
@@ -67,6 +73,18 @@ class PlayerChallengeAnswer
     {
         if ($answeredAt->getTimestamp() > $this->challenge->expiresAt->getTimestamp()) {
             throw new ChallengeExpired();
+        }
+
+        $minSelections = $question->choiceConstraint?->minSelections;
+        $maxSelections = $question->choiceConstraint?->maxSelections;
+        $selectedChoicesCount = count($selectedChoiceIds ?? []);
+
+        if ($minSelections !== null && $selectedChoicesCount < $minSelections) {
+            throw new NotEnoughChoices($selectedChoicesCount);
+        }
+
+        if ($maxSelections !== null && $selectedChoicesCount > $maxSelections) {
+            throw new TooManyChoices($selectedChoicesCount);
         }
 
         $existingAnswer = $this->answerForQuestion($question);
