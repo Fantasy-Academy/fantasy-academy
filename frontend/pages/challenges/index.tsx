@@ -7,173 +7,192 @@ import ChallengeCard from '../../components/challenges/ChallengeCard';
 import BackgroundWrapper from '../../layouts/BackgroundWrapper';
 import ChallengeModal from '../../components/modal/ChallangeModal';
 import Head from "next/head";
+import Link from "next/link";
 
 
 type Challenge = {
-    id: string;
-    name: string;
-    shortDescription: string;
-    description: string;
-    image: string | null;
-    addedAt: string;
-    startsAt: string;
-    expiresAt: string;
-    answeredAt: string | null;
-    isStarted: boolean;
-    isExpired: boolean;
-    isAnswered: boolean;
-    isEvaluated: boolean;
+  id: string;
+  name: string;
+  shortDescription: string;
+  description: string;
+  image: string | null;
+  addedAt: string;
+  startsAt: string;
+  expiresAt: string;
+  answeredAt: string | null;
+  isStarted: boolean;
+  isExpired: boolean;
+  isAnswered: boolean;
+  isEvaluated: boolean;
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const Challenges = () => {
-    const [tab, setTab] = useState<'current' | 'completed' | "time's up">('current');
-    const [challenges, setChallenges] = useState<Challenge[]>([]);
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const challengeId = searchParams.get('id');
+  const [tab, setTab] = useState<'current' | 'completed' | "time's up">('current');
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const challengeId = searchParams.get('id');
 
-    const { data: session, status } = useSession();
-    const token = (session as any)?.accessToken as string | undefined;
+  const { data: session, status } = useSession();
+  const token = (session as any)?.accessToken as string | undefined;
+  const isAuthed = status === 'authenticated' && !!token;
 
-    const fetchChallenges = useCallback(async () => {
-        if (!token) return;
-        try {
-            const res = await fetch(`${API_BASE}/api/challenges`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                    'Cache-Control': 'no-cache',
-                },
-                cache: 'no-store',
-            });
-            if (!res.ok) throw new Error('Chyba při načítání výzev');
-            const data = await res.json();
-            setChallenges(data.member || data);
-        } catch (err) {
-            console.error(err);
-        }
-    }, [token]);
-
-    useEffect(() => {
-        if (status === 'authenticated') {
-            fetchChallenges();
-        }
-    }, [status, fetchChallenges]);
-
-    const filteredChallenges = challenges.filter((challenge) => {
-        const isCompleted = challenge.isAnswered;
-        const duration = new Date(challenge.expiresAt).getTime() - Date.now();
-        const durationInMinutes = Math.max(Math.floor(duration / 60000), 0);
-
-        if (tab === 'current') return durationInMinutes > 0 && !isCompleted;
-        if (tab === 'completed') return isCompleted;
-        if (tab === "time's up") return durationInMinutes === 0 && !isCompleted;
-        return false;
-    });
-
-    const selectedChallenge = challenges.find((c) => c.id === challengeId) || null;
-
-    const openModal = (id: string) => {
-        router.push(`/challenges?id=${id}`, { scroll: false });
-    };
-
-    const closeModal = () => {
-        router.replace('/challenges', { scroll: false });
-    };
-
-    const handleSubmitSuccess = async () => {
-        if (challengeId) {
-            setChallenges((prev) =>
-                prev.map((c) =>
-                    c.id === challengeId ? { ...c, isAnswered: true, answeredAt: new Date().toISOString() } : c
-                )
-            );
-        }
-        await fetchChallenges();
-        closeModal();
-    };
-
-    function formatDuration(ms: number) {
-        if (ms <= 0) return 'Expired';
-
-        const totalMinutes = Math.floor(ms / 60000);
-        const days = Math.floor(totalMinutes / (60 * 24));
-        const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-        const minutes = totalMinutes % 60;
-
-        const parts = [];
-        if (days > 0) parts.push(`${days}d`);
-        if (hours > 0) parts.push(`${hours}h`);
-        if (minutes > 0) parts.push(`${minutes}m`);
-
-        return parts.join(' ');
+  const fetchChallenges = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/challenges`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(isAuthed ? { Authorization: `Bearer ${token}` } : {}),
+          'Cache-Control': 'no-cache',
+        },
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Chyba při načítání výzev');
+      const data = await res.json();
+      setChallenges(data.member || data);
+    } catch (err) {
+      console.error(err);
     }
+  }, [isAuthed, token]);
 
-    return (
-        <BackgroundWrapper>
-            <Head>
-                <title>Challenges | Fantasy Academy</title>
-            </Head>
-            <div className="min-h-screen py-8">
-                {/* Tab Navigation */}
-                <div className="w-fit mb-8 mx-auto px-8 py-4">
-                    <div className="max-w-[1200px] mx-auto flex justify-center gap-12 text-lg">
-                        {['current', 'completed', "time's up"].map((type) => (
-                            <button
-                                key={type}
-                                className={`py-2 px-4 transition-colors border-b-4 ${tab === type
-                                    ? 'text-vibrantCoral font-bold border-vibrantCoral'
-                                    : 'text-charcoal font-bold hover:text-vibrantCoral border-transparent'
-                                    }`}
-                                onClick={() => setTab(type as typeof tab)}
-                            >
-                                {type === "time's up" ? "Time's up" : type.charAt(0).toUpperCase() + type.slice(1)}
-                            </button>
-                        ))}
-                    </div>
+  useEffect(() => {
+    fetchChallenges();
+  }, [fetchChallenges]);
+
+  // přihlášený: všechny taby; nepřihlášený: jen "current"
+  const availableTabs: Array<'current' | 'completed' | "time's up"> = isAuthed
+    ? ['current', 'completed', "time's up"]
+    : ['current'];
+
+  // když se stav auth změní a aktuální tab není dostupný, vrať na 'current'
+  useEffect(() => {
+    if (!availableTabs.includes(tab)) setTab('current');
+  }, [availableTabs, tab]);
+
+  const filteredChallenges = challenges.filter((challenge) => {
+    const isCompleted = challenge.isAnswered;
+    const duration = new Date(challenge.expiresAt).getTime() - Date.now();
+    const durationInMinutes = Math.max(Math.floor(duration / 60000), 0);
+
+    if (tab === 'current') return durationInMinutes > 0 && !isCompleted;
+    if (tab === 'completed') return isCompleted;
+    if (tab === "time's up") return durationInMinutes === 0 && !isCompleted;
+    return false;
+  });
+
+  const selectedChallenge = challenges.find((c) => c.id === challengeId) || null;
+
+  const openModal = (id: string) => {
+    if (!isAuthed) return; // bezpečnostní pojistka
+    router.push(`/challenges?id=${id}`, { scroll: false });
+  };
+
+  const closeModal = () => {
+    router.replace('/challenges', { scroll: false });
+  };
+
+  const handleSubmitSuccess = async () => {
+    if (challengeId) {
+      setChallenges((prev) =>
+        prev.map((c) =>
+          c.id === challengeId ? { ...c, isAnswered: true, answeredAt: new Date().toISOString() } : c
+        )
+      );
+    }
+    await fetchChallenges();
+    closeModal();
+  };
+
+  return (
+    <BackgroundWrapper>
+      <Head>
+        <title>Challenges | Fantasy Academy</title>
+      </Head>
+      <div className="min-h-screen py-8">
+        {/* Tab Navigation */}
+        <div className="w-fit mb-8 mx-auto px-8 py-4">
+          <div className="max-w-[1200px] mx-auto flex justify-center gap-12 text-lg">
+            {(['current', 'completed', "time's up"] as const).map((type) => {
+              const isDisabled = !availableTabs.includes(type);
+              return (
+                <button
+                  key={type}
+                  className={`py-2 px-4 border-b-4 transition-colors font-bold ${
+                    tab === type && !isDisabled
+                      ? 'text-vibrantCoral border-vibrantCoral'
+                      : isDisabled
+                      ? 'text-gray-400 border-transparent cursor-not-allowed'
+                      : 'text-charcoal hover:text-vibrantCoral border-transparent'
+                  }`}
+                  onClick={() => !isDisabled && setTab(type)}
+                  disabled={isDisabled}
+                  aria-disabled={isDisabled}
+                  title={isDisabled ? 'Přihlas se pro další záložky' : undefined}
+                >
+                  {type === "time's up" ? "Time's up" : type.charAt(0).toUpperCase() + type.slice(1)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Info pro nepřihlášené */}
+        {!isAuthed && (
+          <p className="text-center text-sm text-gray-600 mb-4">
+            Pro zobrazení detailu výzev a možnost odpovědi se prosím{' '}
+            <Link href="/signup" className="text-vibrantCoral underline hover:no-underline">
+              registruj / přihlas
+            </Link>.
+          </p>
+        )}
+
+        {/* Challenge List */}
+        <div className="flex flex-col items-center">
+          <div className="w-full max-w-[1200px] mx-auto">
+            <div className="flex flex-col gap-4">
+              {filteredChallenges.map((challenge) => (
+                <div
+                  key={challenge.id}
+                  // když není přihlášený, zablokuj interakci a dej „disabled“ vzhled na hover
+                  className={`${!isAuthed ? 'pointer-events-none opacity-90' : ''}`}
+                  onClick={() => openModal(challenge.id)}
+                  title={!isAuthed ? 'Přihlas se pro otevření výzvy' : undefined}
+                >
+                  <ChallengeCard
+                    challengeCard={{
+                      id: challenge.id,
+                      title: challenge.name,
+                      shortDescription: challenge.shortDescription,
+                      description: challenge.description,
+                      image: challenge.image ?? '',
+                      duration: Math.max(
+                        Math.floor((new Date(challenge.expiresAt).getTime() - Date.now()) / 60000),
+                        0
+                      ),
+                      isCompleted: challenge.isAnswered,
+                    }}
+                  />
                 </div>
-
-                {/* Challenge List */}
-                <div className="flex flex-col items-center">
-                    <div className="w-full max-w-[1200px] mx-auto">
-                        <div className="flex flex-col gap-4">
-                            {filteredChallenges.map((challenge) => (
-                                <div key={challenge.id} onClick={() => openModal(challenge.id)}>
-                                    <ChallengeCard
-                                        challengeCard={{
-                                            id: challenge.id,
-                                            title: challenge.name,
-                                            shortDescription: challenge.shortDescription,
-                                            description: challenge.description,
-                                            image: challenge.image ?? '',
-                                            duration: Math.max(
-                                                Math.floor((new Date(challenge.expiresAt).getTime() - Date.now()) / 60000),
-                                                0
-                                            ),
-                                            isCompleted: challenge.isAnswered,
-                                        }}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Modal */}
-                {selectedChallenge && challengeId && (
-                    <ChallengeModal
-                        challengeId={challengeId}
-                        onClose={closeModal}
-                        onSubmitSuccess={handleSubmitSuccess}
-                        apiBase={API_BASE}
-                    />
-                )}
+              ))}
             </div>
-        </BackgroundWrapper>
-    );
+          </div>
+        </div>
+
+        {/* Modal jen pro přihlášené */}
+        {isAuthed && selectedChallenge && challengeId && (
+          <ChallengeModal
+            challengeId={challengeId}
+            onClose={closeModal}
+            onSubmitSuccess={handleSubmitSuccess}
+            apiBase={API_BASE}
+          />
+        )}
+      </div>
+    </BackgroundWrapper>
+  );
 };
 
 export default Challenges;

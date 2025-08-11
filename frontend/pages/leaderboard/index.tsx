@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Head from "next/head";
-
 
 type PlayerSkill = { name: string; percentage: number; percentageChange: number | null };
 type LeaderboardEntry = {
@@ -30,23 +28,18 @@ type LeaderboardTableProps = { apiBase?: string };
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   apiBase = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
 }) => {
-  const { data: session } = useSession();
-  const accessToken = (session as any)?.accessToken as string | undefined;
-
   const [rows, setRows] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [serverDateHeader, setServerDateHeader] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      if (!accessToken) return;
       setLoading(true);
       setError(null);
       try {
         const res = await fetch(`${apiBase}/api/leaderboards`, {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+          headers: { 'Content-Type': 'application/json' },
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -70,7 +63,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
     };
 
     load();
-  }, [apiBase, accessToken]);
+  }, [apiBase]);
 
   const mapped = useMemo(
     () =>

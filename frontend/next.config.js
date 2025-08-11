@@ -12,12 +12,18 @@ const nextConfig = {
         hostname: "covers.openlibrary.org",
         port: "",
         pathname: "/b/id/**"
+      },
+      {
+        protocol: "https",
+        hostname: "placecats.com",
+        port: "",
+        pathname: "/**"
       }
     ]
   },
-    typescript: {
-      ignoreBuildErrors: isProd
-    }
-}
+  typescript: {
+    ignoreBuildErrors: isProd
+  }
+};
 
 module.exports = nextConfig;
