@@ -120,6 +120,7 @@ const UserProfile: React.FC = () => {
                 </div>
 
                 {/* Achievements – zatím mock */}
+                {/* 
                 <div className="w-full flex flex-col gap-8">
                     <div>
                         <hr className="h-1 bg-charcoal" />
@@ -136,7 +137,7 @@ const UserProfile: React.FC = () => {
                             }
                         />
                     </div>
-                </div>
+                </div>*/}
             </div>
         </BackgroundWrapper>
     );
