@@ -142,9 +142,9 @@ const Challenges = () => {
         {/* Info pro nepřihlášené */}
         {!isAuthed && (
           <p className="text-center text-sm text-gray-600 mb-4">
-            Pro zobrazení detailu výzev a možnost odpovědi se prosím{' '}
+            For more details please login{' '}
             <Link href="/signup" className="text-vibrantCoral underline hover:no-underline">
-              registruj / přihlas
+              Signup / Login
             </Link>.
           </p>
         )}
