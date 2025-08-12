@@ -1,7 +1,7 @@
 // components/modal/ChallangeModal.tsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 
 type Choice = {
@@ -37,6 +37,14 @@ type Question = {
     selectedChoiceIds?: string[] | null;
     orderedChoiceIds?: string[] | null;
   } | null;
+};
+
+type AnswerValue = {
+  textAnswer?: string | null;
+  numericAnswer?: number | null;
+  selectedChoiceId?: string | null;
+  selectedChoiceIds?: string[] | null;
+  orderedChoiceIds?: string[] | null;
 };
 
 type ChallengeDetail = {
@@ -78,6 +86,9 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [submittingAll, setSubmittingAll] = useState(false);
+  const collectorsRef = useRef<Record<string, () => AnswerValue>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -106,47 +117,82 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
     load();
   }, [challengeId, apiBase, token]);
 
-// Renders one question with its own local state and submit
+  useEffect(() => {
+    if (!challenge) return;
+    const initial: Record<string, AnswerValue> = {};
+    challenge.questions.forEach((q) => {
+      initial[q.id] = {
+        textAnswer: q.answer?.textAnswer ?? null,
+        numericAnswer: q.answer?.numericAnswer ?? null,
+        selectedChoiceId: q.answer?.selectedChoiceId ?? null,
+        selectedChoiceIds: q.answer?.selectedChoiceIds ?? [],
+        orderedChoiceIds:
+          q.type === "sort"
+            ? q.answer?.orderedChoiceIds ?? q.choiceConstraint?.choices?.map((c) => c.id) ?? []
+            : null,
+      };
+    });
+    setAnswers(initial);
+  }, [challenge]);
+
+// Renders one question with controlled answer value
 type QuestionBlockProps = {
   question: Question;
-  token?: string;
-  onSubmitSuccess: () => void;
+  value: AnswerValue;
+  onChange: (value: AnswerValue) => void;
+  registerCollector: (questionId: string, getter: () => AnswerValue) => void;
 };
 
 const QuestionBlock: React.FC<QuestionBlockProps> = ({
   question,
-  token,
-  onSubmitSuccess,
+  value,
+  onChange,
+  registerCollector,
 }) => {
   const [textAnswer, setTextAnswer] = useState("");
   const [numericAnswer, setNumericAnswer] = useState<string>("");
   const [singleChoiceId, setSingleChoiceId] = useState<string | null>(null);
   const [multiChoiceIds, setMultiChoiceIds] = useState<string[]>([]);
-
   const [orderedChoiceIds, setOrderedChoiceIds] = useState<string[]>([]);
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const touchedRef = useRef(false);
 
-  // initialize from existing answer / defaults
+  // Register a live getter so the parent can read the latest local value at submit time
   useEffect(() => {
-    setTextAnswer(question.answer?.textAnswer ?? "");
-    setNumericAnswer(
-      question.answer?.numericAnswer != null
-        ? String(question.answer.numericAnswer)
-        : ""
-    );
-    setSingleChoiceId(question.answer?.selectedChoiceId ?? null);
-    setMultiChoiceIds(question.answer?.selectedChoiceIds ?? []);
+    registerCollector(question.id, () => ({
+      textAnswer,
+      numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+      selectedChoiceId: singleChoiceId,
+      selectedChoiceIds: multiChoiceIds,
+      orderedChoiceIds,
+    }));
+  }, [registerCollector, question.id, textAnswer, numericAnswer, singleChoiceId, multiChoiceIds, orderedChoiceIds]);
 
-    if (question.type === "sort" && question.choiceConstraint?.choices) {
-      const initial = question.answer?.orderedChoiceIds?.length
-        ? question.answer.orderedChoiceIds!
-        : question.choiceConstraint.choices.map((c) => c.id);
-      setOrderedChoiceIds(initial);
-    } else {
-      setOrderedChoiceIds([]);
+  // Hydrate local inputs from parent `value` until the user interacts.
+  useEffect(() => {
+    if (!touchedRef.current) {
+      setTextAnswer(value?.textAnswer ?? "");
+      setNumericAnswer(
+        value?.numericAnswer != null ? String(value.numericAnswer) : ""
+      );
+      setSingleChoiceId(value?.selectedChoiceId ?? null);
+      setMultiChoiceIds(value?.selectedChoiceIds ?? []);
+
+      if (question.type === "sort" && question.choiceConstraint?.choices) {
+        const initial = value?.orderedChoiceIds?.length
+          ? value.orderedChoiceIds!
+          : question.choiceConstraint.choices.map((c) => c.id);
+        setOrderedChoiceIds(initial);
+      } else {
+        setOrderedChoiceIds([]);
+      }
     }
-  }, [question]);
+  }, [question.id, value]);
+
+  // Reset touch state when switching questions
+  useEffect(() => {
+    touchedRef.current = false;
+  }, [question.id]);
 
   const choiceById: Record<string, Choice> = useMemo(() => {
     const map: Record<string, Choice> = {};
@@ -154,50 +200,25 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
     return map;
   }, [question]);
 
-  const isAnySelected = useMemo(() => {
-    switch (question.type) {
-      case "text":
-        return textAnswer.trim().length > 0;
-      case "numeric":
-        return numericAnswer.trim().length > 0;
-      case "single_select":
-        return !!singleChoiceId;
-      case "multi_select":
-        return multiChoiceIds.length > 0;
-      case "sort":
-        return (
-          Array.isArray(orderedChoiceIds) &&
-          orderedChoiceIds.length ===
-            (question.choiceConstraint?.choices?.length || 0)
-        );
-      default:
-        return false;
-    }
-  }, [
-    question,
-    textAnswer,
-    numericAnswer,
-    singleChoiceId,
-    multiChoiceIds,
-    orderedChoiceIds,
-  ]);
-
-  const toggleMulti = (id: string) => {
-    setMultiChoiceIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
-
   // sort helpers
   const moveItem = (id: string, delta: number) => {
     setOrderedChoiceIds((prev) => {
+      touchedRef.current = true;
       const idx = prev.indexOf(id);
       if (idx === -1) return prev;
       const newIdx = Math.max(0, Math.min(prev.length - 1, idx + delta));
       const copy = [...prev];
       const [item] = copy.splice(idx, 1);
       copy.splice(newIdx, 0, item);
-      return copy;
+      const next = copy;
+      onChange({
+        textAnswer,
+        numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+        selectedChoiceId: singleChoiceId,
+        selectedChoiceIds: multiChoiceIds,
+        orderedChoiceIds: next,
+      });
+      return next;
     });
   };
   const onDragStart = (id: string) => setDraggingId(id);
@@ -205,61 +226,24 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
   const onDrop = (targetId: string) => {
     if (!draggingId || draggingId === targetId) return;
     setOrderedChoiceIds((prev) => {
+      touchedRef.current = true;
       const from = prev.indexOf(draggingId);
       const to = prev.indexOf(targetId);
       if (from === -1 || to === -1) return prev;
       const copy = [...prev];
       const [moved] = copy.splice(from, 1);
       copy.splice(to, 0, moved);
-      return copy;
+      const next = copy;
+      onChange({
+        textAnswer,
+        numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+        selectedChoiceId: singleChoiceId,
+        selectedChoiceIds: multiChoiceIds,
+        orderedChoiceIds: next,
+      });
+      return next;
     });
     setDraggingId(null);
-  };
-
-  const handleSubmit = async () => {
-    if (!token) {
-      alert("Musíš být přihlášen.");
-      return;
-    }
-
-    const payload = {
-      questionId: question.id,
-      textAnswer: question.type === "text" ? textAnswer : null,
-      numericAnswer: question.type === "numeric" ? Number(numericAnswer) : null,
-      selectedChoiceId:
-        question.type === "single_select" ? singleChoiceId : null,
-      selectedChoiceIds:
-        question.type === "multi_select" ? multiChoiceIds : null,
-      orderedChoiceIds: question.type === "sort" ? orderedChoiceIds : null,
-    };
-
-    try {
-      setSubmitting(true);
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/questions/answer`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error("❌ Chyba při odeslání:", err);
-        alert("Chyba při odesílání odpovědi.");
-        return;
-      }
-      onSubmitSuccess();
-    } catch (e) {
-      console.error("❌ Výjimka při odesílání:", e);
-      alert("Došlo k chybě během komunikace se serverem.");
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   return (
@@ -269,7 +253,25 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
       {question.type === "text" && (
         <textarea
           value={textAnswer}
-          onChange={(e) => setTextAnswer(e.target.value)}
+          onChange={(e) => {
+            touchedRef.current = true;
+            setTextAnswer(e.target.value);
+          }}
+          onBlur={() => {
+            onChange({
+              textAnswer,
+              numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+              selectedChoiceId: singleChoiceId,
+              selectedChoiceIds: multiChoiceIds,
+              orderedChoiceIds,
+            });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              (e.currentTarget as HTMLTextAreaElement).blur();
+            }
+          }}
           className="w-full border p-2 rounded"
           placeholder="Zadej odpověď…"
         />
@@ -279,7 +281,25 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
         <input
           type="number"
           value={numericAnswer}
-          onChange={(e) => setNumericAnswer(e.target.value)}
+          onChange={(e) => {
+            touchedRef.current = true;
+            setNumericAnswer(e.target.value);
+          }}
+          onBlur={() => {
+            onChange({
+              textAnswer,
+              numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+              selectedChoiceId: singleChoiceId,
+              selectedChoiceIds: multiChoiceIds,
+              orderedChoiceIds,
+            });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              (e.currentTarget as HTMLInputElement).blur();
+            }
+          }}
           className="w-full border p-2 rounded"
           placeholder="Zadej číslo…"
         />
@@ -297,7 +317,17 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
                   type="radio"
                   name={`singleSelect-${question.id}`}
                   checked={singleChoiceId === c.id}
-                  onChange={() => setSingleChoiceId(c.id)}
+                  onChange={() => {
+                    touchedRef.current = true;
+                    setSingleChoiceId(c.id);
+                    onChange({
+                      textAnswer,
+                      numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+                      selectedChoiceId: c.id,
+                      selectedChoiceIds: multiChoiceIds,
+                      orderedChoiceIds,
+                    });
+                  }}
                 />
                 <div>
                   <p className="font-semibold">{c.text}</p>
@@ -321,7 +351,20 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
                 <input
                   type="checkbox"
                   checked={multiChoiceIds.includes(c.id)}
-                  onChange={() => toggleMulti(c.id)}
+                  onChange={() => {
+                    touchedRef.current = true;
+                    const next = multiChoiceIds.includes(c.id)
+                      ? multiChoiceIds.filter((x) => x !== c.id)
+                      : [...multiChoiceIds, c.id];
+                    setMultiChoiceIds(next);
+                    onChange({
+                      textAnswer,
+                      numericAnswer: numericAnswer.trim() === "" ? null : Number(numericAnswer),
+                      selectedChoiceId: singleChoiceId,
+                      selectedChoiceIds: next,
+                      orderedChoiceIds,
+                    });
+                  }}
                 />
                 <div>
                   <p className="font-semibold">{c.text}</p>
@@ -398,21 +441,6 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
             </div>
           </div>
         )}
-
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={isAnySelected ? handleSubmit : undefined}
-          disabled={!isAnySelected || submitting}
-          className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${
-            isAnySelected && !submitting
-              ? "bg-vibrantCoral cursor-pointer"
-              : "bg-coolGray cursor-not-allowed"
-          }`}
-        >
-          {submitting ? "Odesílám…" : "Submit answer"}
-        </button>
-      </div>
     </div>
   );
 };
@@ -474,12 +502,67 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
             <div key={q.id} className="mb-6">
               <QuestionBlock
                 question={q}
-                token={token}
-                onSubmitSuccess={onSubmitSuccess}
+                value={answers[q.id] || {}}
+                onChange={(val) => setAnswers((prev) => ({ ...prev, [q.id]: val }))}
+                registerCollector={(questionId, getter) => { collectorsRef.current[questionId] = getter; }}
               />
               <hr className="border-0 h-[2px] bg-charcoal/10 my-4" />
             </div>
           ))}
+          <div className="mt-8">
+            <button
+              type="button"
+              onClick={async () => {
+                if (!token) {
+                  alert("Musíš být přihlášen.");
+                  return;
+                }
+                const payload = {
+                  challengeId: challenge.id,
+                  answers: challenge.questions.map((q) => {
+                    const v = (collectorsRef.current[q.id]?.() || answers[q.id] || {}) as AnswerValue;
+                    const shaped = {
+                      textAnswer: q.type === "text" ? (v.textAnswer ?? null) : null,
+                      numericAnswer: q.type === "numeric" ? (v.numericAnswer ?? null) : null,
+                      selectedChoiceId: q.type === "single_select" ? (v.selectedChoiceId ?? null) : null,
+                      selectedChoiceIds: q.type === "multi_select" ? (v.selectedChoiceIds ?? null) : null,
+                      orderedChoiceIds: q.type === "sort" ? (v.orderedChoiceIds ?? null) : null,
+                    };
+                    return { questionId: q.id, answer: shaped };
+                  }),
+                };
+                try {
+                  setSubmittingAll(true);
+                  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/challenges/answer`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(payload),
+                  });
+                  if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    console.error("❌ Chyba při odeslání odpovědí:", err);
+                    alert("Chyba při odesílání odpovědí.");
+                    return;
+                  }
+                  onSubmitSuccess();
+                } catch (e) {
+                  console.error("❌ Výjimka při odeslání odpovědí:", e);
+                  alert("Došlo k chybě během komunikace se serverem.");
+                } finally {
+                  setSubmittingAll(false);
+                }
+              }}
+              disabled={submittingAll}
+              className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${
+                !submittingAll ? "bg-vibrantCoral cursor-pointer" : "bg-coolGray cursor-not-allowed"
+              }`}
+            >
+              {submittingAll ? "Odesílám…" : "Submit answers"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
