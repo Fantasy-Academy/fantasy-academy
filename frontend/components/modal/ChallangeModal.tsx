@@ -79,18 +79,6 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // answers
-  const [textAnswer, setTextAnswer] = useState('');
-  const [numericAnswer, setNumericAnswer] = useState<string>(''); // ← správně
-  const [singleChoiceId, setSingleChoiceId] = useState<string | null>(null);
-  const [multiChoiceIds, setMultiChoiceIds] = useState<string[]>([]);
-
-  // sort state
-  const [orderedChoiceIds, setOrderedChoiceIds] = useState<string[]>([]);
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-
-  const [submitting, setSubmitting] = useState(false);
-
   useEffect(() => {
     const load = async () => {
       if (!challengeId) return;
@@ -118,21 +106,57 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
     load();
   }, [challengeId, apiBase, token]);
 
-  const question = useMemo(() => challenge?.questions?.[0], [challenge]);
+// Renders one question with its own local state and submit
+type QuestionBlockProps = {
+  question: Question;
+  token?: string;
+  hintText?: string | null;
+  onSubmitSuccess: () => void;
+};
 
-  // init sort order when question arrives
+const QuestionBlock: React.FC<QuestionBlockProps> = ({
+  question,
+  token,
+  hintText,
+  onSubmitSuccess,
+}) => {
+  const [textAnswer, setTextAnswer] = useState("");
+  const [numericAnswer, setNumericAnswer] = useState<string>("");
+  const [singleChoiceId, setSingleChoiceId] = useState<string | null>(null);
+  const [multiChoiceIds, setMultiChoiceIds] = useState<string[]>([]);
+
+  const [orderedChoiceIds, setOrderedChoiceIds] = useState<string[]>([]);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // initialize from existing answer / defaults
   useEffect(() => {
-    if (question?.type === "sort" && question.choiceConstraint?.choices) {
-      const initial =
-        question.answer?.orderedChoiceIds?.length
-          ? question.answer.orderedChoiceIds
-          : question.choiceConstraint.choices.map((c) => c.id);
+    setTextAnswer(question.answer?.textAnswer ?? "");
+    setNumericAnswer(
+      question.answer?.numericAnswer != null
+        ? String(question.answer.numericAnswer)
+        : ""
+    );
+    setSingleChoiceId(question.answer?.selectedChoiceId ?? null);
+    setMultiChoiceIds(question.answer?.selectedChoiceIds ?? []);
+
+    if (question.type === "sort" && question.choiceConstraint?.choices) {
+      const initial = question.answer?.orderedChoiceIds?.length
+        ? question.answer.orderedChoiceIds!
+        : question.choiceConstraint.choices.map((c) => c.id);
       setOrderedChoiceIds(initial);
+    } else {
+      setOrderedChoiceIds([]);
     }
   }, [question]);
 
+  const choiceById: Record<string, Choice> = useMemo(() => {
+    const map: Record<string, Choice> = {};
+    question.choiceConstraint?.choices?.forEach((c) => (map[c.id] = c));
+    return map;
+  }, [question]);
+
   const isAnySelected = useMemo(() => {
-    if (!question) return false;
     switch (question.type) {
       case "text":
         return textAnswer.trim().length > 0;
@@ -145,12 +169,20 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
       case "sort":
         return (
           Array.isArray(orderedChoiceIds) &&
-          orderedChoiceIds.length === (question.choiceConstraint?.choices?.length || 0)
+          orderedChoiceIds.length ===
+            (question.choiceConstraint?.choices?.length || 0)
         );
       default:
         return false;
     }
-  }, [question, textAnswer, numericAnswer, singleChoiceId, multiChoiceIds, orderedChoiceIds]);
+  }, [
+    question,
+    textAnswer,
+    numericAnswer,
+    singleChoiceId,
+    multiChoiceIds,
+    orderedChoiceIds,
+  ]);
 
   const toggleMulti = (id: string) => {
     setMultiChoiceIds((prev) =>
@@ -186,39 +218,36 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
     setDraggingId(null);
   };
 
-  // 🔁 MOVE THIS HOOK ABOVE EARLY RETURNS (fixes the error)
-  const choiceById: Record<string, Choice> = useMemo(() => {
-    const map: Record<string, Choice> = {};
-    question?.choiceConstraint?.choices?.forEach((c) => (map[c.id] = c));
-    return map;
-  }, [question]);
-
   const handleSubmit = async () => {
     if (!token) {
       alert("Musíš být přihlášen.");
       return;
     }
-    if (!question) return;
 
     const payload = {
       questionId: question.id,
       textAnswer: question.type === "text" ? textAnswer : null,
       numericAnswer: question.type === "numeric" ? Number(numericAnswer) : null,
-      selectedChoiceId: question.type === "single_select" ? singleChoiceId : null,
-      selectedChoiceIds: question.type === "multi_select" ? multiChoiceIds : null,
+      selectedChoiceId:
+        question.type === "single_select" ? singleChoiceId : null,
+      selectedChoiceIds:
+        question.type === "multi_select" ? multiChoiceIds : null,
       orderedChoiceIds: question.type === "sort" ? orderedChoiceIds : null,
     };
 
     try {
       setSubmitting(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/questions/answer`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/questions/answer`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -234,6 +263,168 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
       setSubmitting(false);
     }
   };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h4 className="text-xl font-semibold text-charcoal">{question.text}</h4>
+
+      {hintText && (
+        <div
+          className="italic text-sm text-gray-600 bg-gray-50 p-2 border-l-4 border-vibrantCoral"
+          dangerouslySetInnerHTML={{ __html: `💡 ${hintText}` }}
+        />
+      )}
+
+      {question.type === "text" && (
+        <textarea
+          value={textAnswer}
+          onChange={(e) => setTextAnswer(e.target.value)}
+          className="w-full border p-2 rounded"
+          placeholder="Zadej odpověď…"
+        />
+      )}
+
+      {question.type === "numeric" && (
+        <input
+          type="number"
+          value={numericAnswer}
+          onChange={(e) => setNumericAnswer(e.target.value)}
+          className="w-full border p-2 rounded"
+          placeholder="Zadej číslo…"
+        />
+      )}
+
+      {question.type === "single_select" &&
+        question.choiceConstraint?.choices && (
+          <div className="flex flex-col gap-2">
+            {question.choiceConstraint.choices.map((c) => (
+              <label
+                key={c.id}
+                className="flex items-start gap-2 cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  name={`singleSelect-${question.id}`}
+                  checked={singleChoiceId === c.id}
+                  onChange={() => setSingleChoiceId(c.id)}
+                />
+                <div>
+                  <p className="font-semibold">{c.text}</p>
+                  {c.description && (
+                    <p className="text-sm text-gray-600">{c.description}</p>
+                  )}
+                </div>
+              </label>
+            ))}
+          </div>
+        )}
+
+      {question.type === "multi_select" &&
+        question.choiceConstraint?.choices && (
+          <div className="flex flex-col gap-2">
+            {question.choiceConstraint.choices.map((c) => (
+              <label
+                key={c.id}
+                className="flex items-start gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={multiChoiceIds.includes(c.id)}
+                  onChange={() => toggleMulti(c.id)}
+                />
+                <div>
+                  <p className="font-semibold">{c.text}</p>
+                  {c.description && (
+                    <p className="text-sm text-gray-600">{c.description}</p>
+                  )}
+                </div>
+              </label>
+            ))}
+          </div>
+        )}
+
+      {question.type === "sort" &&
+        question.choiceConstraint?.choices &&
+        orderedChoiceIds.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-coolGray">
+              Sort correctly options down below ↑/↓.
+            </p>
+            <div className="flex flex-col gap-2">
+              {orderedChoiceIds.map((id, idx) => {
+                const c = choiceById[id];
+                if (!c) return null;
+                const isDragging = draggingId === id;
+                return (
+                  <div
+                    key={id}
+                    draggable
+                    onDragStart={() => onDragStart(id)}
+                    onDragOver={onDragOver}
+                    onDrop={() => onDrop(id)}
+                    className={`flex items-center justify-between gap-3 rounded border p-3 bg-white ${
+                      isDragging ? "opacity-60" : "opacity-100"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 text-center font-bold text-charcoal">
+                        {idx + 1}
+                      </span>
+                      <span
+                        className="cursor-grab select-none"
+                        title="Drag to reorder"
+                      >
+                        ⋮⋮
+                      </span>
+                      <div>
+                        <p className="font-semibold">{c.text}</p>
+                        {c.description && (
+                          <p className="text-sm text-gray-600">{c.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => moveItem(id, -1)}
+                        className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                        aria-label="Move up"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveItem(id, +1)}
+                        className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                        aria-label="Move down"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      <div className="mt-6">
+        <button
+          type="button"
+          onClick={isAnySelected ? handleSubmit : undefined}
+          disabled={!isAnySelected || submitting}
+          className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${
+            isAnySelected && !submitting
+              ? "bg-vibrantCoral cursor-pointer"
+              : "bg-coolGray cursor-not-allowed"
+          }`}
+        >
+          {submitting ? "Odesílám…" : "Submit answer"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
   // ✅ Early returns are AFTER all hooks
   if (loading) {
@@ -282,155 +473,17 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
 
           <hr className="border-0 h-[2px] bg-charcoal/10 my-4" />
 
-          {question && (
-            <div className="flex flex-col gap-4">
-              <h4 className="text-xl font-semibold text-charcoal">{question.text}</h4>
-
-              {challenge.hintText && (
-                <div
-                  className="italic text-sm text-gray-600 bg-gray-50 p-2 border-l-4 border-vibrantCoral"
-                  dangerouslySetInnerHTML={{ __html: `💡 ${challenge.hintText}` }}
-                />
-              )}
-
-              {question.type === "text" && (
-                <textarea
-                  value={textAnswer}
-                  onChange={(e) => setTextAnswer(e.target.value)}
-                  className="w-full border p-2 rounded"
-                  placeholder="Zadej odpověď…"
-                />
-              )}
-
-              {question.type === "numeric" && (
-                <input
-                  type="number"
-                  value={numericAnswer}
-                  onChange={(e) => setNumericAnswer(e.target.value)}
-                  className="w-full border p-2 rounded"
-                  placeholder="Zadej číslo…"
-                />
-              )}
-
-              {question.type === "single_select" &&
-                question.choiceConstraint?.choices && (
-                  <div className="flex flex-col gap-2">
-                    {question.choiceConstraint.choices.map((c) => (
-                      <label key={c.id} className="flex items-start gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="singleSelect"
-                          checked={singleChoiceId === c.id}
-                          onChange={() => setSingleChoiceId(c.id)}
-                        />
-                        <div>
-                          <p className="font-semibold">{c.text}</p>
-                          {c.description && (
-                            <p className="text-sm text-gray-600">{c.description}</p>
-                          )}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-
-              {question.type === "multi_select" &&
-                question.choiceConstraint?.choices && (
-                  <div className="flex flex-col gap-2">
-                    {question.choiceConstraint.choices.map((c) => (
-                      <label key={c.id} className="flex items-start gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={multiChoiceIds.includes(c.id)}
-                          onChange={() => toggleMulti(c.id)}
-                        />
-                        <div>
-                          <p className="font-semibold">{c.text}</p>
-                          {c.description && (
-                            <p className="text-sm text-gray-600">{c.description}</p>
-                          )}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-
-              {question.type === "sort" &&
-                question.choiceConstraint?.choices &&
-                orderedChoiceIds.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm text-coolGray">
-                      Sort correctly options down below ↑/↓.
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {orderedChoiceIds.map((id, idx) => {
-                        const c = choiceById[id];
-                        if (!c) return null;
-                        const isDragging = draggingId === id;
-                        return (
-                          <div
-                            key={id}
-                            draggable
-                            onDragStart={() => onDragStart(id)}
-                            onDragOver={onDragOver}
-                            onDrop={() => onDrop(id)}
-                            className={`flex items-center justify-between gap-3 rounded border p-3 bg-white ${isDragging ? "opacity-60" : "opacity-100"
-                              }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="w-6 text-center font-bold text-charcoal">
-                                {idx + 1}
-                              </span>
-                              <span className="cursor-grab select-none" title="Drag to reorder">
-                                ⋮⋮
-                              </span>
-                              <div>
-                                <p className="font-semibold">{c.text}</p>
-                                {c.description && (
-                                  <p className="text-sm text-gray-600">{c.description}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => moveItem(id, -1)}
-                                className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
-                                aria-label="Move up"
-                              >
-                                ↑
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => moveItem(id, +1)}
-                                className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200"
-                                aria-label="Move down"
-                              >
-                                ↓
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+          {challenge.questions.map((q) => (
+            <div key={q.id} className="mb-6">
+              <QuestionBlock
+                question={q}
+                token={token}
+                hintText={challenge.hintText}
+                onSubmitSuccess={onSubmitSuccess}
+              />
+              <hr className="border-0 h-[2px] bg-charcoal/10 my-4" />
             </div>
-          )}
-
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={isAnySelected ? handleSubmit : undefined}
-              disabled={!isAnySelected || submitting}
-              className={`w-full py-4 text-lg font-bold text-white text-center transition-all duration-200 ${isAnySelected && !submitting
-                ? "bg-vibrantCoral cursor-pointer"
-                : "bg-coolGray cursor-not-allowed"
-                }`}
-            >
-              {submitting ? "Odesílám…" : "Submit answer"}
-            </button>
-          </div>
+          ))}
         </div>
       </div>
     </div>
