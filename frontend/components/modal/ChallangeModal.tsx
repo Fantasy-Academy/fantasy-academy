@@ -110,14 +110,12 @@ const ChallangeModal: React.FC<ChallengeModalProps> = ({
 type QuestionBlockProps = {
   question: Question;
   token?: string;
-  hintText?: string | null;
   onSubmitSuccess: () => void;
 };
 
 const QuestionBlock: React.FC<QuestionBlockProps> = ({
   question,
   token,
-  hintText,
   onSubmitSuccess,
 }) => {
   const [textAnswer, setTextAnswer] = useState("");
@@ -267,13 +265,6 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <h4 className="text-xl font-semibold text-charcoal">{question.text}</h4>
-
-      {hintText && (
-        <div
-          className="italic text-sm text-gray-600 bg-gray-50 p-2 border-l-4 border-vibrantCoral"
-          dangerouslySetInnerHTML={{ __html: `💡 ${hintText}` }}
-        />
-      )}
 
       {question.type === "text" && (
         <textarea
@@ -472,13 +463,18 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
           </div>
 
           <hr className="border-0 h-[2px] bg-charcoal/10 my-4" />
+          {challenge.hintText && (
+            <div
+              className="mb-6 italic text-sm text-gray-600 bg-gray-50 p-3 border-l-4 border-vibrantCoral"
+              dangerouslySetInnerHTML={{ __html: `💡 ${challenge.hintText}` }}
+            />
+          )}
 
           {challenge.questions.map((q) => (
             <div key={q.id} className="mb-6">
               <QuestionBlock
                 question={q}
                 token={token}
-                hintText={challenge.hintText}
                 onSubmitSuccess={onSubmitSuccess}
               />
               <hr className="border-0 h-[2px] bg-charcoal/10 my-4" />

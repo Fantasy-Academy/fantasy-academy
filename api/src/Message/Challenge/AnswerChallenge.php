@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Message\Challenge;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Put;
 use FantasyAcademy\API\Message\UserAware;
 use FantasyAcademy\API\Message\WithUserId;
+use FantasyAcademy\API\Value\QuestionAnswer;
 use Symfony\Component\Uid\Uuid;
 
 #[ApiResource(
-    shortName: 'Answer question',
+    shortName: 'Answer challenge',
 )]
 #[Put(
-    uriTemplate: '/questions/answer',
+    uriTemplate: '/challenges/answer',
     status: 204,
     security: "is_granted('IS_AUTHENTICATED_FULLY')",
     input: self::class,
@@ -22,21 +24,18 @@ use Symfony\Component\Uid\Uuid;
     messenger: 'input',
     read: false,
 )]
-readonly final class AnswerQuestion implements UserAware
+readonly final class AnswerChallenge implements UserAware
 {
     use WithUserId;
 
     /**
-     * @param null|array<Uuid> $selectedChoiceIds
-     * @param null|array<Uuid> $orderedChoiceIds
+     * @param array<QuestionAnswer> $answers
      */
     public function __construct(
-        public Uuid $questionId,
-        public null|string $textAnswer = null,
-        public null|float $numericAnswer = null,
-        public null|Uuid $selectedChoiceId = null,
-        public null|array $selectedChoiceIds = null,
-        public null|array $orderedChoiceIds = null,
+        public Uuid $challengeId,
+        public array $answers,
+
+        #[ApiProperty(readable: false, writable: false)]
         private null|Uuid $userId = null,
     ) {}
 }

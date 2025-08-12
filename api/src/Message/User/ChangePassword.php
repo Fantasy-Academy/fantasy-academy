@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Message\User;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Put;
 use FantasyAcademy\API\Message\UserAware;
@@ -28,6 +29,8 @@ readonly final class ChangePassword implements UserAware
 
     public function __construct(
         public string $newPassword,
+
+        #[ApiProperty(readable: false, writable: false)]
         private null|Uuid $userId = null,
     ) {}
 }
