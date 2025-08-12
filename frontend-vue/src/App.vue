@@ -1,24 +1,32 @@
 <template>
-  <div>
-    <h1>Welcome, {{ username }}</h1>
-    <div v-if="isAdmin">
-      <!-- Render admin-specific features -->
-    </div>
-    <div v-else>
-      <!-- Render user-specific features -->
-    </div>
+  <div id="app">
+    <!-- Hlavní navigace -->
+    <nav>
+      <router-link to="/">Home</router-link>
+      <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
+      <router-link v-if="isAuthenticated" to="/dashboard">Dashboard</router-link>
+      <button v-if="isAuthenticated" @click="logout">Logout</button>
+    </nav>
+
+    <!-- Hlavní obsah aplikace -->
+    <main>
+      <router-view />
+    </main>
   </div>
 </template>
 
 <script>
+import { useAuth } from './composables/useAuth';
+
 export default {
-  computed: {
-    username() {
-      // Get username from authentication state
-    },
-    isAdmin() {
-      // Check if user has admin role
-    }
-  }
+  name: 'App',
+  setup() {
+    const { isAuthenticated, logout } = useAuth();
+
+    return {
+      isAuthenticated,
+      logout,
+    };
+  },
 };
 </script>

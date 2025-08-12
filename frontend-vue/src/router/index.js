@@ -1,42 +1,17 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
+import HomePage from '../views/HomePage.vue';
+import LoginPage from '../views/LoginPage.vue';
+import DashboardPage from '../views/DashboardPage.vue';
 
-Vue.use(VueRouter);
+const routes = [
+  { path: '/', name: 'Home', component: HomePage },
+  { path: '/login', name: 'Login', component: LoginPage },
+  { path: '/dashboard', name: 'Dashboard', component: DashboardPage },
+];
 
-const router = new VueRouter({
-    routes: [
-        {
-            path: '/dashboard',
-            component: Dashboard,
-            meta: {
-                requiresAuth: true // Add meta field to indicate protected route
-            }
-        },
-        {
-            path: '/profile',
-            component: Dashboard,
-            meta: {
-                requiresAuth: true // Add meta field to indicate protected route
-            }
-        }
-        // Other routes...
-    ]
-});
-
-router.beforeEach((to, from, next) => {
-    if (to.meta.requiresAuth) {
-        const token = localStorage.getItem('token');
-        if (token) {
-            // User is authenticated, proceed to the route
-            next();
-        } else {
-            // User is not authenticated, redirect to login
-            next('/login');
-        }
-    } else {
-        // Non-protected route, allow access
-        next();
-    }
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
 });
 
 export default router;
