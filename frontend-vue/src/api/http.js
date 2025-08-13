@@ -17,7 +17,6 @@ export async function apiFetch(path, { method = 'GET', headers = {}, body, auth 
     method,
     headers: finalHeaders,
     body: body ? JSON.stringify(body) : undefined,
-    credentials: 'include', // pokud používáš cookies, jinak může zůstat
   });
 
   // 401 -> odhlásíme uživatele
