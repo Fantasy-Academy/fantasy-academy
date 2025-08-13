@@ -1,35 +1,30 @@
 import { API_BASE_URL } from '../constants/config';
 import { getToken, clearToken } from '../services/tokenService';
 
-export async function apiFetch(path, { method = 'GET', headers = {}, body, auth = true } = {}) {
+export async function apiFetch(path, { method='GET', headers={}, body, auth=true } = {}) {
   const token = getToken();
+  const finalHeaders = { 'Content-Type': 'application/json', ...headers };
+  if (auth && token) finalHeaders.Authorization = `Bearer ${token}`;
 
-  const finalHeaders = {
-    'Content-Type': 'application/json',
-    ...headers,
-  };
+  const url = `${API_BASE_URL}${path}`;
+  const res = await fetch(url, { method, headers: finalHeaders, body: body ? JSON.stringify(body) : undefined });
 
-  if (auth && token) {
-    finalHeaders.Authorization = `Bearer ${token}`;
-  }
+  if (res.status === 401) clearToken();
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method,
-    headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  // 401 -> odhlásíme uživatele
-  if (res.status === 401) {
-    clearToken();
-  }
-
-  const isJson = res.headers.get('content-type')?.includes('application/json');
-  const data = isJson ? await res.json() : await res.text();
+  const ct = res.headers.get('content-type') || '';
+  const isJson = ct.includes('application/json') || ct.includes('application/ld+json');
+  const hasBody = res.status !== 204 && res.status !== 205;
+  const data = hasBody ? (isJson ? await res.json() : await res.text()) : null;
 
   if (!res.ok) {
-    const message = (isJson && data?.message) || res.statusText || 'Request failed';
-    throw new Error(message);
+    const message =
+      (isJson && (data?.detail || data?.message || data?.title)) ||
+      (typeof data === 'string' && data) ||
+      res.statusText || 'Request failed';
+    const err = new Error(message);
+    err.status = res.status;
+    err.data = data;
+    throw err;
   }
 
   return data;

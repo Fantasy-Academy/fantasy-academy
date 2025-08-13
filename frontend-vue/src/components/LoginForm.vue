@@ -12,12 +12,14 @@
 <script>
 import { ref } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { useRouter } from 'vue-router';
 import { validateLoginForm } from '../validators/authValidators';
 
 export default {
   name: 'LoginForm',
   setup() {
     const { login, loading, error } = useAuth();
+    const router = useRouter();
     const email = ref('');
     const password = ref('');
 
@@ -34,9 +36,8 @@ export default {
         console.log('[LoginForm] Calling login...');
         const user = await login(email.value, password.value);
         console.log('[LoginForm] Login successful, user:', user);
+        router.push("/dashboard");
 
-        // redirect example:
-        // router.push({ name: 'Dashboard' })
       } catch (err) {
         console.error('[LoginForm] Login failed:', err);
         error.value = 'Incorrect email or password';

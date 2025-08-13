@@ -1,15 +1,23 @@
 import { apiFetch } from './http';
 
-// POST /api/login -> { accessToken: '...', ... }
+
 export function apiLogin(email, password) {
   return apiFetch('/api/login', {
     method: 'POST',
-    auth: false, // login nevyžaduje token
+    auth: false,
     body: { email, password },
   });
 }
 
-// GET /api/me -> objekt uživatele
+export function apiRegister({ name, email, password }) {
+  return apiFetch('/api/register', {
+    method: 'POST',
+    body: { name, email, password },
+    auth: false,
+  });
+}
+
+//objekt uživatele
 export function apiGetMe() {
   return apiFetch('/api/me', { method: 'GET', auth: true });
 }

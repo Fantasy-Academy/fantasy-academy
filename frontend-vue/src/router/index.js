@@ -1,17 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '../views/HomePage.vue';
-import LoginPage from '../views/LoginPage.vue';
-import DashboardPage from '../views/DashboardPage.vue';
-
-const routes = [
-  { path: '/', name: 'Home', component: HomePage },
-  { path: '/login', name: 'Login', component: LoginPage },
-  { path: '/dashboard', name: 'Dashboard', component: DashboardPage },
-];
+import { useAuth } from '../composables/useAuth';
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: [
+    { path: '/', component: () => import('../views/HomePage.vue') },
+    { path: '/login', component: () => import('../views/LoginPage.vue') },
+    { path: '/signup', component: () => import('../views/SignupPage.vue') },
+    { path: '/dashboard', component: () => import('../views/DashboardPage.vue'), meta: { requiresAuth: true } },
+  ],
+});
+
+router.beforeEach((to) => {
+  const { isAuthenticated } = useAuth();
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    return { path: '/login', query: { redirect: to.fullPath } };
+  }
 });
 
 export default router;
