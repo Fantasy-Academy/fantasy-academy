@@ -22,13 +22,23 @@ export default {
     const password = ref('');
 
     const onSubmit = async () => {
+      console.log('[LoginForm] Submit clicked', { email: email.value, password: password.value });
+
       error.value = validateLoginForm({ email: email.value, password: password.value });
-      if (error.value) return;
+      if (error.value) {
+        console.warn('[LoginForm] Validation failed:', error.value);
+        return;
+      }
 
       try {
-        await login(email.value, password.value);
-        // redirect: router.push({ name: 'Dashboard' })
-      } catch {
+        console.log('[LoginForm] Calling login...');
+        const user = await login(email.value, password.value);
+        console.log('[LoginForm] Login successful, user:', user);
+
+        // redirect example:
+        // router.push({ name: 'Dashboard' })
+      } catch (err) {
+        console.error('[LoginForm] Login failed:', err);
         error.value = 'Incorrect email or password';
       }
     };
