@@ -38,9 +38,6 @@ importers:
       '@tanstack/react-query-next-experimental':
         specifier: ^5.59.20
         version: 5.59.20(@tanstack/react-query@5.59.20(react@18.3.1))(next@15.0.2(@babel/core@7.26.0)(@playwright/test@1.48.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.4.20(postcss@8.4.47)
       formik:
         specifier: ^2.4.6
         version: 2.4.6(react@18.3.1)
@@ -117,6 +114,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.1
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.4.20(postcss@8.4.47)
       eslint:
         specifier: ^9.14.0
         version: 9.14.0(jiti@1.21.6)
