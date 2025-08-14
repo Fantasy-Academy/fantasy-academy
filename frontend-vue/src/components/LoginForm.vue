@@ -1,11 +1,38 @@
 <template>
-  <form @submit.prevent="onSubmit">
-    <input type="email" v-model="email" placeholder="Email" />
-    <input type="password" v-model="password" placeholder="Password" />
+  <form @submit.prevent="onSubmit" class="max-w-sm mx-auto space-y-4 p-6">
+    <!-- Email -->
+    <div>
+      <label class="block text-sm font-medium mb-1">E-mail</label>
+      <input
+        type="email"
+        v-model="email"
+        placeholder="name@example.com"
+        class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
 
-    <button type="submit" :disabled="loading">Login</button>
+    <!-- Password -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Heslo</label>
+      <input
+        type="password"
+        v-model="password"
+        placeholder="••••••••"
+        class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
 
-    <p v-if="error" role="alert" style="color:red">{{ error }}</p>
+    <!-- Error -->
+    <p v-if="error" role="alert" class="text-sm text-red-600">{{ error }}</p>
+
+    <!-- Submit -->
+    <button
+      type="submit"
+      :disabled="loading"
+      class="w-full rounded-lg bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+    >
+      {{ loading ? 'Přihlašuji…' : 'Přihlásit se' }}
+    </button>
   </form>
 </template>
 
