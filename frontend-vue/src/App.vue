@@ -6,6 +6,7 @@
       <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
       <router-link v-if="!isAuthenticated" to="/signup">Signup</router-link>
       <router-link v-if="isAuthenticated" to="/dashboard">Dashboard</router-link>
+      <router-link v-if="isAuthenticated" to="/profile">Profile</router-link>
       <button v-if="isAuthenticated" @click="handleLogout">Logout</button>
     </nav>
 
