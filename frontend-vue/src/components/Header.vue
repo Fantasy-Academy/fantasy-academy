@@ -9,6 +9,7 @@
       <!-- Navigace -->
       <ul class="flex gap-4 items-center">
         <li><router-link to="/" class="hover:text-gray-300 text-black">Home</router-link></li>
+        <li v-if="!isAuthenticated"><router-link to="/challenges" class="hover:text-gray-300 text-black">Challenges</router-link></li>
         <li v-if="!isAuthenticated"><router-link to="/login" class="hover:text-gray-300 text-black">Login</router-link></li>
         <li v-if="!isAuthenticated"><router-link to="/signup" class="hover:text-gray-300 text-black">Signup</router-link></li>
         <li v-if="isAuthenticated"><router-link to="/dashboard" class="hover:text-gray-300 text-black">Dashboard</router-link></li>
