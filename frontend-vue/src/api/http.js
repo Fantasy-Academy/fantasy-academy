@@ -1,31 +1,52 @@
-import { API_BASE_URL } from '../constants/config';
-import { getToken, clearToken } from '../services/tokenService';
+// src/api/http.js
+import { getToken } from '@/services/tokenService';
 
-export async function apiFetch(path, { method='GET', headers={}, body, auth=true } = {}) {
-  const token = getToken();
-  const finalHeaders = { 'Content-Type': 'application/json', ...headers };
-  if (auth && token) finalHeaders.Authorization = `Bearer ${token}`;
+const BASE_URL =
+  import.meta.env.VITE_BACKEND_URL ??
+  import.meta.env.VITE_API_BASE_URL ??
+  ''; // ← nikdy nenechá "undefined"
 
-  const url = `${API_BASE_URL}${path}`;
-  const res = await fetch(url, { method, headers: finalHeaders, body: body ? JSON.stringify(body) : undefined });
+// helper pro bezpečné spojení base + path
+function joinUrl(base, path) {
+  if (!base) return path; // když používáš dev proxy, stačí relativní /api/...
+  return `${base.replace(/\/+$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
+}
 
-  if (res.status === 401) clearToken();
+export async function apiFetch(path, opts = {}) {
+  const url = joinUrl(BASE_URL, path);
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(opts.headers || {}),
+  };
+
+  if (opts.auth) {
+    const token = getToken();               // ← používáme sjednoceně accessToken
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(url, {
+    method: opts.method || 'GET',
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
 
   const ct = res.headers.get('content-type') || '';
-  const isJson = ct.includes('application/json') || ct.includes('application/ld+json');
-  const hasBody = res.status !== 204 && res.status !== 205;
-  const data = hasBody ? (isJson ? await res.json() : await res.text()) : null;
-
   if (!res.ok) {
-    const message =
-      (isJson && (data?.detail || data?.message || data?.title)) ||
-      (typeof data === 'string' && data) ||
-      res.statusText || 'Request failed';
-    const err = new Error(message);
+    let msg = `${res.status} ${res.statusText}`;
+    try {
+      if (ct.includes('application/json')) {
+        const j = await res.json();
+        msg = j?.detail || j?.title || j?.message || msg;
+      } else {
+        const t = await res.text();
+        msg = t || msg;
+      }
+    } catch {}
+    const err = new Error(msg);
     err.status = res.status;
-    err.data = data;
     throw err;
   }
 
-  return data;
+  if (!ct.includes('application/json')) return undefined;
+  return await res.json();
 }
