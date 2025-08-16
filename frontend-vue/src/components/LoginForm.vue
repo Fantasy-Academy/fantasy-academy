@@ -1,77 +1,108 @@
+<!-- src/components/LoginForm.vue -->
 <template>
-  <form @submit.prevent="onSubmit" class="max-w-sm mx-auto space-y-4 p-6">
-    <!-- Email -->
-    <div>
-      <label class="block text-sm font-medium mb-1">E-mail</label>
-      <input
-        type="email"
-        v-model="email"
-        placeholder="name@example.com"
-        class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
+  <section class="mx-auto w-full max-w-md px-4 py-8">
+    <!-- Card -->
+    <div class="rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
+      <!-- Header -->
+      <header class="mb-6">
+        <h1 class="font-bebas-neue text-4xl tracking-wide text-blue-black">Sign in</h1>
+        <p class="mt-1 text-sm font-alexandria text-cool-gray">
+          Welcome back! Enter your credentials to continue.
+        </p>
+      </header>
+
+      <!-- Form -->
+      <form @submit.prevent="onSubmit" class="space-y-4" novalidate>
+        <!-- Email -->
+        <div>
+          <label for="email" class="mb-1 block text-sm font-medium text-blue-black">Email</label>
+          <input
+            id="email"
+            type="email"
+            v-model="email"
+            autocomplete="email"
+            placeholder="name@example.com"
+            class="w-full rounded-lg border border-charcoal/20 bg-white px-3 py-2 font-alexandria text-blue-black placeholder:cool-gray/70 outline-none ring-0 focus:border-golden-yellow focus:ring-2 focus:ring-golden-yellow/40"
+          />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label for="password" class="mb-1 block text-sm font-medium text-blue-black">Password</label>
+          <div class="relative">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              id="password"
+              v-model="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              class="w-full rounded-lg border border-charcoal/20 bg-white px-3 py-2 pr-10 font-alexandria text-blue-black placeholder:cool-gray/70 outline-none ring-0 focus:border-golden-yellow focus:ring-2 focus:ring-golden-yellow/40"
+            />
+            <button
+              type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 text-sm text-cool-gray hover:text-blue-black"
+              @click="showPassword = !showPassword"
+              :aria-label="showPassword ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <p v-if="error" role="alert" class="rounded-md border border-vibrant-coral/30 bg-vibrant-coral/10 p-2 text-sm font-alexandria text-vibrant-coral">
+          {{ error }}
+        </p>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          :disabled="loading"
+          class="w-full rounded-lg bg-vibrant-coral py-2 font-alexandria font-semibold text-white shadow-sm transition hover:bg-vibrant-coral/90 disabled:opacity-60"
+        >
+          {{ loading ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+
+      <!-- Footer links -->
+      <div class="mt-6 flex flex-col items-center gap-2 text-sm font-alexandria">
+        <router-link to="/forgot-password" class="text-blue-black hover:underline">Forgot password?</router-link>
+        <p class="text-cool-gray">
+          Don’t have an account?
+          <router-link to="/signup" class="font-semibold text-vibrant-coral hover:underline">
+            Create one
+          </router-link>
+        </p>
+      </div>
     </div>
-
-    <!-- Password -->
-    <div>
-      <label class="block text-sm font-medium mb-1">Heslo</label>
-      <input
-        type="password"
-        v-model="password"
-        placeholder="••••••••"
-        class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
-    </div>
-
-    <!-- Error -->
-    <p v-if="error" role="alert" class="text-sm text-red-600">{{ error }}</p>
-
-    <!-- Submit -->
-    <button
-      type="submit"
-      :disabled="loading"
-      class="w-full rounded-lg bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-    >
-      {{ loading ? 'Přihlašuji…' : 'Přihlásit se' }}
-    </button>
-  </form>
+  </section>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue';
-import { useAuth } from '../composables/useAuth';
 import { useRouter } from 'vue-router';
-import { validateLoginForm } from '../validators/authValidators';
+import { useAuth } from '@/composables/useAuth';
+import { validateLoginForm } from '@/validators/authValidators';
 
-export default {
-  name: 'LoginForm',
-  setup() {
-    const { login, loading, error } = useAuth();
-    const router = useRouter();
-    const email = ref('');
-    const password = ref('');
+const { login, loading, error } = useAuth();
+const router = useRouter();
 
-    const onSubmit = async () => {
-      console.log('[LoginForm] Submit clicked', { email: email.value, password: password.value });
+const email = ref('');
+const password = ref('');
+const showPassword = ref(false);
 
-      error.value = validateLoginForm({ email: email.value, password: password.value });
-      if (error.value) {
-        console.warn('[LoginForm] Validation failed:', error.value);
-        return;
-      }
+async function onSubmit() {
+  // client-side validation
+  error.value = validateLoginForm({ email: email.value, password: password.value });
+  if (error.value) return;
 
-      try {
-        console.log('[LoginForm] Calling login...');
-        const user = await login(email.value, password.value);
-        console.log('[LoginForm] Login successful, user:', user);
-        router.push("/dashboard");
-
-      } catch (err) {
-        console.error('[LoginForm] Login failed:', err);
-        error.value = 'Incorrect email or password';
-      }
-    };
-
-    return { email, password, onSubmit, loading, error };
-  },
-};
+  try {
+    const user = await login(email.value, password.value);
+    // success → go to dashboard
+    if (user) router.push('/dashboard');
+  } catch (e) {
+    // backend or network error
+    error.value = 'Incorrect email or password';
+  }
+}
 </script>

@@ -111,7 +111,7 @@ function onDrop(idx) {
   move(from, to);
 }
 
-// Volitelný „ghost“ obrázek při dragování (hezký UX)
+// ghost image during moving
 function createGhost(text = '') {
   const el = document.createElement('div');
   el.style.padding = '6px 10px';

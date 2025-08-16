@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Tailwind v4: definice vlastních tokenů přes @theme */
+@theme {
+  /* Colors -> budou dostupné jako bg-blue-black, text-cool-gray, ... */
+  --color-blue-black: #2A313A;
+  --color-cool-gray: #94A3B8;
+  --color-dark-white: #F0F4F8;
+  --color-charcoal: #3C4858;
+  --color-vibrant-coral: #FF6F61;
+  --color-golden-yellow: #FFD700;
+  --color-pistachio: #A8D5BA;
+
+  /* Fonts -> budou dostupné jako font-bebas-neue, font-alexandria, ... */
+  --font-sans: "Open Sans", sans-serif;
+  --font-alexandria: "Alexandria", sans-serif;
+  --font-bebas-neue: "Bebas Neue", sans-serif;
+  --font-source-sans-3: "Source Sans 3", sans-serif;
+  --font-nunito: "Nunito", sans-serif;
+  --font-caveat: "Caveat", sans-serif;
+
+  /* Shadows -> budou dostupné jako shadow-main, shadow-sharp */
+  --shadow-sharp: 6px 6px 0px 0px #94A3B8;
+  --shadow-main:  6px 6px 0px 0px #3C4858;
+}
+
+/* Volitelné: helper pro „soft“ panel background */
+.panel {
+  @apply rounded-2xl border border-charcoal/10 bg-white shadow-sm;
+}

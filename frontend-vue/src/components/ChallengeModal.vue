@@ -1,44 +1,61 @@
 <template>
   <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="w-full max-w-2xl rounded-lg bg-white shadow-lg">
-      <header class="flex items-center justify-between border-b px-5 py-4">
-        <h2 class="text-xl font-semibold">{{ challenge?.name || 'Challenge' }}</h2>
-        <button class="text-gray-500 hover:text-black" @click="$emit('close')">✕</button>
+    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-main border border-charcoal/10">
+      <!-- Header -->
+      <header
+        class="flex items-center justify-between rounded-t-2xl px-5 py-4 bg-gradient-to-r from-blue-black to-charcoal text-dark-white"
+      >
+        <h2 class="text-xl font-bebas-neue tracking-wide">
+          {{ challenge?.name || 'Challenge' }}
+        </h2>
+        <button class="text-dark-white/70 hover:text-golden-yellow transition" @click="$emit('close')">✕</button>
       </header>
 
-      <section class="max-h-[70vh] overflow-y-auto px-5 py-4">
-        <!-- Stavy -->
-        <div v-if="loading" class="text-gray-600">Načítám challenge…</div>
-        <div v-else-if="error" class="text-red-600">{{ error }}</div>
+      <!-- Body -->
+      <section class="max-h-[70vh] overflow-y-auto px-5 py-4 bg-dark-white/30">
+        <!-- States -->
+        <div v-if="loading" class="text-cool-gray">Loading challenge…</div>
+        <div
+          v-else-if="error"
+          class="rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral"
+        >
+          {{ error }}
+        </div>
 
         <template v-else-if="challenge">
-          <!-- hlavní obrázek challenge (volitelné) -->
+          <!-- Main challenge image (optional) -->
           <img
             v-if="challengeImgSrc"
             :src="challengeImgSrc"
             :alt="challenge.name"
-            class="mb-3 max-h-48 w-full rounded object-cover"
+            class="mb-3 max-h-56 w-full rounded-xl object-cover border border-charcoal/10"
             @error="onImgError"
           />
 
-          <p class="mb-2 text-gray-700">{{ challenge.description }}</p>
+          <!-- Description -->
+          <p class="mb-4 text-blue-black font-alexandria">
+            {{ challenge.description }}
+          </p>
 
-          <!-- hint -->
-          <div v-if="challenge.hintText || hintImgSrc" class="mb-4 rounded border bg-blue-50 p-3 text-sm">
-            <p v-if="challenge.hintText" class="mb-2">
-              <strong>Hint:</strong> {{ challenge.hintText }}
+          <!-- Hint -->
+          <div
+            v-if="challenge.hintText || hintImgSrc"
+            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm"
+          >
+            <p v-if="challenge.hintText" class="mb-2 text-blue-black">
+              <strong class="font-semibold">Hint:</strong> {{ challenge.hintText }}
             </p>
             <img
               v-if="hintImgSrc"
               :src="hintImgSrc"
               alt="Hint"
-              class="max-h-48 w-full rounded object-contain"
+              class="max-h-48 w-full rounded object-contain bg-dark-white"
               @error="onImgError"
             />
           </div>
 
-          <!-- Otázky -->
-          <div v-for="q in questions" :key="q.id" class="mb-5">
+          <!-- Questions -->
+          <div v-for="q in questions" :key="q.id" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
             <!-- single_select -->
             <QuestionSingleSelect
               v-if="q.type === 'single_select'"
@@ -74,21 +91,28 @@
               v-model="sortModels[q.id]"
             />
 
-            <div v-else class="text-sm text-gray-500">Neznámý typ otázky: {{ q.type }}</div>
+            <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
+
+            <!-- Per-question validation error -->
+            <p v-if="qErrors[q.id]" class="mt-2 text-sm text-vibrant-coral font-medium">{{ qErrors[q.id] }}</p>
           </div>
         </template>
       </section>
 
-      <footer class="flex items-center justify-end gap-3 border-t px-5 py-4">
-        <button class="rounded-lg border px-4 py-2 hover:bg-gray-50" @click="$emit('close')">
-          Zavřít
+      <!-- Footer -->
+      <footer class="flex items-center justify-end gap-3 border-t border-charcoal/10 px-5 py-4 bg-white rounded-b-2xl">
+        <button
+          class="rounded-lg border border-charcoal/20 px-4 py-2 font-alexandria font-semibold text-blue-black hover:bg-dark-white transition"
+          @click="$emit('close')"
+        >
+          Close
         </button>
         <button
-          class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+          class="rounded-lg bg-vibrant-coral px-4 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 disabled:opacity-60 shadow-sm transition"
           :disabled="submitting || !challenge"
           @click="handleSubmit"
         >
-          {{ submitting ? 'Odesílám…' : 'Odeslat odpovědi' }}
+          {{ submitting ? 'Submitting…' : 'Submit answers' }}
         </button>
       </footer>
     </div>
@@ -100,12 +124,12 @@ import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { apiGetChallengeDetail, apiAnswerChallenge } from '@/api/challenges';
 import { resolvedImage, onImgError } from '@/utils/imageHelpers';
 
-// Vaše existující komponenty pro jednotlivé typy:
-import QuestionSingleSelect from '../components/questions/SingleSelectQuestion.vue';
-import QuestionMultiSelect   from '../components/questions/MultiSelectQuestion.vue';
-import QuestionNumeric       from '../components/questions/NumericQuestion.vue';
-import QuestionText          from '../components/questions/TextQuestion.vue';
-import QuestionSort          from '../components/questions/SortQuestion.vue';
+// question components
+import QuestionSingleSelect from '@/components/questions/SingleSelectQuestion.vue';
+import QuestionMultiSelect  from '@/components/questions/MultiSelectQuestion.vue';
+import QuestionNumeric      from '@/components/questions/NumericQuestion.vue';
+import QuestionText         from '@/components/questions/TextQuestion.vue';
+import QuestionSort         from '@/components/questions/SortQuestion.vue';
 
 const props = defineProps({
   show: { type: Boolean, default: false },
@@ -116,22 +140,23 @@ const emit = defineEmits(['close', 'submitted']);
 const loading    = ref(false);
 const error      = ref(null);
 const challenge  = ref(null);
-const questions  = ref([]);       // otázky v API tvaru
-const answers    = reactive({});  // map questionId -> model (viz níže)
-const sortModels = reactive({});  // map questionId -> array of choice objects (UI), slouží jen pro zobrazení
+const questions  = ref([]);       // API form
+const answers    = reactive({});  // map questionId -> model
+const sortModels = reactive({});  // map questionId -> [{ id,label } ...] for UI sort
+const qErrors    = reactive({});  // map questionId -> error string
 
 const submitting = ref(false);
 
 const log = (...a) => console.log('[ChallengeModal]', ...a);
 const err = (...a) => console.error('[ChallengeModal]', ...a);
 
-// absolutní URL pro hlavní obrázek a hint image
+// absolute URLs for images
 const challengeImgSrc = computed(() => resolvedImage(challenge.value));
 const hintImgSrc = computed(() =>
   challenge.value?.hintImage ? resolvedImage({ image: challenge.value.hintImage }) : null
 );
 
-/** Pomocné převody pro UI komponenty **/
+/** UI mappers */
 function toSingleSelectUI(q) {
   return {
     id: q.id,
@@ -140,7 +165,7 @@ function toSingleSelectUI(q) {
     options: (q.choiceConstraint?.choices || []).map(c => ({
       id: c.id,
       label: c.text,
-      value: c.id, // v modelu držíme přímo ID volby
+      value: c.id,
       description: c.description ?? null,
       image: c.image ? resolvedImage({ image: c.image }) : null,
     })),
@@ -148,14 +173,16 @@ function toSingleSelectUI(q) {
 }
 
 function toMultiSelectUI(q) {
+  const minSel = q.choiceConstraint?.minSelections ?? null;
+  const maxSel = q.choiceConstraint?.maxSelections ?? null;
   return {
     id: q.id,
     text: q.text,
-    hint: null,
+    hint: minSel || maxSel ? hintForSelect(minSel, maxSel) : null,
     options: (q.choiceConstraint?.choices || []).map(c => ({
       id: c.id,
       label: c.text,
-      value: c.id, // v modelu držíme přímo ID volby
+      value: c.id,
       description: c.description ?? null,
       image: c.image ? resolvedImage({ image: c.image }) : null,
     })),
@@ -173,7 +200,6 @@ function toNumericUI(q) {
 }
 
 function toSortUI(q) {
-  // UI komponenta zatím jen zobrazuje, pořadí držíme v sortModels[q.id] jako pole objektů
   const opts = (q.choiceConstraint?.choices || []).map(c => ({
     id: c.id,
     label: c.text,
@@ -182,23 +208,33 @@ function toSortUI(q) {
   return {
     id: q.id,
     text: q.text,
-    hint: 'Pořadí odpovědí – drag & drop doplníme později.',
+    hint: 'Order the options (drag & drop).',
     options: opts,
   };
 }
 
+/** Hints */
 function rangeHint(constraint) {
   if (!constraint) return null;
   const hasMin = typeof constraint.min === 'number';
   const hasMax = typeof constraint.max === 'number';
-  if (hasMin && hasMax) return `Zadej číslo v rozsahu ${constraint.min}–${constraint.max}.`;
-  if (hasMin) return `Zadej číslo ≥ ${constraint.min}.`;
-  if (hasMax) return `Zadej číslo ≤ ${constraint.max}.`;
+  if (hasMin && hasMax) return `Enter a number from ${constraint.min} to ${constraint.max}.`;
+  if (hasMin) return `Enter a number ≥ ${constraint.min}.`;
+  if (hasMax) return `Enter a number ≤ ${constraint.max}.`;
+  return null;
+}
+function hintForSelect(minSel, maxSel) {
+  if (minSel && maxSel) return `Select ${minSel}–${maxSel} options.`;
+  if (minSel) return `Select at least ${minSel} option(s).`;
+  if (maxSel) return `Select at most ${maxSel} option(s).`;
   return null;
 }
 
-/** Inicializace modelů odpovědí podle typu **/
+/** Init models per question type */
 function initAnswerModels(apiQuestions) {
+  // clear previous errors
+  Object.keys(qErrors).forEach(k => delete qErrors[k]);
+
   apiQuestions.forEach(q => {
     switch (q.type) {
       case 'single_select': {
@@ -221,12 +257,10 @@ function initAnswerModels(apiQuestions) {
         break;
       }
       case 'sort': {
-        // Model pro odevzdání: pole ID v pořadí
         const base = (q.choiceConstraint?.choices || []).map(c => c.id);
         const preset = Array.isArray(q.answer?.orderedChoiceIds) ? q.answer.orderedChoiceIds : base;
-        answers[q.id] = preset.slice(); // pole stringů (id)
+        answers[q.id] = preset.slice();
 
-        // UI pro sort komponentu: potřebuje pole objektů { id,label } v pořadí
         const opts = (q.choiceConstraint?.choices || []).map(c => ({ id: c.id, label: c.text }));
         const ordered = preset.map(id => opts.find(o => o.id === id)).filter(Boolean);
         sortModels[q.id] = ordered;
@@ -238,24 +272,89 @@ function initAnswerModels(apiQuestions) {
   });
 }
 
-/** Když se vizuální pořadí (sortModels) změní, přepiš odpověď do answers */
+/** Keep submit order in sync with UI sort */
 watch(
   () => ({ ...sortModels }),
   () => {
     for (const qId of Object.keys(sortModels)) {
       const arr = sortModels[qId];
-      if (Array.isArray(arr)) {
-        answers[qId] = arr.map(o => o.id);
-      }
+      if (Array.isArray(arr)) answers[qId] = arr.map(o => o.id);
     }
   },
   { deep: true }
 );
 
-/** Načtení detailu */
+/** Validation */
+function validateAnswers() {
+  Object.keys(qErrors).forEach(k => delete qErrors[k]);
+
+  for (const q of questions.value) {
+    const val = answers[q.id];
+
+    if (q.type === 'single_select') {
+      if (!val) {
+        qErrors[q.id] = 'Select an answer.';
+        continue;
+      }
+    }
+
+    if (q.type === 'multi_select') {
+      const arr = Array.isArray(val) ? val : [];
+      const minSel = q.choiceConstraint?.minSelections ?? 1;
+      const maxSel = q.choiceConstraint?.maxSelections ?? null;
+
+      if (arr.length < minSel) {
+        qErrors[q.id] = minSel === 1 ? 'Select at least one option.' : `Select at least ${minSel} options.`;
+        continue;
+      }
+      if (maxSel != null && arr.length > maxSel) {
+        qErrors[q.id] = `Select at most ${maxSel} options.`;
+        continue;
+      }
+    }
+
+    if (q.type === 'text') {
+      const str = (val ?? '').toString().trim();
+      if (!str) {
+        qErrors[q.id] = 'Please enter a text answer.';
+        continue;
+      }
+    }
+
+    if (q.type === 'numeric') {
+      if (val === null || val === '' || Number.isNaN(Number(val))) {
+        qErrors[q.id] = 'Enter a numeric value.';
+        continue;
+      }
+      const num = Number(val);
+      const min = q.numericConstraint?.min ?? null;
+      const max = q.numericConstraint?.max ?? null;
+      if (min != null && num < min) {
+        qErrors[q.id] = `The number must be ≥ ${min}.`;
+        continue;
+      }
+      if (max != null && num > max) {
+        qErrors[q.id] = `The number must be ≤ ${max}.`;
+        continue;
+      }
+    }
+
+    if (q.type === 'sort') {
+      const arr = Array.isArray(val) ? val : [];
+      if (arr.length === 0) {
+        qErrors[q.id] = 'The order cannot be empty.';
+        continue;
+      }
+    }
+  }
+
+  return Object.keys(qErrors).length === 0;
+}
+
+/** Fetch challenge */
 async function fetchChallenge() {
   if (!props.challengeId) {
-    log('⚠️ fetchChallenge skipped: žádné challengeId');
+    log('⚠️ fetchChallenge skipped: missing challengeId');
     return;
   }
 
@@ -275,48 +374,49 @@ async function fetchChallenge() {
     initAnswerModels(questions.value);
   } catch (e) {
     err('fetchChallenge failed:', e);
-    error.value = e?.message || 'Nepodařilo se načíst challenge';
+    error.value = e?.message || 'Failed to load challenge.';
   } finally {
     loading.value = false;
   }
 }
 
-/** Submit odpovědí dle schématu Answer.challenge */
+/** Submit (Answer.challenge schema) */
 async function handleSubmit() {
   if (!challenge.value) return;
+
+  if (!validateAnswers()) return;
 
   const payload = {
     challengeId: challenge.value.id,
     answers: questions.value.map(q => {
-    const model = answers[q.id];
-    // Překlad do schématu Answer
-    const answer = {
-      textAnswer:        null,
-      numericAnswer:     null,
-      selectedChoiceId:  null,
-      selectedChoiceIds: null,
-      orderedChoiceIds:  null,
-    };
+      const model = answers[q.id];
+      const answer = {
+        textAnswer:        null,
+        numericAnswer:     null,
+        selectedChoiceId:  null,
+        selectedChoiceIds: null,
+        orderedChoiceIds:  null,
+      };
 
-    switch (q.type) {
-      case 'single_select':
-        answer.selectedChoiceId = model || null;            // string | null
-        break;
-      case 'multi_select':
-        answer.selectedChoiceIds = Array.isArray(model) ? model : []; // string[]
-        break;
-      case 'text':
-        answer.textAnswer = (model ?? '').toString();
-        break;
-      case 'numeric':
-        answer.numericAnswer = (model === '' || model === null) ? null : Number(model);
-        break;
-      case 'sort':
-        answer.orderedChoiceIds = Array.isArray(model) ? model : [];
-        break;
-    }
+      switch (q.type) {
+        case 'single_select':
+          answer.selectedChoiceId = model || null;
+          break;
+        case 'multi_select':
+          answer.selectedChoiceIds = Array.isArray(model) ? model : [];
+          break;
+        case 'text':
+          answer.textAnswer = (model ?? '').toString();
+          break;
+        case 'numeric':
+          answer.numericAnswer = (model === '' || model === null) ? null : Number(model);
+          break;
+        case 'sort':
+          answer.orderedChoiceIds = Array.isArray(model) ? model : [];
+          break;
+      }
 
-    return { questionId: q.id, answer };
+      return { questionId: q.id, answer };
     }),
   };
 
@@ -326,7 +426,6 @@ async function handleSubmit() {
     emit('submitted');
   } catch (e) {
     err('handleSubmit failed:', e);
-    alert(e?.message || 'Chyba při odeslání odpovědí.');
   } finally {
     submitting.value = false;
   }
