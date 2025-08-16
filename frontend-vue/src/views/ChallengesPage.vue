@@ -1,22 +1,57 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Challenges</h1>
+  <section class="mx-auto max-w-6xl px-4 py-8">
+    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <h1 class="text-3xl font-bold text-blue-black">Challenges</h1>
 
-    <p v-if="error" class="text-red-600 mb-4">{{ error }}</p>
-    <p v-if="loading" class="text-gray-600">Načítám…</p>
-    <div v-if="!loading && !error && challenges.length === 0" class="text-gray-600">
-      Zatím tu nejsou žádné výzvy.
+      <!-- Filter pills -->
+      <nav class="flex flex-wrap gap-2">
+        <button
+          v-for="opt in filters"
+          :key="opt.value"
+          type="button"
+          @click="activeFilter = opt.value"
+          class="rounded-full px-3 py-1.5 text-sm font-semibold border transition"
+          :class="activeFilter === opt.value
+            ? 'bg-blue-black text-white border-blue-black'
+            : 'bg-white text-blue-black border-charcoal/20 hover:bg-dark-white'"
+        >
+          {{ opt.label }}
+          <span v-if="opt.badge != null"
+                class="ml-2 rounded-full bg-dark-white px-2 py-0.5 text-xs font-bold text-blue-black">
+            {{ opt.badge }}
+          </span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- States -->
+    <p v-if="error" class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
+      {{ error }}
+    </p>
+    <p v-else-if="loading" class="text-cool-gray">Loading…</p>
+
+    <!-- Empty state per filter -->
+    <div
+      v-else-if="filteredChallenges.length === 0"
+      class="rounded-xl border border-charcoal/10 bg-dark-white p-6 text-cool-gray"
+    >
+      <span v-if="activeFilter === 'all'">No challenges yet.</span>
+      <span v-else-if="activeFilter === 'active'">No active challenges right now.</span>
+      <span v-else-if="activeFilter === 'completed'">You haven’t completed any challenges yet.</span>
+      <span v-else-if="activeFilter === 'expired'">No expired challenges.</span>
     </div>
 
-    <div class="space-y-4" v-if="!loading && challenges.length">
+    <!-- List -->
+    <div class="space-y-4" v-else>
       <ChallengeCard
-        v-for="c in challenges"
+        v-for="c in filteredChallenges"
         :key="c.id"
         :challenge="c"
         @select="openChallenge(c.id)"
       />
     </div>
 
+    <!-- Modal -->
     <ChallengeModal
       v-if="showModal"
       :show="showModal"
@@ -24,11 +59,11 @@
       @close="showModal = false"
       @submitted="handleSubmitted"
     />
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useChallenges } from '@/composables/useChallenges';
 import ChallengeCard from '@/components/ChallengeCard.vue';
 import ChallengeModal from '@/components/ChallengeModal.vue';
@@ -37,6 +72,46 @@ const { challenges, loading, error, loadChallenges } = useChallenges();
 
 const showModal = ref(false);
 const selectedId = ref(null);
+
+// filter state: all | active | completed | expired
+const activeFilter = ref('all');
+
+// helpers to derive status from challenge
+const isCompleted = (c) => !!c.isAnswered; // or c.isEvaluated if that’s your definition
+const isExpired   = (c) => !!c.isExpired;
+const isActive    = (c) => {
+  // Active = started, not expired, not completed
+  const started = c.isStarted ?? true;
+  return started && !isExpired(c) && !isCompleted(c);
+};
+
+// filtered list
+const filteredChallenges = computed(() => {
+  const list = challenges.value || [];
+  switch (activeFilter.value) {
+    case 'active':    return list.filter(isActive);
+    case 'completed': return list.filter(isCompleted);
+    case 'expired':   return list.filter(isExpired);
+    default:          return list;
+  }
+});
+
+// pill labels + counters
+const filters = computed(() => {
+  const list = challenges.value || [];
+  const counts = {
+    all: list.length,
+    active: list.filter(isActive).length,
+    completed: list.filter(isCompleted).length,
+    expired: list.filter(isExpired).length,
+  };
+  return [
+    { value: 'all',       label: 'All',       badge: counts.all },
+    { value: 'active',    label: 'Active',    badge: counts.active },
+    { value: 'completed', label: 'Completed', badge: counts.completed },
+    { value: 'expired',   label: 'Expired',   badge: counts.expired },
+  ];
+});
 
 function openChallenge(id) {
   selectedId.value = id;
@@ -48,7 +123,5 @@ function handleSubmitted() {
   loadChallenges();
 }
 
-onMounted(() => {
-  loadChallenges();
-});
+onMounted(loadChallenges);
 </script>

@@ -14,7 +14,9 @@
       <div
         class="mb-8 flex flex-wrap items-center gap-4 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main"
       >
-        <div class="grid h-14 w-14 place-items-center rounded-full bg-golden-yellow text-blue-black text-lg font-extrabold">
+        <div
+          class="grid h-14 w-14 place-items-center rounded-full bg-golden-yellow text-blue-black text-lg font-extrabold"
+        >
           {{ initials }}
         </div>
         <div class="min-w-0">
@@ -57,7 +59,7 @@
         </div>
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
           <p class="text-sm text-cool-gray font-alexandria">Available Challenges</p>
-          <p class="mt-1 text-3xl font-extrabold text-blue-black">{{ profile.availableChallenges ?? 0 }}</p>
+          <p class="mt-1 text-3xl font-extrabold text-blue-black">{{ availableChallenges.length }}</p>
         </div>
       </div>
 
@@ -65,21 +67,24 @@
         <!-- Available Challenges -->
         <div class="lg:col-span-2">
           <div class="mb-3 flex items-center justify-between">
-            <h2 class="font-bebas-neue text-2xl text-blue-black">Available Challenges</h2>
+            <h2 class="font-bebas-neue text-2xl text-blue-black">
+              Available Challenges
+              <span class="ml-2 text-base font-normal text-cool-gray">({{ availableChallenges.length }})</span>
+            </h2>
             <router-link to="/challenges" class="text-sm text-vibrant-coral hover:underline">
               All challenges →
             </router-link>
           </div>
 
           <div v-if="loadingChallenges" class="text-cool-gray">Loading challenges…</div>
-          <div
-            v-else-if="errorChallenges"
-            class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800"
-          >
+          <div v-else-if="errorChallenges" class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800">
             {{ errorChallenges }}
           </div>
           <div v-else>
-            <div v-if="topChallenges.length === 0" class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray">
+            <div
+              v-if="topChallenges.length === 0"
+              class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray"
+            >
               No available challenges at the moment.
             </div>
 
@@ -90,7 +95,9 @@
                 class="flex cursor-pointer gap-4 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm transition hover:shadow-main"
                 @click="openChallenge(c.id)"
               >
-                <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded bg-dark-white">
+                <div
+                  class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded bg-dark-white"
+                >
                   <img
                     v-if="resolvedImage(c)"
                     :src="resolvedImage(c)"
@@ -109,7 +116,9 @@
                   <div class="mt-1 flex items-center gap-2 text-xs text-cool-gray">
                     <span v-if="c.maxPoints != null">{{ c.maxPoints }} pts</span>
                     <span v-if="c.isAnswered" class="rounded bg-pistachio/20 px-2 py-0.5 text-pistachio">Answered</span>
-                    <span v-else-if="c.isExpired" class="rounded bg-vibrant-coral/10 px-2 py-0.5 text-vibrant-coral">Expired</span>
+                    <span v-else-if="c.isExpired" class="rounded bg-vibrant-coral/10 px-2 py-0.5 text-vibrant-coral"
+                      >Expired</span
+                    >
                   </div>
                 </div>
               </article>
@@ -121,28 +130,17 @@
         <div class="lg:col-span-1">
           <div class="mb-3 flex items-center justify-between">
             <h2 class="font-bebas-neue text-2xl text-blue-black">Leaderboard (Top 5)</h2>
-            <button
-              class="text-sm text-blue-black/70 hover:underline"
-              @click="loadLeaderboards"
-              :disabled="loadingLb"
-            >
+            <button class="text-sm text-blue-black/70 hover:underline" @click="loadLeaderboards" :disabled="loadingLb">
               Refresh
             </button>
           </div>
 
           <div v-if="loadingLb" class="text-cool-gray">Loading leaderboard…</div>
-          <div
-            v-else-if="errorLb"
-            class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800"
-          >
+          <div v-else-if="errorLb" class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800">
             {{ errorLb }}
           </div>
           <ul v-else class="divide-y rounded-xl border border-charcoal/10 bg-white shadow-sm">
-            <li
-              v-for="(p, i) in top5"
-              :key="p.playerId || i"
-              class="flex items-center gap-3 p-3"
-            >
+            <li v-for="(p, i) in top5" :key="p.playerId || i" class="flex items-center gap-3 p-3">
               <div
                 class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-blue-black"
                 :class="badgeBg(i)"
@@ -165,7 +163,10 @@
       <!-- Skills -->
       <div class="mt-8">
         <h2 class="mb-3 font-bebas-neue text-2xl text-blue-black">Skills</h2>
-        <div v-if="(overall.skills?.length || 0) === 0" class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray">
+        <div
+          v-if="(overall.skills?.length || 0) === 0"
+          class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray"
+        >
           No skills evaluated yet.
         </div>
         <ul v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -212,7 +213,6 @@ import { apiFetch } from '@/api/http';
 /* Profile */
 const { me, loading: loadingProfile, error: errorProfile, load } = useProfile();
 const { user } = useAuth();
-
 if (user.value && !me.value) me.value = user.value;
 onMounted(load);
 
@@ -239,7 +239,19 @@ const initials = computed(() => {
 /* Challenges */
 const { challenges, loading: loadingChallenges, error: errorChallenges, loadChallenges } = useChallenges();
 onMounted(() => loadChallenges());
-const topChallenges = computed(() => (challenges.value || []).slice(0, 5));
+
+// filtrování výzev (aby "Available" opravdu sedělo)
+const availableChallenges = computed(() =>
+  (challenges.value || []).filter(c => c.isStarted && !c.isExpired && !c.isAnswered)
+);
+const completedChallenges = computed(() =>
+  (challenges.value || []).filter(c => c.isAnswered)
+);
+const expiredChallenges = computed(() =>
+  (challenges.value || []).filter(c => c.isExpired && !c.isAnswered)
+);
+// zobrazíme jen prvních 5 dostupných
+const topChallenges = computed(() => availableChallenges.value.slice(0, 5));
 
 /* Modal */
 const showModal = ref(false);
@@ -250,7 +262,7 @@ function openChallenge(id) {
 }
 function afterSubmit() {
   showModal.value = false;
-  loadChallenges(); // refresh after submitting
+  loadChallenges(); // refresh po odeslání
 }
 
 /* Leaderboards */
@@ -273,13 +285,13 @@ async function loadLeaderboards() {
 onMounted(loadLeaderboards);
 const top5 = computed(() => (lb.value || []).slice(0, 5));
 
-/* UI helpers for the rank badge */
+/* UI helpers */
 function badgeBg(index) {
-  // Use your theme colors for the top 3 + default
+  // decentní odstíny, ladí s tvými barvami
   return [
     'bg-golden-yellow/30 text-blue-black',
     'bg-dark-white text-blue-black',
-    'bg-amber-300/40 text-blue-black',
-  ][index] || 'bg-pistachio/30 text-blue-black';
+    'bg-amber-200 text-charcoal',
+  ][index] || 'bg-blue-black/10 text-blue-black';
 }
 </script>
