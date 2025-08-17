@@ -23,6 +23,15 @@
         </div>
 
         <template v-else-if="challenge">
+          <!-- Readonly info banner -->
+          <div
+            v-if="readOnly"
+            class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800 text-sm font-medium"
+          >
+            <template v-if="challenge.isExpired">This challenge has expired. Answers are read-only.</template>
+            <template v-else>You've already answered this challenge. Answers are read-only.</template>
+          </div>
+
           <!-- Main challenge image (optional) -->
           <img
             v-if="challengeImgSrc"
@@ -55,46 +64,118 @@
           </div>
 
           <!-- Questions -->
-          <div v-for="q in questions" :key="q.id" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
-            <!-- single_select -->
-            <QuestionSingleSelect
-              v-if="q.type === 'single_select'"
-              :question="toSingleSelectUI(q)"
-              v-model="answers[q.id]"
-            />
+          <div
+            v-for="q in questions"
+            :key="q.id"
+            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm"
+          >
+            <!-- READ-ONLY block if challenge or question is locked -->
+            <template v-if="isQuestionReadOnly(q)">
+              <p class="mb-2 font-semibold text-blue-black font-alexandria">{{ q.text }}</p>
 
-            <!-- multi_select -->
-            <QuestionMultiSelect
-              v-else-if="q.type === 'multi_select'"
-              :question="toMultiSelectUI(q)"
-              v-model="answers[q.id]"
-            />
+              <!-- Render read-only answer preview by type -->
+              <div class="text-sm text-blue-black">
+                <!-- single_select -->
+                <template v-if="q.type === 'single_select'">
+                  <span class="inline-flex items-center rounded bg-dark-white px-2 py-1">
+                    {{ roSingleLabel(q) || '—' }}
+                  </span>
+                </template>
 
-            <!-- text -->
-            <QuestionText
-              v-else-if="q.type === 'text'"
-              :question="{ id: q.id, text: q.text, hint: null }"
-              v-model="answers[q.id]"
-            />
+                <!-- multi_select -->
+                <template v-else-if="q.type === 'multi_select'">
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      v-for="(lbl, i) in roMultiLabels(q)"
+                      :key="i"
+                      class="inline-flex items-center rounded bg-dark-white px-2 py-1"
+                    >
+                      {{ lbl }}
+                    </span>
+                    <span v-if="roMultiLabels(q).length === 0">—</span>
+                  </div>
+                </template>
 
-            <!-- numeric -->
-            <QuestionNumeric
-              v-else-if="q.type === 'numeric'"
-              :question="toNumericUI(q)"
-              v-model="answers[q.id]"
-            />
+                <!-- text -->
+                <template v-else-if="q.type === 'text'">
+                  <p class="whitespace-pre-line bg-dark-white rounded p-2">
+                    {{ (q.answer?.textAnswer ?? '').trim() || '—' }}
+                  </p>
+                </template>
 
-            <!-- sort -->
-            <QuestionSort
-              v-else-if="q.type === 'sort'"
-              :question="toSortUI(q)"
-              v-model="sortModels[q.id]"
-            />
+                <!-- numeric -->
+                <template v-else-if="q.type === 'numeric'">
+                  <span class="inline-flex items-center rounded bg-dark-white px-2 py-1">
+                    {{ q.answer?.numericAnswer ?? '—' }}
+                  </span>
+                </template>
 
-            <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
+                <!-- sort -->
+                <template v-else-if="q.type === 'sort'">
+                  <ol class="list-decimal pl-5 space-y-1">
+                    <li
+                      v-for="(lbl, i) in roSortLabels(q)"
+                      :key="i"
+                    >
+                      {{ lbl }}
+                    </li>
+                    <li v-if="roSortLabels(q).length === 0">—</li>
+                  </ol>
+                </template>
 
-            <!-- Per-question validation error -->
-            <p v-if="qErrors[q.id]" class="mt-2 text-sm text-vibrant-coral font-medium">{{ qErrors[q.id] }}</p>
+                <template v-else>
+                  <span class="text-cool-gray">Unknown question type: {{ q.type }}</span>
+                </template>
+              </div>
+
+              <!-- answered flag -->
+              <p v-if="q.answeredAt" class="mt-2 text-xs text-cool-gray">
+                Answered at: {{ new Date(q.answeredAt).toLocaleString() }}
+              </p>
+            </template>
+
+            <!-- EDITABLE block -->
+            <template v-else>
+              <!-- single_select -->
+              <QuestionSingleSelect
+                v-if="q.type === 'single_select'"
+                :question="toSingleSelectUI(q)"
+                v-model="answers[q.id]"
+              />
+
+              <!-- multi_select -->
+              <QuestionMultiSelect
+                v-else-if="q.type === 'multi_select'"
+                :question="toMultiSelectUI(q)"
+                v-model="answers[q.id]"
+              />
+
+              <!-- text -->
+              <QuestionText
+                v-else-if="q.type === 'text'"
+                :question="{ id: q.id, text: q.text, hint: null }"
+                v-model="answers[q.id]"
+              />
+
+              <!-- numeric -->
+              <QuestionNumeric
+                v-else-if="q.type === 'numeric'"
+                :question="toNumericUI(q)"
+                v-model="answers[q.id]"
+              />
+
+              <!-- sort -->
+              <QuestionSort
+                v-else-if="q.type === 'sort'"
+                :question="toSortUI(q)"
+                v-model="sortModels[q.id]"
+              />
+
+              <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
+
+              <!-- Per-question validation error -->
+              <p v-if="qErrors[q.id]" class="mt-2 text-sm text-vibrant-coral font-medium">{{ qErrors[q.id] }}</p>
+            </template>
           </div>
         </template>
       </section>
@@ -107,7 +188,10 @@
         >
           Close
         </button>
+
+        <!-- Hide submit in read-only mode -->
         <button
+          v-if="!readOnly"
           class="rounded-lg bg-vibrant-coral px-4 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 disabled:opacity-60 shadow-sm transition"
           :disabled="submitting || !challenge"
           @click="handleSubmit"
@@ -155,6 +239,17 @@ const challengeImgSrc = computed(() => resolvedImage(challenge.value));
 const hintImgSrc = computed(() =>
   challenge.value?.hintImage ? resolvedImage({ image: challenge.value.hintImage }) : null
 );
+
+/** Global read-only mode for the whole challenge */
+const readOnly = computed(() =>
+  !!challenge.value && (challenge.value.isExpired || challenge.value.isAnswered || challenge.value.isEvaluated)
+);
+
+/** Is a single question locked (already answered) */
+function isQuestionReadOnly(q) {
+  // whole-challenge lock OR per-question lock
+  return readOnly.value || !!q.answeredAt || !!q.answer;
+}
 
 /** UI mappers */
 function toSingleSelectUI(q) {
@@ -232,7 +327,6 @@ function hintForSelect(minSel, maxSel) {
 
 /** Init models per question type */
 function initAnswerModels(apiQuestions) {
-  // clear previous errors
   Object.keys(qErrors).forEach(k => delete qErrors[k]);
 
   apiQuestions.forEach(q => {
@@ -284,11 +378,13 @@ watch(
   { deep: true }
 );
 
-/** Validation */
+/** Validation — skip locked questions */
 function validateAnswers() {
   Object.keys(qErrors).forEach(k => delete qErrors[k]);
 
   for (const q of questions.value) {
+    if (isQuestionReadOnly(q)) continue; // don't validate locked ones
+
     const val = answers[q.id];
 
     if (q.type === 'single_select') {
@@ -351,6 +447,28 @@ function validateAnswers() {
   return Object.keys(qErrors).length === 0;
 }
 
+/** Read-only label helpers */
+function choiceMap(q) {
+  const map = new Map();
+  (q.choiceConstraint?.choices || []).forEach(c => map.set(c.id, c.text));
+  return map;
+}
+function roSingleLabel(q) {
+  const id = q.answer?.selectedChoiceId ?? null;
+  if (!id) return null;
+  return choiceMap(q).get(id) || id;
+}
+function roMultiLabels(q) {
+  const ids = Array.isArray(q.answer?.selectedChoiceIds) ? q.answer.selectedChoiceIds : [];
+  const map = choiceMap(q);
+  return ids.map(id => map.get(id) || id);
+}
+function roSortLabels(q) {
+  const ids = Array.isArray(q.answer?.orderedChoiceIds) ? q.answer.orderedChoiceIds : [];
+  const map = choiceMap(q);
+  return ids.map(id => map.get(id) || id);
+}
+
 /** Fetch challenge */
 async function fetchChallenge() {
   if (!props.challengeId) {
@@ -369,6 +487,10 @@ async function fetchChallenge() {
       description: data.description || '',
       hintText: data.hintText ?? null,
       hintImage: data.hintImage ?? null,
+      isExpired: !!data.isExpired,
+      isAnswered: !!data.isAnswered,
+      isEvaluated: !!data.isEvaluated,
+      isStarted: !!data.isStarted,
     };
     questions.value = Array.isArray(data.questions) ? data.questions : [];
     initAnswerModels(questions.value);
@@ -380,15 +502,17 @@ async function fetchChallenge() {
   }
 }
 
-/** Submit (Answer.challenge schema) */
+/** Submit (Answer.challenge schema) — skip locked questions */
 async function handleSubmit() {
   if (!challenge.value) return;
+  if (readOnly.value) return; // extra safety
 
   if (!validateAnswers()) return;
 
+  const editableQuestions = questions.value.filter(q => !isQuestionReadOnly(q));
   const payload = {
     challengeId: challenge.value.id,
-    answers: questions.value.map(q => {
+    answers: editableQuestions.map(q => {
       const model = answers[q.id];
       const answer = {
         textAnswer:        null,
