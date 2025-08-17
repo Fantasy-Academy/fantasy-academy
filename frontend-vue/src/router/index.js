@@ -10,6 +10,8 @@ const router = createRouter({
     { path: '/signup', component: () => import('../views/SignupPage.vue') },
     { path: '/challenges', component: () => import('../views/ChallengesPage.vue') },
     { path: '/forgot-password', component: () => import('../views/ForgotPasswordPage.vue') },
+    { path: '/leaderboard', component: () => import('../views/LeaderboardPage.vue') },
+    { path: '/player/:id', component: () => import('../views/PlayerPage.vue') },
     //secured
     { path: '/profile', component: () => import('../views/ProfilePage.vue'), meta: { requiresAuth: true } },
     { path: '/dashboard', component: () => import('../views/DashboardPage.vue'), meta: { requiresAuth: true } },
