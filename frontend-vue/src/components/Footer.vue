@@ -10,7 +10,7 @@
       <ul class="flex gap-6 text-sm font-alexandria">
         <li>
           <router-link
-            to="/about"
+            to="/"
             class="hover:text-vibrant-coral transition"
           >
             About
@@ -18,7 +18,7 @@
         </li>
         <li>
           <router-link
-            to="/privacy"
+            to="/"
             class="hover:text-vibrant-coral transition"
           >
             Privacy
@@ -26,7 +26,7 @@
         </li>
         <li>
           <router-link
-            to="/terms"
+            to="/"
             class="hover:text-vibrant-coral transition"
           >
             Terms
