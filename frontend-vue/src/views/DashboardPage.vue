@@ -210,6 +210,8 @@ import { resolvedImage, onImgError } from '@/utils/imageHelpers';
 import ChallengeModal from '@/components/ChallengeModal.vue';
 import { apiFetch } from '@/api/http';
 
+document.title = 'Fantasy Academy | Dashboard';
+
 /* Profile */
 const { me, loading: loadingProfile, error: errorProfile, load } = useProfile();
 const { user } = useAuth();

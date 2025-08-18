@@ -6,4 +6,6 @@
 
 <script setup>
 import SignupForm from '../components/SignupForm.vue';
+
+document.title = 'Fantasy Academy | Signup';
 </script>

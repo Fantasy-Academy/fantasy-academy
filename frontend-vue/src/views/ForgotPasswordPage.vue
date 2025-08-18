@@ -71,6 +71,8 @@
 import { ref } from 'vue';
 import { apiRequestResetCode } from '@/api/password';
 
+document.title = 'Fantasy Academy | Forgot Password';
+
 const email = ref('');
 const loading = ref(false);
 const success = ref(false);

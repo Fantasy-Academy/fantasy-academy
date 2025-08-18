@@ -125,6 +125,8 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { apiGetPlayer } from '@/api/players';
 
+document.title = 'Fantasy Academy | Player';
+
 const route = useRoute();
 const player = ref(null);
 const loading = ref(false);

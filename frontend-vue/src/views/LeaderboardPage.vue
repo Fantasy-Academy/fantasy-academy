@@ -102,6 +102,8 @@
 import { onMounted, ref, computed } from 'vue';
 import { apiGetLeaderboards } from '@/api/leaderboards';
 
+document.title = 'Fantasy Academy | Leaderboard';
+
 const items = ref([]);
 const initialLoading = ref(false);
 const loadingMore = ref(false);

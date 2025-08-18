@@ -156,6 +156,8 @@ import { useChallenges } from '@/composables/useChallenges';
 const { user } = useAuth();
 const { me, loading, error, load } = useProfile();
 
+document.title = 'Fantasy Academy | Profile';
+
 // ⬇️ NEW: challenges
 const { challenges, loadChallenges } = useChallenges();
 

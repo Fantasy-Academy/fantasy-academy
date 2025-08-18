@@ -200,6 +200,7 @@ import { useAuth } from '@/composables/useAuth';
 import { computed } from 'vue';
 
 const { isAuthenticated } = useAuth();
+document.title = 'Fantasy Academy | Home';
 
 // malý statický náhled (neblokuje nic v app)
 const demoStats = computed(() => ({

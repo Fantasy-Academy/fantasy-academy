@@ -70,6 +70,8 @@ import ChallengeModal from '@/components/ChallengeModal.vue';
 
 const { challenges, loading, error, loadChallenges } = useChallenges();
 
+document.title = 'Fantasy Academy | Challenges';
+
 const showModal = ref(false);
 const selectedId = ref(null);
 
