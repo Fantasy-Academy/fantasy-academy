@@ -3,7 +3,8 @@
   <section class="px-6 py-10">
 
     <!-- HERO -->
-    <div class="mx-auto max-w-6xl rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-8 text-dark-white shadow-main">
+    <div
+      class="mx-auto max-w-6xl rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-8 text-dark-white shadow-main">
       <div class="grid gap-8 md:grid-cols-2 md:items-center">
         <div>
           <h1 class="font-bebas-neue text-5xl tracking-wide">
@@ -14,25 +15,17 @@
           </p>
 
           <div class="mt-6 flex flex-wrap gap-3">
-            <router-link
-              to="/challenges"
-              class="inline-flex items-center justify-center rounded-lg bg-golden-yellow px-5 py-2 font-alexandria font-semibold text-blue-black shadow-sm hover:opacity-90 transition"
-            >
+            <router-link to="/challenges"
+              class="inline-flex items-center justify-center rounded-lg bg-golden-yellow px-5 py-2 font-alexandria font-semibold text-blue-black shadow-sm hover:opacity-90 transition">
               Browse Challenges
             </router-link>
 
-            <router-link
-              v-if="isAuthenticated"
-              to="/dashboard"
-              class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 px-5 py-2 font-alexandria font-semibold text-dark-white hover:bg-dark-white/10 transition"
-            >
+            <router-link v-if="isAuthenticated" to="/dashboard"
+              class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 px-5 py-2 font-alexandria font-semibold text-dark-white hover:bg-dark-white/10 transition">
               Go to Dashboard
             </router-link>
-            <router-link
-              v-else
-              to="/signup"
-              class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 px-5 py-2 font-alexandria font-semibold text-dark-white hover:bg-dark-white/10 transition"
-            >
+            <router-link v-else to="/signup"
+              class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 px-5 py-2 font-alexandria font-semibold text-dark-white hover:bg-dark-white/10 transition">
               Create Account
             </router-link>
           </div>
@@ -45,33 +38,24 @@
         </div>
 
         <div class="rounded-xl bg-dark-white/10 p-4 border border-dark-white/20">
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <div class="rounded-xl bg-dark-white/20 p-4 text-center">
-              <p class="text-sm text-dark-white/80 font-alexandria">Total Points</p>
-              <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ demoStats.points }}</p>
+              <p class="text-sm text-dark-white/80 font-alexandria">Total Challenges</p>
+              <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ allChallenges }}</p>
             </div>
             <div class="rounded-xl bg-dark-white/20 p-4 text-center">
-              <p class="text-sm text-dark-white/80 font-alexandria">Rank</p>
-              <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ demoStats.rank }}</p>
-            </div>
-            <div class="rounded-xl bg-dark-white/20 p-4 text-center">
-              <p class="text-sm text-dark-white/80 font-alexandria">Challenges</p>
-              <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ demoStats.challenges }}</p>
+              <p class="text-sm text-dark-white/80 font-alexandria">Active Challenges</p>
+              <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ activeChallengesCount }}</p>
             </div>
           </div>
-          <p class="mt-3 text-xs text-dark-white/70 font-alexandria">
-            * Preview data. Sign in to see your real stats.
-          </p>
         </div>
       </div>
     </div>
 
     <!-- QUICK ACTIONS -->
     <div class="mx-auto mt-10 max-w-6xl grid gap-4 md:grid-cols-3">
-      <router-link
-        to="/challenges"
-        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition"
-      >
+      <router-link to="/challenges"
+        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition">
         <h3 class="text-xl font-alexandria font-semibold text-blue-black flex items-center gap-2">
           <span class="inline-grid h-8 w-8 place-items-center rounded-full bg-pistachio/20 text-pistachio">🏆</span>
           Explore Challenges
@@ -82,28 +66,25 @@
         <span class="mt-3 inline-block text-vibrant-coral font-semibold">Start now →</span>
       </router-link>
 
-      <router-link
-        :to="isAuthenticated ? '/dashboard' : '/signup'"
-        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition"
-      >
+      <router-link :to="isAuthenticated ? '/dashboard' : '/signup'"
+        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition">
         <h3 class="text-xl font-alexandria font-semibold text-blue-black flex items-center gap-2">
-          <span class="inline-grid h-8 w-8 place-items-center rounded-full bg-golden-yellow/30 text-blue-black">📊</span>
+          <span
+            class="inline-grid h-8 w-8 place-items-center rounded-full bg-golden-yellow/30 text-blue-black">📊</span>
           {{ isAuthenticated ? 'Your Dashboard' : 'Create Account' }}
         </h3>
-        <p class="mt-2 text-sm text-cool-gray">
-          {{ isAuthenticated ? 'See your points, rank and active challenges.' : 'Join and save your progress across seasons.' }}
-        </p>
+        <p class="mt-2 text-sm text-cool-gray">{{ isAuthenticated ? 'See your points, rank and active challenges.' :
+          'Join and save your progressacrossseasons.' }}</p>
         <span class="mt-3 inline-block text-vibrant-coral font-semibold">
           {{ isAuthenticated ? 'View dashboard →' : 'Sign up →' }}
         </span>
       </router-link>
 
-      <router-link
-        to="/profile"
-        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition"
-      >
+      <router-link to="/profile"
+        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition">
         <h3 class="text-xl font-alexandria font-semibold text-blue-black flex items-center gap-2">
-          <span class="inline-grid h-8 w-8 place-items-center rounded-full bg-vibrant-coral/10 text-vibrant-coral">🧑‍🚀</span>
+          <span
+            class="inline-grid h-8 w-8 place-items-center rounded-full bg-vibrant-coral/10 text-vibrant-coral">🧑‍🚀</span>
           Profile & Stats
         </h3>
         <p class="mt-2 text-sm text-cool-gray">
@@ -183,10 +164,8 @@
             Choose a challenge, submit answers and collect points today.
           </p>
         </div>
-        <router-link
-          to="/challenges"
-          class="inline-flex items-center justify-center rounded-lg bg-vibrant-coral px-5 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 transition shadow-sm"
-        >
+        <router-link to="/challenges"
+          class="inline-flex items-center justify-center rounded-lg bg-vibrant-coral px-5 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 transition shadow-sm">
           Browse Challenges →
         </router-link>
       </div>
@@ -197,15 +176,23 @@
 
 <script setup>
 import { useAuth } from '@/composables/useAuth';
-import { computed } from 'vue';
+import { useChallenges } from '@/composables/useChallenges'
+import { computed, onMounted } from 'vue';
+
+const { challenges, totalCount, loadChallenges } = useChallenges();
+
+onMounted(() => {
+  loadChallenges({ auth: false });
+});
+
+const activeChallengesCount = computed(() => {
+  const list = challenges.value || [];
+  return list.filter(c => c?.isStarted && !c.isExpired).length;
+});
+
+const allChallenges = computed(() => totalCount.value || 0);
 
 const { isAuthenticated } = useAuth();
 document.title = 'Fantasy Academy | Home';
 
-// malý statický náhled (neblokuje nic v app)
-const demoStats = computed(() => ({
-  points: 1240,
-  rank: 12,
-  challenges: 37,
-}));
 </script>

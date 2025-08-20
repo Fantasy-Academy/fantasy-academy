@@ -158,7 +158,7 @@ const { me, loading, error, load } = useProfile();
 
 document.title = 'Fantasy Academy | Profile';
 
-// ⬇️ NEW: challenges
+//challenges
 const { challenges, loadChallenges } = useChallenges();
 
 if (user.value && !me.value) {
@@ -166,7 +166,7 @@ if (user.value && !me.value) {
 }
 onMounted(() => {
   load();
-  loadChallenges(); // ⬅️ načteme seznam výzev pro výpočet aktivních
+  loadChallenges(); // načteme seznam výzev pro výpočet aktivních
 });
 
 const profile = computed(() => ({
@@ -179,7 +179,7 @@ const profile = computed(() => ({
   seasonsStatistics: me.value?.seasonsStatistics ?? user.value?.seasonsStatistics ?? [],
 }));
 
-// ⬇️ NEW: výpočet aktivních výzev z reálných dat
+//výpočet aktivních výzev z reálných dat
 const activeChallengesCount = computed(() => {
   const list = challenges.value || [];
   return list.filter(c => c && c.isStarted && !c.isExpired && !c.isAnswered).length;

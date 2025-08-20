@@ -5,19 +5,13 @@
 
       <!-- Filter pills -->
       <nav class="flex flex-wrap gap-2">
-        <button
-          v-for="opt in filters"
-          :key="opt.value"
-          type="button"
-          @click="activeFilter = opt.value"
-          class="rounded-full px-3 py-1.5 text-sm font-semibold border transition"
-          :class="activeFilter === opt.value
+        <button v-for="opt in filters" :key="opt.value" type="button" @click="activeFilter = opt.value"
+          class="rounded-full px-3 py-1.5 text-sm font-semibold border transition" :class="activeFilter === opt.value
             ? 'bg-blue-black text-white border-blue-black'
-            : 'bg-white text-blue-black border-charcoal/20 hover:bg-dark-white'"
-        >
+            : 'bg-white text-blue-black border-charcoal/20 hover:bg-dark-white'">
           {{ opt.label }}
           <span v-if="opt.badge != null"
-                class="ml-2 rounded-full bg-dark-white px-2 py-0.5 text-xs font-bold text-blue-black">
+            class="ml-2 rounded-full bg-dark-white px-2 py-0.5 text-xs font-bold text-blue-black">
             {{ opt.badge }}
           </span>
         </button>
@@ -31,10 +25,8 @@
     <p v-else-if="loading" class="text-cool-gray">Loading…</p>
 
     <!-- Empty state per filter -->
-    <div
-      v-else-if="filteredChallenges.length === 0"
-      class="rounded-xl border border-charcoal/10 bg-dark-white p-6 text-cool-gray"
-    >
+    <div v-else-if="filteredChallenges.length === 0"
+      class="rounded-xl border border-charcoal/10 bg-dark-white p-6 text-cool-gray">
       <span v-if="activeFilter === 'all'">No challenges yet.</span>
       <span v-else-if="activeFilter === 'active'">No active challenges right now.</span>
       <span v-else-if="activeFilter === 'completed'">You haven’t completed any challenges yet.</span>
@@ -43,22 +35,12 @@
 
     <!-- List -->
     <div class="space-y-4" v-else>
-      <ChallengeCard
-        v-for="c in filteredChallenges"
-        :key="c.id"
-        :challenge="c"
-        @select="openChallenge(c.id)"
-      />
+      <ChallengeCard v-for="c in filteredChallenges" :key="c.id" :challenge="c" @select="openChallenge(c.id)" />
     </div>
 
     <!-- Modal -->
-    <ChallengeModal
-      v-if="showModal"
-      :show="showModal"
-      :challenge-id="selectedId"
-      @close="showModal = false"
-      @submitted="handleSubmitted"
-    />
+    <ChallengeModal v-if="showModal" :show="showModal" :challenge-id="selectedId" @close="showModal = false"
+      @submitted="handleSubmitted" />
   </section>
 </template>
 
@@ -80,8 +62,8 @@ const activeFilter = ref('all');
 
 // helpers to derive status from challenge
 const isCompleted = (c) => !!c.isAnswered; // or c.isEvaluated if that’s your definition
-const isExpired   = (c) => !!c.isExpired;
-const isActive    = (c) => {
+const isExpired = (c) => !!c.isExpired;
+const isActive = (c) => {
   // Active = started, not expired, not completed
   const started = c.isStarted ?? true;
   return started && !isExpired(c) && !isCompleted(c);
@@ -91,10 +73,10 @@ const isActive    = (c) => {
 const filteredChallenges = computed(() => {
   const list = challenges.value || [];
   switch (activeFilter.value) {
-    case 'active':    return list.filter(isActive);
+    case 'active': return list.filter(isActive);
     case 'completed': return list.filter(isCompleted);
-    case 'expired':   return list.filter(isExpired);
-    default:          return list;
+    case 'expired': return list.filter(isExpired);
+    default: return list;
   }
 });
 
@@ -108,10 +90,10 @@ const filters = computed(() => {
     expired: list.filter(isExpired).length,
   };
   return [
-    { value: 'all',       label: 'All',       badge: counts.all },
-    { value: 'active',    label: 'Active',    badge: counts.active },
+    { value: 'all', label: 'All', badge: counts.all },
+    { value: 'active', label: 'Active', badge: counts.active },
     { value: 'completed', label: 'Completed', badge: counts.completed },
-    { value: 'expired',   label: 'Expired',   badge: counts.expired },
+    { value: 'expired', label: 'Expired', badge: counts.expired },
   ];
 });
 

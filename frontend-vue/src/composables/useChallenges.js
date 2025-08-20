@@ -1,8 +1,9 @@
+// src/composables/useChallenges.js
 import { ref } from 'vue';
 import { apiListChallenges } from '@/api/challenges';
 
 function normalizeList(raw) {
-  const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.member) ? raw.member : []);
+  const list = Array.isArray(raw) ? raw : [];
   return list.map(item => ({
     id: item.id,
     name: item.name,
@@ -23,15 +24,17 @@ function normalizeList(raw) {
 
 export function useChallenges() {
   const challenges = ref([]);
+  const totalCount = ref(0);
   const loading = ref(false);
   const error = ref(null);
 
-  async function loadChallenges(page = 1) {
+  async function loadChallenges({ page = 1, auth = true, params = {} } = {}) {
     loading.value = true;
     error.value = null;
     try {
-      const data = await apiListChallenges({ page });
-      challenges.value = normalizeList(data);
+      const { items, total } = await apiListChallenges({ page, auth, params });
+      challenges.value = normalizeList(items);
+      totalCount.value = total;
     } catch (err) {
       error.value = err?.message || 'Nepodařilo se načíst výzvy';
     } finally {
@@ -39,5 +42,5 @@ export function useChallenges() {
     }
   }
 
-  return { challenges, loading, error, loadChallenges };
+  return { challenges, totalCount, loading, error, loadChallenges };
 }
