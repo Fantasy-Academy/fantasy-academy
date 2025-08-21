@@ -38,13 +38,17 @@
         </div>
 
         <div class="rounded-xl bg-dark-white/10 p-4 border border-dark-white/20">
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-3 gap-3">
+            <div class="rounded-xl bg-dark-white/20 p-4 text-center">
+              <p class="text-sm text-dark-white/80 font-alexandria">Active <br /> Players</p>
+              <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ playerCount }}</p>
+            </div>
             <div class="rounded-xl bg-dark-white/20 p-4 text-center">
               <p class="text-sm text-dark-white/80 font-alexandria">Total Challenges</p>
               <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ allChallenges }}</p>
             </div>
             <div class="rounded-xl bg-dark-white/20 p-4 text-center">
-              <p class="text-sm text-dark-white/80 font-alexandria">Active Challenges</p>
+              <p class="text-sm text-dark-white/80 font-alexandria">Live <br /> Challenges</p>
               <p class="mt-1 text-3xl font-bold text-golden-yellow">{{ activeChallengesCount }}</p>
             </div>
           </div>
@@ -176,13 +180,22 @@
 
 <script setup>
 import { useAuth } from '@/composables/useAuth';
-import { useChallenges } from '@/composables/useChallenges'
-import { computed, onMounted } from 'vue';
+import { useChallenges } from '@/composables/useChallenges';
+import { apiGetLeaderboards } from '@/api/leaderboards';
+import { computed, onMounted, ref } from 'vue';
 
 const { challenges, totalCount, loadChallenges } = useChallenges();
+const playerCount = ref(null);
 
-onMounted(() => {
+onMounted(async () => {
   loadChallenges({ auth: false });
+
+  try {
+    const { totalItems } = await apiGetLeaderboards({ page: 1, auth: false });
+    playerCount.value = Number.isFinite(totalItems) ? totalItems : 0;
+  } catch (e) {
+    playerCount.value = null;
+  }
 });
 
 const activeChallengesCount = computed(() => {
@@ -194,5 +207,4 @@ const allChallenges = computed(() => totalCount.value || 0);
 
 const { isAuthenticated } = useAuth();
 document.title = 'Fantasy Academy | Home';
-
 </script>

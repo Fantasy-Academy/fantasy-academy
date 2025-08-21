@@ -1,19 +1,27 @@
 import { apiFetch } from '@/api/http';
 
-export async function apiGetLeaderboards(page = 1) {
-  const data = await apiFetch(`/api/leaderboards?page=${encodeURIComponent(page)}`, { auth: true });
+export async function apiGetLeaderboards({ page = 1, auth = true } = {}) {
+  const data = await apiFetch(`/api/leaderboards?page=${encodeURIComponent(page)}`, { auth });
 
-  // Normalize hydra or plain array
-  const list = Array.isArray(data) ? data : (Array.isArray(data?.member) ? data.member : []);
-  const totalItems = typeof data?.totalItems === 'number' ? data.totalItems : list.length;
-  const view = data?.view || null;
+  // Hydra i plain varianty
+  const items =
+    Array.isArray(data) ? data :
+    Array.isArray(data?.member) ? data.member :
+    Array.isArray(data?.['hydra:member']) ? data['hydra:member'] :
+    [];
 
-  // Attempt to parse last page from hydra.view.last (?page=N)
+  const totalItems =
+    typeof data?.totalItems === 'number' ? data.totalItems :
+    typeof data?.['hydra:totalItems'] === 'number' ? data['hydra:totalItems'] :
+    items.length;
+
+  // hydra:view -> last page (volitelné)
+  const view = data?.view || data?.['hydra:view'] || null;
   let lastPage = 1;
   if (view?.last) {
     const m = view.last.match(/[\?&]page=(\d+)/i);
     lastPage = m ? parseInt(m[1], 10) || 1 : 1;
   }
 
-  return { items: list, totalItems, lastPage };
+  return { items, totalItems, lastPage };
 }
