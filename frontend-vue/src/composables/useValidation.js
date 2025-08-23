@@ -30,11 +30,11 @@ export function useValidation() {
     let error = '';
 
     if (!email.trim()) {
-      error = 'E-mail je povinný.';
+      error = 'E-mail is compulsory.';
     } else if (!isValidEmail(email)) {
-      error = 'Neplatný e-mail.';
+      error = 'Invalid e-mail.';
     } else if (!password.trim()) {
-      error = 'Heslo je povinné.';
+      error = 'Password is compulsory.';
     }
 
     return error;
