@@ -26,9 +26,24 @@ export function useValidation() {
     return errors;
   }
 
+  function validateLoginForm({ email, password }) {
+    let error = '';
+
+    if (!email.trim()) {
+      error = 'E-mail je povinný.';
+    } else if (!isValidEmail(email)) {
+      error = 'Neplatný e-mail.';
+    } else if (!password.trim()) {
+      error = 'Heslo je povinné.';
+    }
+
+    return error;
+  }
+
   return {
     isValidEmail,
     isStrongPassword,
-    validateSignup
+    validateSignup,
+    validateLoginForm
   };
 }

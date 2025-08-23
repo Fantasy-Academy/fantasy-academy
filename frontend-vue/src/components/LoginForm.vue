@@ -82,7 +82,9 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
-import { validateLoginForm } from '@/validators/authValidators';
+import { useValidation } from '@/composables/useValidation';
+
+const { validateLoginForm } = useValidation();
 
 const { login, loading, error } = useAuth();
 const router = useRouter();
