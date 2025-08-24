@@ -11,7 +11,6 @@ use FantasyAcademy\API\Exceptions\PasswordResetTokenNotFound;
 use FantasyAcademy\API\Message\User\ResetPassword;
 use FantasyAcademy\API\Repository\PasswordResetTokenRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -24,8 +23,6 @@ readonly final class ResetPasswordHandler
         private UserPasswordHasherInterface $passwordHasher,
         private ClockInterface $clock,
         private MailerInterface $mailer,
-        #[Autowire(env: 'FRONTEND_URI')]
-        private string $frontendUri,
     ) {
     }
 
