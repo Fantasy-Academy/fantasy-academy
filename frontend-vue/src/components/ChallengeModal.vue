@@ -3,8 +3,7 @@
     <div class="w-full max-w-2xl rounded-2xl bg-white shadow-main border border-charcoal/10">
       <!-- Header -->
       <header
-        class="flex items-center justify-between rounded-t-2xl px-5 py-4 bg-gradient-to-r from-blue-black to-charcoal text-dark-white"
-      >
+        class="flex items-center justify-between rounded-t-2xl px-5 py-4 bg-gradient-to-r from-blue-black to-charcoal text-dark-white">
         <h2 class="text-xl font-bebas-neue tracking-wide">
           {{ challenge?.name || 'Challenge' }}
         </h2>
@@ -15,31 +14,22 @@
       <section class="max-h-[70vh] overflow-y-auto px-5 py-4 bg-dark-white/30">
         <!-- States -->
         <div v-if="loading" class="text-cool-gray">Loading challenge…</div>
-        <div
-          v-else-if="error"
-          class="rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral"
-        >
+        <div v-else-if="error"
+          class="rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
           {{ error }}
         </div>
 
         <template v-else-if="challenge">
           <!-- Readonly info banner -->
-          <div
-            v-if="readOnly"
-            class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800 text-sm font-medium"
-          >
+          <div v-if="readOnly"
+            class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800 text-sm font-medium">
             <template v-if="challenge.isExpired">This challenge has expired. Answers are read-only.</template>
             <template v-else>You've already answered this challenge. Answers are read-only.</template>
           </div>
 
           <!-- Main challenge image (optional) -->
-          <img
-            v-if="challengeImgSrc"
-            :src="challengeImgSrc"
-            :alt="challenge.name"
-            class="mb-3 max-h-56 w-full rounded-xl object-cover border border-charcoal/10"
-            @error="onImgError"
-          />
+          <img v-if="challengeImgSrc" :src="challengeImgSrc" :alt="challenge.name"
+            class="mb-3 max-h-56 w-full rounded-xl object-cover border border-charcoal/10" @error="onImgError" />
 
           <!-- Description -->
           <p class="mb-4 text-blue-black font-alexandria">
@@ -47,28 +37,16 @@
           </p>
 
           <!-- Hint -->
-          <div
-            v-if="challenge.hintText || hintImgSrc"
-            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm"
-          >
-            <p v-if="challenge.hintText" class="mb-2 text-blue-black">
-              <strong class="font-semibold">Hint:</strong> {{ challenge.hintText }}
-            </p>
-            <img
-              v-if="hintImgSrc"
-              :src="hintImgSrc"
-              alt="Hint"
-              class="max-h-48 w-full rounded object-contain bg-dark-white"
-              @error="onImgError"
-            />
+          <div v-if="challenge.hintText || hintImgSrc"
+            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm">
+            <div v-if="challenge.hintText" class="hint-content prose prose-sm max-w-none" v-html="challenge.hintText" />
+            <img v-if="hintImgSrc" :src="hintImgSrc" alt="Hint"
+              class="max-h-48 w-full rounded object-contain bg-dark-white" @error="onImgError" />
           </div>
 
           <!-- Questions -->
-          <div
-            v-for="q in questions"
-            :key="q.id"
-            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm"
-          >
+          <div v-for="q in questions" :key="q.id"
+            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
             <!-- READ-ONLY block if challenge or question is locked -->
             <template v-if="isQuestionReadOnly(q)">
               <p class="mb-2 font-semibold text-blue-black font-alexandria">{{ q.text }}</p>
@@ -85,11 +63,8 @@
                 <!-- multi_select -->
                 <template v-else-if="q.type === 'multi_select'">
                   <div class="flex flex-wrap gap-2">
-                    <span
-                      v-for="(lbl, i) in roMultiLabels(q)"
-                      :key="i"
-                      class="inline-flex items-center rounded bg-dark-white px-2 py-1"
-                    >
+                    <span v-for="(lbl, i) in roMultiLabels(q)" :key="i"
+                      class="inline-flex items-center rounded bg-dark-white px-2 py-1">
                       {{ lbl }}
                     </span>
                     <span v-if="roMultiLabels(q).length === 0">—</span>
@@ -113,10 +88,7 @@
                 <!-- sort -->
                 <template v-else-if="q.type === 'sort'">
                   <ol class="list-decimal pl-5 space-y-1">
-                    <li
-                      v-for="(lbl, i) in roSortLabels(q)"
-                      :key="i"
-                    >
+                    <li v-for="(lbl, i) in roSortLabels(q)" :key="i">
                       {{ lbl }}
                     </li>
                     <li v-if="roSortLabels(q).length === 0">—</li>
@@ -137,39 +109,22 @@
             <!-- EDITABLE block -->
             <template v-else>
               <!-- single_select -->
-              <QuestionSingleSelect
-                v-if="q.type === 'single_select'"
-                :question="toSingleSelectUI(q)"
-                v-model="answers[q.id]"
-              />
+              <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)"
+                v-model="answers[q.id]" />
 
               <!-- multi_select -->
-              <QuestionMultiSelect
-                v-else-if="q.type === 'multi_select'"
-                :question="toMultiSelectUI(q)"
-                v-model="answers[q.id]"
-              />
+              <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)"
+                v-model="answers[q.id]" />
 
               <!-- text -->
-              <QuestionText
-                v-else-if="q.type === 'text'"
-                :question="{ id: q.id, text: q.text, hint: null }"
-                v-model="answers[q.id]"
-              />
+              <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text, hint: null }"
+                v-model="answers[q.id]" />
 
               <!-- numeric -->
-              <QuestionNumeric
-                v-else-if="q.type === 'numeric'"
-                :question="toNumericUI(q)"
-                v-model="answers[q.id]"
-              />
+              <QuestionNumeric v-else-if="q.type === 'numeric'" :question="toNumericUI(q)" v-model="answers[q.id]" />
 
               <!-- sort -->
-              <QuestionSort
-                v-else-if="q.type === 'sort'"
-                :question="toSortUI(q)"
-                v-model="sortModels[q.id]"
-              />
+              <QuestionSort v-else-if="q.type === 'sort'" :question="toSortUI(q)" v-model="sortModels[q.id]" />
 
               <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
 
@@ -184,24 +139,24 @@
       <footer class="flex items-center justify-end gap-3 border-t border-charcoal/10 px-5 py-4 bg-white rounded-b-2xl">
         <button
           class="rounded-lg border border-charcoal/20 px-4 py-2 font-alexandria font-semibold text-blue-black hover:bg-dark-white transition"
-          @click="$emit('close')"
-        >
+          @click="$emit('close')">
           Close
         </button>
 
         <!-- Hide submit in read-only mode -->
-        <button
-          v-if="!readOnly"
+        <button v-if="!readOnly"
           class="rounded-lg bg-vibrant-coral px-4 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 disabled:opacity-60 shadow-sm transition"
-          :disabled="submitting || !challenge"
-          @click="handleSubmit"
-        >
+          :disabled="submitting || !challenge" @click="handleSubmit">
           {{ submitting ? 'Submitting…' : 'Submit answers' }}
         </button>
       </footer>
     </div>
   </div>
 </template>
+
+<style>
+@import "@/assets/hint.css";
+</style>
 
 <script setup>
 import { ref, reactive, onMounted, watch, computed } from 'vue';
@@ -210,10 +165,10 @@ import { resolvedImage, onImgError } from '@/utils/imageHelpers';
 
 // question components
 import QuestionSingleSelect from '@/components/questions/SingleSelectQuestion.vue';
-import QuestionMultiSelect  from '@/components/questions/MultiSelectQuestion.vue';
-import QuestionNumeric      from '@/components/questions/NumericQuestion.vue';
-import QuestionText         from '@/components/questions/TextQuestion.vue';
-import QuestionSort         from '@/components/questions/SortQuestion.vue';
+import QuestionMultiSelect from '@/components/questions/MultiSelectQuestion.vue';
+import QuestionNumeric from '@/components/questions/NumericQuestion.vue';
+import QuestionText from '@/components/questions/TextQuestion.vue';
+import QuestionSort from '@/components/questions/SortQuestion.vue';
 
 const props = defineProps({
   show: { type: Boolean, default: false },
@@ -221,13 +176,13 @@ const props = defineProps({
 });
 const emit = defineEmits(['close', 'submitted']);
 
-const loading    = ref(false);
-const error      = ref(null);
-const challenge  = ref(null);
-const questions  = ref([]);       // API form
-const answers    = reactive({});  // map questionId -> model
+const loading = ref(false);
+const error = ref(null);
+const challenge = ref(null);
+const questions = ref([]);       // API form
+const answers = reactive({});  // map questionId -> model
 const sortModels = reactive({});  // map questionId -> [{ id,label } ...] for UI sort
-const qErrors    = reactive({});  // map questionId -> error string
+const qErrors = reactive({});  // map questionId -> error string
 
 const submitting = ref(false);
 
@@ -515,11 +470,11 @@ async function handleSubmit() {
     answers: editableQuestions.map(q => {
       const model = answers[q.id];
       const answer = {
-        textAnswer:        null,
-        numericAnswer:     null,
-        selectedChoiceId:  null,
+        textAnswer: null,
+        numericAnswer: null,
+        selectedChoiceId: null,
         selectedChoiceIds: null,
-        orderedChoiceIds:  null,
+        orderedChoiceIds: null,
       };
 
       switch (q.type) {

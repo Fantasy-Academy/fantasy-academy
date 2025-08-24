@@ -117,7 +117,7 @@
         <button
           type="submit"
           :disabled="loading"
-          class="w-full rounded-lg bg-vibrant-coral py-2 font-alexandria font-semibold text-white shadow-sm transition hover:bg-vibrant-coral/90 disabled:opacity-60"
+          class="w-full rounded-lg bg-vibrant-coral py-2 font-alexandria font-semibold text-white shadow-sm transition hover:bg-vibrant-coral/90 disabled:opacity-60 cursor-pointer"
         >
           {{ loading ? 'Creating account…' : 'Create account' }}
         </button>

@@ -1,0 +1,46 @@
+.hint-content {
+  font-family: 'Alexandria', sans-serif;
+  font-size: 0.9rem;
+  color: #1c1c1c;
+  line-height: 1.5;
+}
+
+.hint-content p {
+  margin: 0.5rem 0;
+}
+
+.hint-content h1,
+.hint-content h2,
+.hint-content h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.hint-content h1 { font-size: 1.5rem; }
+.hint-content h2 { font-size: 1.25rem; }
+.hint-content h3 { font-size: 1.1rem; }
+
+.hint-content ul,
+.hint-content ol {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+  padding: 0;
+}
+
+.hint-content li {
+  margin: 0.25rem 0;
+}
+
+.hint-content strong {
+  font-weight: 600;
+  color: #000;
+}
+
+.hint-content code {
+  background: #f4f4f4;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}

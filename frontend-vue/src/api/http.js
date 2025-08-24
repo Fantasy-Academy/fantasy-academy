@@ -14,39 +14,72 @@ function joinUrl(base, path) {
 
 export async function apiFetch(path, opts = {}) {
   const url = joinUrl(BASE_URL, path);
+  const {
+    method = 'GET',
+    auth = false,             // default bez tokenu; u privátních volání pošli auth:true
+    body,
+    headers: extraHeaders = {},
+    credentials,              // volitelné přeposlání (např. 'include')
+    signal,                   // volitelně AbortController
+  } = opts;
+
   const headers = {
     'Content-Type': 'application/json',
-    ...(opts.headers || {}),
+    ...extraHeaders,
   };
 
-  if (opts.auth) {
-    const token = getToken();               // ← používáme sjednoceně accessToken
+  if (auth) {
+    const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
   const res = await fetch(url, {
-    method: opts.method || 'GET',
+    method,
     headers,
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
+    body: body != null ? JSON.stringify(body) : undefined,
+    credentials,
+    signal,
   });
 
   const ct = res.headers.get('content-type') || '';
+  const contentLength = res.headers.get('content-length');
+
   if (!res.ok) {
-    let msg = `${res.status} ${res.statusText}`;
+    // snaž se vyčíst message z JSONu/Plain textu
+    let message = `${res.status} ${res.statusText}`;
+    let data = null;
+
     try {
       if (ct.includes('application/json')) {
-        const j = await res.json();
-        msg = j?.detail || j?.title || j?.message || msg;
+        data = await res.json();
+        message = data?.detail || data?.title || data?.message || message;
       } else {
-        const t = await res.text();
-        msg = t || msg;
+        const text = await res.text();
+        message = text || message;
       }
-    } catch {}
-    const err = new Error(msg);
+    } catch {
+      /* noop */
+    }
+
+    const err = new Error(message);
     err.status = res.status;
+    err.data = data;
+    err.allow = res.headers.get('Allow') || undefined; // u 405 pomůže
     throw err;
   }
 
-  if (!ct.includes('application/json')) return undefined;
-  return await res.json();
+  // 204 No Content – úspěch bez těla
+  if (res.status === 204) return { ok: true, status: 204 };
+
+  // Některé 2xx bez těla (nebo bez JSONu)
+  if (!ct.includes('application/json') || contentLength === '0') {
+    return { ok: true, status: res.status };
+  }
+
+  // Bezpečně zkus JSON
+  try {
+    return await res.json();
+  } catch {
+    return { ok: true, status: res.status };
+  }
 }
