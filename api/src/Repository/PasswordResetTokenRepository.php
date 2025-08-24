@@ -6,7 +6,7 @@ namespace FantasyAcademy\API\Repository;
 
 use FantasyAcademy\API\Entity\PasswordResetToken;
 use Doctrine\ORM\EntityManagerInterface;
-use FantasyAcademy\API\Exceptions\InvalidPasswordResetToken;
+use FantasyAcademy\API\Exceptions\PasswordResetTokenNotFound;
 
 readonly final class PasswordResetTokenRepository
 {
@@ -21,7 +21,7 @@ readonly final class PasswordResetTokenRepository
     }
 
     /**
-     * @throws InvalidPasswordResetToken
+     * @throws PasswordResetTokenNotFound
      */
     public function get(string $tokenId): PasswordResetToken
     {
@@ -31,6 +31,6 @@ readonly final class PasswordResetTokenRepository
             return $token;
         }
 
-        throw new InvalidPasswordResetToken();
+        throw new PasswordResetTokenNotFound();
     }
 }
