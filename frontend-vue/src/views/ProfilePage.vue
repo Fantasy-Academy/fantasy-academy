@@ -166,7 +166,7 @@ if (user.value && !me.value) {
 }
 onMounted(() => {
   load();
-  loadChallenges(); // načteme seznam výzev pro výpočet aktivních
+  loadChallenges();
 });
 
 const profile = computed(() => ({
