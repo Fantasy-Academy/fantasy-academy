@@ -7,15 +7,15 @@ namespace FantasyAcademy\API\Exceptions;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class InvalidPasswordResetToken extends UnrecoverableMessageHandlingException implements DomainException
+final class PasswordResetTokenExpired extends UnrecoverableMessageHandlingException implements DomainException
 {
     public function statusCode(): int
     {
-        return 400;
+        return 410;
     }
 
     public function toHumanReadableMessage(TranslatorInterface $translator): string
     {
-        return $translator->trans('invalid_password_reset_token', domain: 'exceptions');
+        return $translator->trans('password_reset_token_expired', domain: 'exceptions');
     }
 }

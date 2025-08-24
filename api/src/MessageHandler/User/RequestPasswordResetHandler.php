@@ -9,6 +9,9 @@ use FantasyAcademy\API\Entity\PasswordResetToken;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Exceptions\UserNotRegistered;
 use FantasyAcademy\API\Message\User\RequestPasswordReset;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use FantasyAcademy\API\Repository\PasswordResetTokenRepository;
 use FantasyAcademy\API\Repository\UserRepository;
@@ -22,19 +25,18 @@ readonly final class RequestPasswordResetHandler
         private ProvideIdentity $provideIdentity,
         private PasswordResetTokenRepository $passwordResetTokenRepository,
         private ClockInterface $clock,
+        private MailerInterface $mailer,
+        #[Autowire(env: 'FRONTEND_URI')]
+        private string $frontendUri,
     ) {
     }
 
     /**
-     * @throws UserNotRegistered
+     * @throws UserNotFound
      */
     public function __invoke(RequestPasswordReset $message): void
     {
-        try {
-            $user = $this->userRepository->get($message->email);
-        } catch (UserNotFound) {
-            throw new UserNotRegistered();
-        }
+        $user = $this->userRepository->get($message->email);
 
         $token = new PasswordResetToken(
             $this->provideIdentity->next(),
@@ -45,6 +47,22 @@ readonly final class RequestPasswordResetHandler
 
         $this->passwordResetTokenRepository->add($token);
 
-        // TODO: send email
+        $resetUrl = sprintf(
+            '%s/reset-password?code=%s&email=%s',
+            $this->frontendUri,
+            $token->id->toString(),
+            $user->email,
+        );
+
+        $email = new TemplatedEmail()
+            ->to($user->email)
+            ->subject('Password Reset Request - Fantasy Academy')
+            ->htmlTemplate('emails/password_reset_request.html.twig')
+            ->context([
+                'userName' => $user->name,
+                'resetUrl' => $resetUrl,
+            ]);
+
+        $this->mailer->send($email);
     }
 }

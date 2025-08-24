@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\MessageHandler\User;
 
+use Psr\Clock\ClockInterface;
 use FantasyAcademy\API\Exceptions\InvalidPasswordResetToken;
+use FantasyAcademy\API\Exceptions\PasswordResetTokenExpired;
 use FantasyAcademy\API\Exceptions\PasswordResetTokenNotFound;
 use FantasyAcademy\API\Message\User\ResetPassword;
 use FantasyAcademy\API\Repository\PasswordResetTokenRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -17,12 +22,16 @@ readonly final class ResetPasswordHandler
     public function __construct(
         private PasswordResetTokenRepository $passwordResetTokenRepository,
         private UserPasswordHasherInterface $passwordHasher,
-
+        private ClockInterface $clock,
+        private MailerInterface $mailer,
+        #[Autowire(env: 'FRONTEND_URI')]
+        private string $frontendUri,
     ) {
     }
 
     /**
      * @throws InvalidPasswordResetToken
+     * @throws PasswordResetTokenExpired
      */
     public function __invoke(ResetPassword $message): void
     {
@@ -32,11 +41,31 @@ readonly final class ResetPasswordHandler
             throw new InvalidPasswordResetToken(previous: $exception);
         }
 
+        $now = $this->clock->now();
+
+        if ($token->usedAt !== null) {
+            throw new InvalidPasswordResetToken();
+        }
+
+        if ($now > $token->validUntil) {
+            throw new PasswordResetTokenExpired();
+        }
+
         $user = $token->user;
         $hashedPassword = $this->passwordHasher->hashPassword($user, $message->newPassword);
 
         $user->changePassword($hashedPassword);
+        $token->use($now);
 
-        // TODO: send email
+        $email = new TemplatedEmail()
+            ->to($user->email)
+            ->subject('Password Changed Successfully - Fantasy Academy')
+            ->htmlTemplate('emails/password_reset_confirmation.html.twig')
+            ->context([
+                'userName' => $user->name,
+                'changedAt' => $now,
+            ]);
+
+        $this->mailer->send($email);
     }
 }
