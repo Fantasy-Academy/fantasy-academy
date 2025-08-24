@@ -10,37 +10,47 @@
         <template v-else>
             <!-- Header with avatar/monogram -->
             <div
-                class="mb-8 flex items-center gap-5 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main">
+                class="mb-8 flex items-center gap-5 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main justify-between">
                 <!-- Avatar -->
-                <div class="relative h-16 w-16 shrink-0">
-                    <img v-if="avatarSrc" :src="avatarSrc" :alt="profile.name || 'User avatar'"
-                        class="h-full w-full rounded-full object-cover border-2 border-golden-yellow" loading="lazy"
-                        @error="onImgError" />
-                    <div v-else
-                        class="grid h-full w-full place-items-center rounded-full bg-golden-yellow text-blue-black text-2xl font-bold">
-                        {{ initials }}
+                <div class="flex flex-row gap-2 items-center">
+                    <div class="relative h-16 w-16 shrink-0">
+                        <img v-if="avatarSrc" :src="avatarSrc" :alt="profile.name || 'User avatar'"
+                            class="h-full w-full rounded-full object-cover border-2 border-golden-yellow" loading="lazy"
+                            @error="onImgError" />
+                        <div v-else
+                            class="grid h-full w-full place-items-center rounded-full bg-golden-yellow text-blue-black text-2xl font-bold">
+                            {{ initials }}
+                        </div>
+                    </div>
+
+                    <!-- User info -->
+                    <div class="min-w-0">
+                        <h1 class="font-bebas-neue text-3xl tracking-wide">{{ profile.name }}</h1>
+                        <p class="text-dark-white/90 font-alexandria">{{ profile.email }}</p>
+                        <p class="text-sm text-dark-white/70 font-alexandria">
+                            Registered: <span class="font-semibold text-white">{{ formattedRegistered }}</span>
+                        </p>
                     </div>
                 </div>
+                <div class="flex flex-col gap-1">
+                    <div class="ml-auto">
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full bg-pistachio/20 px-3 py-1 text-sm font-semibold text-pistachio shadow-sm"
+                            title="Number of available challenges to answer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path
+                                    d="M5 4h14a1 1 0 0 1 1 1v13.382a1 1 0 0 1-1.553.833L12 15.236l-5.447 3.979A1 1 0 0 1 5 18.382V5a1 1 0 0 1 1-1Z" />
+                            </svg>
+                            {{ activeChallengesCount }} challenges available
+                        </span>
+                    </div>
+                    <router-link to="profile/edit"
+                        class="inline-flex items-center justify-end rounded-lg px-5 py-2 font-semibold text-white hover:underline">
+                        Edit Profile
+                    </router-link>
+                </div>
 
-                <!-- User info -->
-                <div class="min-w-0">
-                    <h1 class="font-bebas-neue text-3xl tracking-wide">{{ profile.name }}</h1>
-                    <p class="text-dark-white/90 font-alexandria">{{ profile.email }}</p>
-                    <p class="text-sm text-dark-white/70 font-alexandria">
-                        Registered: <span class="font-semibold text-white">{{ formattedRegistered }}</span>
-                    </p>
-                </div>
-                <div class="ml-auto">
-                    <span
-                        class="inline-flex items-center gap-2 rounded-full bg-pistachio/20 px-3 py-1 text-sm font-semibold text-pistachio shadow-sm"
-                        title="Number of available challenges to answer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M5 4h14a1 1 0 0 1 1 1v13.382a1 1 0 0 1-1.553.833L12 15.236l-5.447 3.979A1 1 0 0 1 5 18.382V5a1 1 0 0 1 1-1Z" />
-                        </svg>
-                        {{ activeChallengesCount }} challenges available
-                    </span>
-                </div>
             </div>
 
             <!-- Stat cards -->
@@ -162,60 +172,60 @@ document.title = 'Fantasy Academy | Profile';
 const { challenges, loadChallenges } = useChallenges();
 
 if (user.value && !me.value) {
-  me.value = user.value;
+    me.value = user.value;
 }
 onMounted(() => {
-  load();
-  loadChallenges();
+    load();
+    loadChallenges();
 });
 
 const profile = computed(() => ({
-  id: me.value?.id ?? user.value?.id ?? null,
-  name: me.value?.name ?? user.value?.name ?? '',
-  email: me.value?.email ?? user.value?.email ?? '',
-  registeredAt: me.value?.registeredAt ?? user.value?.registeredAt ?? null,
-  availableChallenges: me.value?.availableChallenges ?? 0,
-  overallStatistics: me.value?.overallStatistics ?? user.value?.overallStatistics ?? null,
-  seasonsStatistics: me.value?.seasonsStatistics ?? user.value?.seasonsStatistics ?? [],
+    id: me.value?.id ?? user.value?.id ?? null,
+    name: me.value?.name ?? user.value?.name ?? '',
+    email: me.value?.email ?? user.value?.email ?? '',
+    registeredAt: me.value?.registeredAt ?? user.value?.registeredAt ?? null,
+    availableChallenges: me.value?.availableChallenges ?? 0,
+    overallStatistics: me.value?.overallStatistics ?? user.value?.overallStatistics ?? null,
+    seasonsStatistics: me.value?.seasonsStatistics ?? user.value?.seasonsStatistics ?? [],
 }));
 
 //výpočet aktivních výzev z reálných dat
 const activeChallengesCount = computed(() => {
-  const list = challenges.value || [];
-  return list.filter(c => c && c.isStarted && !c.isExpired && !c.isAnswered).length;
+    const list = challenges.value || [];
+    return list.filter(c => c && c.isStarted && !c.isExpired && !c.isAnswered).length;
 });
 
 const avatarSrc = computed(() => resolvedImage(profile.value));
 
 const formattedRegistered = computed(() => {
-  if (!profile.value.registeredAt) return '—';
-  const d = new Date(profile.value.registeredAt);
-  try {
-    return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    }).format(d);
-  } catch {
-    return d.toLocaleString();
-  }
+    if (!profile.value.registeredAt) return '—';
+    const d = new Date(profile.value.registeredAt);
+    try {
+        return new Intl.DateTimeFormat('en-GB', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        }).format(d);
+    } catch {
+        return d.toLocaleString();
+    }
 });
 
 const overall = computed(() => profile.value.overallStatistics ?? {
-  rank: null,
-  challengesAnswered: 0,
-  points: 0,
-  skills: [],
+    rank: null,
+    challengesAnswered: 0,
+    points: 0,
+    skills: [],
 });
 
 const initials = computed(() => {
-  const name = profile.value.name?.trim();
-  if (name) {
-    const parts = name.split(/\s+/).filter(Boolean);
-    const first = parts[0]?.[0] ?? '';
-    const last = parts.length > 1 ? parts[parts.length - 1][0] ?? '' : '';
-    return (first + last).toUpperCase();
-  }
-  const email = profile.value.email ?? '';
-  return (email[0] || '?').toUpperCase();
+    const name = profile.value.name?.trim();
+    if (name) {
+        const parts = name.split(/\s+/).filter(Boolean);
+        const first = parts[0]?.[0] ?? '';
+        const last = parts.length > 1 ? parts[parts.length - 1][0] ?? '' : '';
+        return (first + last).toUpperCase();
+    }
+    const email = profile.value.email ?? '';
+    return (email[0] || '?').toUpperCase();
 });
 </script>
