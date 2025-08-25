@@ -1,123 +1,99 @@
 <template>
   <section class="mx-auto max-w-md px-4 py-10">
     <div class="rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
-      <header class="mb-6">
-        <h1 class="font-bebas-neue text-3xl tracking-wide text-blue-black">Reset password</h1>
-        <p class="mt-1 text-sm font-alexandria text-cool-gray">
-          Enter your new password to complete the reset process.
-        </p>
-      </header>
+      <h1 class="font-bebas-neue text-3xl tracking-wide text-blue-black">Reset Password</h1>
+      <p class="mt-1 text-sm text-cool-gray font-alexandria">
+        Code: <strong>{{ code || '—' }}</strong>, Email: <strong>{{ email || '—' }}</strong>
+      </p>
 
-      <!-- Success -->
-      <div
-        v-if="success"
-        class="mb-4 rounded-xl border border-pistachio/30 bg-pistachio/10 p-3 text-pistachio"
-      >
-        Password has been changed. You can now
-        <router-link to="/login" class="underline">log in</router-link>.
+      <div v-if="error" class="mt-3 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
+        {{ error }}
+      </div>
+      <div v-if="success" class="mt-3 rounded-xl border border-pistachio/30 bg-pistachio/10 p-3 text-pistachio">
+        Password changed. Logging you in…
       </div>
 
-      <!-- Error -->
-      <div
-        v-if="formError"
-        class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral"
-      >
-        {{ formError }}
-      </div>
-
-      <!-- Form -->
-      <form @submit.prevent="onSubmit" novalidate class="space-y-4" v-if="!success">
+      <form class="mt-5 space-y-3" @submit.prevent="onSubmit" novalidate>
         <div>
-          <label class="mb-1 block text-sm font-medium text-blue-black">New password</label>
+          <label class="block text-sm font-medium text-blue-black mb-1">New password</label>
           <input
+            v-model.trim="password"
             type="password"
-            v-model="password"
-            placeholder="Min. 6 chars, uppercase and number"
             class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-golden-yellow"
             :class="passwordError ? 'border-vibrant-coral' : 'border-charcoal/20'"
-            autocomplete="new-password"
+            placeholder="••••••••"
           />
           <p v-if="passwordError" class="mt-1 text-sm text-vibrant-coral">{{ passwordError }}</p>
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-blue-black">Confirm password</label>
-          <input
-            type="password"
-            v-model="confirm"
-            placeholder="Repeat new password"
-            class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-golden-yellow"
-            :class="confirmError ? 'border-vibrant-coral' : 'border-charcoal/20'"
-            autocomplete="new-password"
-          />
-          <p v-if="confirmError" class="mt-1 text-sm text-vibrant-coral">{{ confirmError }}</p>
         </div>
 
         <button
           type="submit"
           :disabled="loading"
-          class="w-full rounded-lg bg-blue-black px-4 py-2 font-semibold text-white shadow-main hover:opacity-90 disabled:opacity-60 cursor-pointer"
+          class="w-full rounded-lg bg-blue-black px-4 py-2 font-semibold text-white shadow-main hover:opacity-90 disabled:opacity-60"
         >
-          {{ loading ? 'Changing…' : 'Change password' }}
+          {{ loading ? 'Saving…' : 'Set new password' }}
         </button>
       </form>
-
-      <div class="mt-6 flex items-center justify-between text-sm">
-        <router-link to="/forgot-password" class="font-alexandria text-blue-black hover:underline">
-          Request a new code
-        </router-link>
-        <router-link to="/login" class="font-alexandria text-vibrant-coral hover:underline">
-          Back to login
-        </router-link>
-      </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { apiResetPassword } from '@/api/password';
+import { apiLogin } from '@/api/auth';          
+import { setToken } from '@/services/tokenService';
+import { useAuth } from '@/composables/useAuth';
+
+const route = useRoute();
+const router = useRouter();
+const { refreshMe } = useAuth?.() ?? {};
+
+const code = computed(() => route.query.code?.toString() || '');
+const email = computed(() => route.query.email?.toString() || '');
+
+const password = ref('');
+const loading = ref(false);
+const success = ref(false);
+const error = ref('');
+const passwordError = ref('');
 
 document.title = 'Fantasy Academy | Reset Password';
 
-const route = useRoute();
-const code = route.query.code || ''; // ← kód z URL
-
-const password = ref('');
-const confirm = ref('');
-const loading = ref(false);
-const success = ref(false);
-
-const formError = ref('');
-const passwordError = ref('');
-const confirmError = ref('');
-
-function isStrongPassword(v) {
-  return /^(?=.*[A-Z])(?=.*\d).{6,}$/.test(v);
+function validate() {
+  passwordError.value = '';
+  if (!password.value || password.value.length < 6) {
+    passwordError.value = 'Min. 6 znaků.';
+  }
+  return !passwordError.value;
 }
 
 async function onSubmit() {
-  formError.value = '';
-  passwordError.value = '';
-  confirmError.value = '';
+  error.value = '';
+  success.value = false;
+  if (!validate()) return;
 
-  if (!password.value) passwordError.value = 'Enter a new password.';
-  else if (!isStrongPassword(password.value))
-    passwordError.value = 'Min. 6 chars, uppercase and number.';
+  if (!code.value) {
+    error.value = 'Missing reset code in URL.';
+    return;
+  }
 
-  if (!confirm.value) confirmError.value = 'Confirm the new password.';
-  else if (password.value !== confirm.value)
-    confirmError.value = 'Passwords do not match.';
-
-  if (passwordError.value || confirmError.value) return;
-
-  loading.value = true;
   try {
-    await apiResetPassword({ code, newPassword: password.value });
+    loading.value = true;
+    await apiResetPassword({ code: code.value, newPassword: password.value });
     success.value = true;
+
+    if (email.value) {
+      const { token } = await apiLogin({ email: email.value, password: password.value });
+      setToken(token);
+      await refreshMe?.();
+      router.replace('/dashboard');
+    } else {
+      router.replace('/login');
+    }
   } catch (e) {
-    formError.value = e?.message || 'Failed to reset password.';
+    error.value = e?.message || 'Reset failed.';
   } finally {
     loading.value = false;
   }

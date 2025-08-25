@@ -1,9 +1,7 @@
 <!-- src/components/LoginForm.vue -->
 <template>
   <section class="mx-auto w-full max-w-md px-4 py-8">
-    <!-- Card -->
     <div class="rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
-      <!-- Header -->
       <header class="mb-6">
         <h1 class="font-bebas-neue text-4xl tracking-wide text-blue-black">Sign in</h1>
         <p class="mt-1 text-sm font-alexandria text-cool-gray">
@@ -11,15 +9,15 @@
         </p>
       </header>
 
-      <!-- Form -->
       <form @submit.prevent="onSubmit" class="space-y-4" novalidate>
         <!-- Email -->
         <div>
           <label for="email" class="mb-1 block text-sm font-medium text-blue-black">Email</label>
           <input
             id="email"
+            name="email"
             type="email"
-            v-model="email"
+            v-model.trim="email"
             autocomplete="email"
             placeholder="name@example.com"
             class="w-full rounded-lg border border-charcoal/20 bg-white px-3 py-2 font-alexandria text-blue-black placeholder:cool-gray/70 outline-none ring-0 focus:border-golden-yellow focus:ring-2 focus:ring-golden-yellow/40"
@@ -33,6 +31,7 @@
             <input
               :type="showPassword ? 'text' : 'password'"
               id="password"
+              name="password"
               v-model="password"
               autocomplete="current-password"
               placeholder="••••••••"
@@ -50,21 +49,24 @@
         </div>
 
         <!-- Error -->
-        <p v-if="error" role="alert" class="rounded-md border border-vibrant-coral/30 bg-vibrant-coral/10 p-2 text-sm font-alexandria text-vibrant-coral">
-          {{ error }}
+        <p
+          v-if="formError"
+          role="alert"
+          class="rounded-md border border-vibrant-coral/30 bg-vibrant-coral/10 p-2 text-sm font-alexandria text-vibrant-coral"
+        >
+          {{ formError }}
         </p>
 
         <!-- Submit -->
         <button
           type="submit"
-          :disabled="loading"
-          class="w-full rounded-lg bg-vibrant-coral py-2 font-alexandria font-semibold text-white shadow-sm transition hover:bg-vibrant-coral/90 disabled:opacity-60 cursor-pointer"
+          :disabled="authLoading"
+          class="w-full rounded-lg bg-vibrant-coral py-2 font-alexandria font-semibold text-white shadow-sm transition hover:bg-vibrant-coral/90 disabled:opacity-60"
         >
-          {{ loading ? 'Signing in…' : 'Sign in' }}
+          {{ authLoading ? 'Signing in…' : 'Sign in' }}
         </button>
       </form>
 
-      <!-- Footer links -->
       <div class="mt-6 flex flex-col items-center gap-2 text-sm font-alexandria">
         <router-link to="/forgot-password" class="text-blue-black hover:underline">Forgot password?</router-link>
         <p class="text-cool-gray">
@@ -80,31 +82,37 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { useValidation } from '@/composables/useValidation';
 
-const { validateLoginForm } = useValidation();
+const { validateLoginForm } = useValidation(); // očekává { email, password } → '' | chybová hláška
 
-const { login, loading, error } = useAuth();
+const { login, loading: authLoading } = useAuth();
 const router = useRouter();
+const route = useRoute();
 
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
+const formError = ref('');
 
 async function onSubmit() {
-  // client-side validation
-  error.value = validateLoginForm({ email: email.value, password: password.value });
-  if (error.value) return;
+  const em = String(email.value ?? '').trim();
+  const pw = String(password.value ?? '');
+
+  console.log('[LoginForm] submit payload preview:', { email: em, hasPw: pw.length > 0 });
+
+  const msg = validateLoginForm({ email: em, password: pw });
+  formError.value = msg;
+  if (msg) return;
 
   try {
-    const user = await login(email.value, password.value);
-    // success → go to dashboard
-    if (user) router.push('/dashboard');
+    const me = await login(em, pw);
+    const target = (route.query.redirect && String(route.query.redirect)) || '/dashboard';
+    if (me) router.push(target);
   } catch (e) {
-    // backend or network error
-    error.value = 'Incorrect email or password';
+    formError.value = e?.message || 'Incorrect email or password';
   }
 }
 </script>

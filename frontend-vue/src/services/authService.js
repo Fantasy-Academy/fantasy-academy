@@ -2,10 +2,11 @@ import { apiLogin, apiGetMe, apiRegister } from '../api/auth';
 import { setToken, clearToken, getToken } from './tokenService';
 
 export async function loginAndLoadUser({ email, password }) {
-  const loginRes = await apiLogin(email, password);
+  // ✅ správně předáno jako objekt
+  const loginRes = await apiLogin({ email, password });
   console.debug('[authService] /api/login response:', loginRes);
 
-  const token = loginRes?.token; // ⬅️ tady taky "token"
+  const token = loginRes?.token;
   if (!token) {
     const detail = loginRes?.detail || loginRes?.message;
     throw new Error(detail || 'Chybí token v odpovědi /api/login.');
@@ -22,12 +23,12 @@ export async function registerAndLoadUser({ name, email, password }) {
   await apiRegister({ name, email, password });
 
   // 2) login – musí vrátit { token }
-  const loginRes = await apiLogin(email, password);
-  console.debug('[authService] /api/login response:', loginRes); // ⬅️ uvidíš, co přesně vrací
+  // ✅ opraveno: předávám jako objekt
+  const loginRes = await apiLogin({ email, password });
+  console.debug('[authService] /api/login response:', loginRes);
 
-  const token = loginRes?.token; // ⬅️ SPECIFIKACE říká "token"
+  const token = loginRes?.token;
   if (!token) {
-    // vypiš detail z backendu, pokud je
     const detail = loginRes?.detail || loginRes?.message;
     throw new Error(detail || 'Chybí token v odpovědi /api/login.');
   }

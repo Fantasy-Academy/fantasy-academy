@@ -22,6 +22,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const { isAuthenticated } = useAuth();
+  if (to.path === '/reset-password') return true;
   if (to.meta.requiresAuth && !isAuthenticated.value) {
     return { path: '/login', query: { redirect: to.fullPath } };
   }

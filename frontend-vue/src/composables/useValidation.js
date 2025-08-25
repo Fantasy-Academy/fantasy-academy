@@ -1,15 +1,16 @@
 // src/composables/useValidation.js
 export function useValidation() {
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  function isValidEmail(email = '') {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
   }
 
-  function isStrongPassword(password) {
+  function isStrongPassword(password = '') {
     // min. 6 znaků, aspoň jedno velké písmeno a číslo
-    return /^(?=.*[A-Z])(?=.*\d).{6,}$/.test(password);
+    return /^(?=.*[A-Z])(?=.*\d).{6,}$/.test(String(password));
   }
 
-  function validateSignup({ name, email, password, confirm }) {
+  // Signup → vrací objekt chyb pro jednotlivá pole
+  function validateSignup({ name = '', email = '', password = '', confirm = '' }) {
     const errors = { name: '', email: '', password: '', confirm: '' };
 
     if (!name.trim()) errors.name = 'Jméno je povinné.';
@@ -18,7 +19,7 @@ export function useValidation() {
 
     if (!password) errors.password = 'Heslo je povinné.';
     else if (!isStrongPassword(password))
-      errors.password = 'Min. 6 znaků, velké písmeno a číslo.';
+      errors.password = 'Min. 6 znaků, jedno velké písmeno a číslo.';
 
     if (!confirm) errors.confirm = 'Potvrzení hesla je povinné.';
     else if (password !== confirm) errors.confirm = 'Hesla se neshodují.';
@@ -26,24 +27,36 @@ export function useValidation() {
     return errors;
   }
 
-  function validateLoginForm({ email, password }) {
-    let error = '';
+  // Login → vrací JEDEN řetězec se souhrnnou chybou (jak už používáš)
+  function validateLoginForm({ email = '', password = '' }) {
+    if (!email.trim()) return 'E-mail je povinný.';
+    if (!isValidEmail(email)) return 'Neplatný e-mail.';
+    if (!String(password).trim()) return 'Heslo je povinné.';
+    return '';
+  }
 
-    if (!email.trim()) {
-      error = 'E-mail is compulsory.';
-    } else if (!isValidEmail(email)) {
-      error = 'Invalid e-mail.';
-    } else if (!password.trim()) {
-      error = 'Password is compulsory.';
+  // Forgot password (jen e-mail)
+  function validateForgotEmail(email = '') {
+    if (!email.trim()) return 'Zadej e-mail.';
+    if (!isValidEmail(email)) return 'Neplatný e-mail.';
+    return '';
+  }
+
+  // Reset password (nové heslo)
+  function validateResetPassword(newPassword = '') {
+    if (!newPassword) return 'Zadej nové heslo.';
+    if (!isStrongPassword(newPassword)) {
+      return 'Heslo musí mít min. 6 znaků, obsahovat velké písmeno a číslo.';
     }
-
-    return error;
+    return '';
   }
 
   return {
     isValidEmail,
     isStrongPassword,
     validateSignup,
-    validateLoginForm
+    validateLoginForm,
+    validateForgotEmail,
+    validateResetPassword,
   };
 }

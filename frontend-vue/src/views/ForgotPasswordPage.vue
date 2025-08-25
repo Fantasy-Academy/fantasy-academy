@@ -81,9 +81,11 @@ async function onSubmit() {
 
   loading.value = true;
   try {
-    await apiRequestResetCode(email.value);
+    const res = await apiRequestResetCode(email.value);
+    console.log('[ForgotPassword] success, raw response:', res);
     success.value = true;
   } catch (e) {
+    console.error('[ForgotPassword] error:', e);
     formError.value = e?.message || 'Failed to request reset code.';
   }
 }

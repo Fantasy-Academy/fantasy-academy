@@ -1,11 +1,13 @@
 import { apiFetch } from '@/api/http';
 
 export async function apiRequestResetCode(email) {
-  await apiFetch('/api/forgotten-password/request-reset-code', {
+  console.log('[apiRequestResetCode] sending', email);
+  const res = await apiFetch('/api/forgotten-password/request-reset-code', {
     method: 'PUT',
-    auth: false,
-    body: { email },
+    body: { email }
   });
+  console.log('[apiRequestResetCode] response', res);
+  return res;
 }
 
 export function apiResetPassword({ code, newPassword }) {

@@ -4,23 +4,29 @@ import { getToken } from '@/services/tokenService';
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ??
   import.meta.env.VITE_API_BASE_URL ??
-  ''; // ← nikdy nenechá "undefined"
+  '';
+
+const API_DEBUG = String(import.meta.env.VITE_API_DEBUG || '').toLowerCase() === 'true';
 
 // helper pro bezpečné spojení base + path
 function joinUrl(base, path) {
-  if (!base) return path; // když používáš dev proxy, stačí relativní /api/...
+  if (!base) return path; // s dev proxy stačí relativní /api/...
   return `${base.replace(/\/+$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
+let REQ_ID = 0;
+
 export async function apiFetch(path, opts = {}) {
+  const reqId = ++REQ_ID;
   const url = joinUrl(BASE_URL, path);
+
   const {
     method = 'GET',
-    auth = false,             // default bez tokenu; u privátních volání pošli auth:true
+    auth = false,
     body,
     headers: extraHeaders = {},
-    credentials,              // volitelné přeposlání (např. 'include')
-    signal,                   // volitelně AbortController
+    credentials,
+    signal,
   } = opts;
 
   const headers = {
@@ -31,6 +37,22 @@ export async function apiFetch(path, opts = {}) {
   if (auth) {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (API_DEBUG) {
+    // maskni token a zaloguj jen shrnutí requestu
+    const authHeader = headers.Authorization ? `${headers.Authorization.slice(0, 16)}…` : undefined;
+    // group pro přehlednost
+    // (collapsed, ať to nekazí konzoli)
+    console.groupCollapsed(`%c[apiFetch#${reqId}] → ${method} ${url}`, 'color:#888');
+    console.log('request', {
+      url,
+      method,
+      headers: { ...headers, ...(authHeader ? { Authorization: authHeader } : {}) },
+      body: body ?? null,
+      credentials: credentials ?? undefined,
+    });
+    console.groupEnd();
   }
 
   const res = await fetch(url, {
@@ -44,42 +66,68 @@ export async function apiFetch(path, opts = {}) {
   const ct = res.headers.get('content-type') || '';
   const contentLength = res.headers.get('content-length');
 
+  // ----- ERROR BRANCH -----
   if (!res.ok) {
-    // snaž se vyčíst message z JSONu/Plain textu
     let message = `${res.status} ${res.statusText}`;
     let data = null;
+    let text = null;
 
     try {
       if (ct.includes('application/json')) {
         data = await res.json();
         message = data?.detail || data?.title || data?.message || message;
       } else {
-        const text = await res.text();
+        text = await res.text();
         message = text || message;
       }
-    } catch {
-      /* noop */
-    }
+    } catch { /* noop */ }
+
+    // viditelný log u chyb
+    const allow = res.headers.get('Allow') || undefined;
+    const maskedAuth = headers.Authorization ? `${headers.Authorization.slice(0, 16)}…` : undefined;
+
+    console.error('[apiFetch ERROR]', {
+      id: reqId,
+      url,
+      method,
+      status: res.status,
+      statusText: res.statusText,
+      message,
+      responseJson: data,
+      responseText: text,
+      allow,
+      sentBody: body ?? null,
+      sentHeaders: { ...headers, ...(maskedAuth ? { Authorization: maskedAuth } : {}) },
+    });
 
     const err = new Error(message);
     err.status = res.status;
-    err.data = data;
-    err.allow = res.headers.get('Allow') || undefined; // u 405 pomůže
+    err.data = data ?? text;
+    err.allow = allow;
     throw err;
   }
 
-  // 204 No Content – úspěch bez těla
-  if (res.status === 204) return { ok: true, status: 204 };
+  // ----- SUCCESS BRANCH -----
+  if (res.status === 204) {
+    if (API_DEBUG) console.info('[apiFetch OK]', { id: reqId, url, method, status: 204 });
+    return { ok: true, status: 204 };
+  }
 
-  // Některé 2xx bez těla (nebo bez JSONu)
   if (!ct.includes('application/json') || contentLength === '0') {
+    if (API_DEBUG) console.info('[apiFetch OK]', { id: reqId, url, method, status: res.status, note: 'no-json' });
     return { ok: true, status: res.status };
   }
 
-  // Bezpečně zkus JSON
   try {
-    return await res.json();
+    const json = await res.json();
+    if (API_DEBUG) {
+      console.info('[apiFetch OK]', { id: reqId, url, method, status: res.status, json });
+    }
+    return json;
   } catch {
+    if (API_DEBUG) {
+      console.info('[apiFetch OK]', { id: reqId, url, method, status: res.status, note: 'json-parse-failed' });
+    }
     return { ok: true, status: res.status };
   }
 }
