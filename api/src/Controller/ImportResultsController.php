@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Controller;
 
 use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Exceptions\ImportResultsWarning;
 use FantasyAcademy\API\FormData\ExcelImportFormData;
 use FantasyAcademy\API\FormType\ExcelImportFormType;
-use FantasyAcademy\API\Services\Import\ChallengesImport;
 use FantasyAcademy\API\Services\Import\ChallengesResultsImport;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +20,7 @@ final class ImportResultsController extends AbstractController
 {
     public function __construct(
         readonly private ChallengesResultsImport $challengesResultsImport,
-        readonly Private LoggerInterface $logger,
+        readonly private LoggerInterface $logger,
     ) {
     }
 
@@ -38,11 +38,22 @@ final class ImportResultsController extends AbstractController
             try {
                 $this->challengesResultsImport->importFile($data->file);
 
-                $this->addFlash('success', 'Results imported successfully.');
+                $this->addFlash('success', 'All results imported successfully.');
+            } catch (ImportResultsWarning $warning) {
+                $this->addFlash('success', sprintf(
+                    '%d results imported successfully.',
+                    $warning->importedCount
+                ));
+
+                $this->addFlash('warning', sprintf(
+                    '%d IDs not found and were not imported: %s',
+                    count($warning->missingIds),
+                    implode(', ', $warning->missingIds)
+                ));
             } catch (Throwable $exception) {
                 $this->addFlash('error', $exception->getMessage());
 
-                $this->logger->error('Challenge import failed', [
+                $this->logger->error('Results import failed', [
                     'exception' => $exception,
                 ]);
             }

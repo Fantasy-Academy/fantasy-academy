@@ -117,5 +117,5 @@ The API uses a message/handler pattern for operations:
 ## Testing Approach
 - API tests use PHPUnit with database fixtures
 - Database transactions are isolated per test using DAMA doctrine test bundle
-
+- Always run PHPStan on whole codebase, never test single file(s)
 - Never execute doctrine migrations unless explicitely asked to - this is risky and might lead into data loss
