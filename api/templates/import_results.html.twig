@@ -1,0 +1,13 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Import results{% endblock %}
+
+{% block content %}
+    <h1 class="h2 mb-4">Import results</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.file) }}
+
+    <button class="btn btn-primary mt-3">Import</button>
+    {{ form_end(form) }}
+{% endblock %}

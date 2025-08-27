@@ -138,4 +138,9 @@ class PlayerChallengeAnswer
             throw new TooManyChoices($selectedChoicesCount);
         }
     }
+
+    public function evaluate(int $points): void
+    {
+        $this->points = $points;
+    }
 }
