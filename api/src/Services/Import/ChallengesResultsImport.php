@@ -64,8 +64,8 @@ readonly final class ChallengesResultsImport
                 continue;
             }
             
-            $idColumnLetter = chr(65 + $idColumnIndex);
-            $pointsColumnLetter = chr(65 + $pointsColumnIndex);
+            $idColumnLetter = $this->convertColumnIndexToLetter($idColumnIndex);
+            $pointsColumnLetter = $this->convertColumnIndexToLetter($pointsColumnIndex);
             
             $idValue = $worksheet->getCell($idColumnLetter . $row)->getValue();
             $pointsValue = $worksheet->getCell($pointsColumnLetter . $row)->getValue();
@@ -103,5 +103,11 @@ readonly final class ChallengesResultsImport
         if (!empty($missingIds)) {
             throw new ImportResultsWarning($missingIds, $importedCount);
         }
+    }
+
+    private function convertColumnIndexToLetter(int $columnIndex): string
+    {
+        // Converting `A` to 65 + column index to translate A + 1 to B for example (column name)
+        return chr(ord('A') + $columnIndex);
     }
 }
