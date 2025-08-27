@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Fantasy Academy is a full-stack application with a Symfony 7 API backend and multiple frontend options (Next.js React and Vue 3). It's designed as a challenge/quiz platform where users can compete in fantasy-style challenges.
+Fantasy Academy is a full-stack application with a Symfony 7 API backend and a Vue 3 frontend. It's designed as a challenge/quiz platform where users can compete in fantasy-style challenges.
 
 ## Architecture
 
@@ -23,11 +23,12 @@ Fantasy Academy is a full-stack application with a Symfony 7 API backend and mul
   - `src/Api/StateProvider/`: API Platform state providers
   - `src/Repository/`: Custom Doctrine repositories 
 
-### Frontend Options
-1. **Next.js (React)**: `/frontend` - Next.js 15 with TypeScript, Tailwind CSS, NextAuth
-2. **Vue 3**: `/frontend-vue` - Vue 3 with TypeScript, Vite, Pinia, Tailwind CSS
-
-Both frontends consume the same Symfony API.
+### Frontend (Vue 3)
+- **Location**: `/frontend` directory
+- **Framework**: Vue 3 with TypeScript, Vite, Pinia, Tailwind CSS
+- **Build Tool**: Vite
+- **State Management**: Pinia
+- **Styling**: Tailwind CSS
 
 ## Development Commands
 
@@ -62,26 +63,9 @@ bin/console doctrine:migrations:migrate
 bin/console cache:clear
 ```
 
-### Frontend (Next.js)
-```bash
-# Run inside api container: docker compose exec frontend <command>
-
-# Development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Lint code
-pnpm lint
-
-# Run Playwright tests
-pnpm test
-```
-
 ### Frontend (Vue)
 ```bash
-# Run inside frontend-vue container: docker compose exec frontend-vue <command>
+# Run inside frontend container: docker compose exec frontend <command>
 
 # Development server
 pnpm dev
@@ -94,7 +78,6 @@ vue-tsc -b
 ```
 
 ## Service URLs
-- **Frontend (Next.js)**: http://localhost:3000
 - **Frontend (Vue)**: http://localhost:5173
 - **API**: http://localhost:8080
 - **Database Admin (Adminer)**: http://localhost:8000
@@ -133,7 +116,6 @@ The API uses a message/handler pattern for operations:
 
 ## Testing Approach
 - API tests use PHPUnit with database fixtures
-- Frontend tests use Playwright for E2E testing
 - Database transactions are isolated per test using DAMA doctrine test bundle
 
 - Never execute doctrine migrations unless explicitely asked to - this is risky and might lead into data loss
