@@ -11,7 +11,7 @@ RUN corepack enable pnpm && \
 FROM base AS build
 
 ENV NODE_ENV=production
-ENV VITE_API_BASE_URL="https://fantasy-academy.com"
+ENV VITE_API_BASE_URL="https://backend.fantasy-academy.com"
 ENV VITE_API_DEBUG=false
 
 COPY --link pnpm-lock.yaml package.json ./
@@ -25,7 +25,7 @@ RUN pnpm install --frozen-lockfile && pnpm run build
 FROM node:24-alpine AS runner
 
 ENV NODE_ENV=production
-ENV VITE_API_BASE_URL="https://fantasy-academy.com"
+ENV VITE_API_BASE_URL="https://backend.fantasy-academy.com"
 ENV VITE_API_DEBUG=false
 ENV PORT=3000
 
