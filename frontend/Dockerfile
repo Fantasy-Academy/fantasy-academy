@@ -1,7 +1,5 @@
 FROM node:24 AS base
 
-ENV NEXT_TELEMETRY_DISABLED=1
-
 WORKDIR /app
 
 RUN corepack enable pnpm && \
@@ -13,8 +11,8 @@ RUN corepack enable pnpm && \
 FROM base AS build
 
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_BACKEND_URL="https://backend.fantasy-academy.com"
-ENV NEXT_PUBLIC_GTAG_CODE="G-BV7SPNRT08"
+ENV VITE_API_BASE_URL="https://fantasy-academy.com"
+ENV VITE_API_DEBUG=false
 
 COPY --link pnpm-lock.yaml package.json ./
 RUN pnpm fetch
@@ -24,18 +22,19 @@ RUN pnpm install --frozen-lockfile && pnpm run build
 
 
 
-FROM node:24 AS runner
+FROM node:24-alpine AS runner
 
 ENV NODE_ENV=production
+ENV VITE_API_BASE_URL="https://fantasy-academy.com"
+ENV VITE_API_DEBUG=false
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 
 WORKDIR /app
 
-# copy the minimal standalone runtime
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+RUN npm install -g serve
+
+# copy the built static files
+COPY --from=build /app/dist ./dist
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["serve", "-s", "dist", "-l", "3000"]

@@ -1,7 +1,5 @@
-# Progressive Web App
+# Vue 3 + TypeScript + Vite
 
-Contains a [Next.js](https://nextjs.org/) project bootstrapped with [pnpm](https://pnpm.io/) and [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-The `admin` page contains an API Platform Admin project (refer to its [documentation](https://api-platform.com/docs/admin)).
-
-You can also generate your web app here by using the API Platform Client Generator (refer to its [documentation](https://api-platform.com/docs/client-generator/nextjs/)).
+Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).

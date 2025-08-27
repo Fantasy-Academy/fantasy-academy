@@ -1,29 +1,7 @@
 {
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "moduleResolution": "node",
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "noEmit": true,
-    "incremental": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve"
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
   ]
 }
