@@ -5,21 +5,26 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Services\Import;
 
 use Doctrine\ORM\EntityManagerInterface;
-use FantasyAcademy\API\Entity\PlayerChallengeAnswer;
 use FantasyAcademy\API\Exceptions\ImportFailed;
 use FantasyAcademy\API\Exceptions\ImportResultsWarning;
+use FantasyAcademy\API\Exceptions\PlayerChallengeAnswerNotFound;
+use FantasyAcademy\API\Repository\PlayerChallengeAnswerRepository;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
-use Throwable;
 
 readonly final class ChallengesResultsImport
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private PlayerChallengeAnswerRepository $playerChallengeAnswerRepository,
     ) {
     }
 
+    /**
+     * @throws ImportResultsWarning
+     * @throws ImportFailed
+     */
     public function importFile(UploadedFile $file): void
     {
         $path = $file->getPathname();
@@ -68,34 +73,33 @@ readonly final class ChallengesResultsImport
             $pointsColumnLetter = $this->convertColumnIndexToLetter($pointsColumnIndex);
             
             $idValue = $worksheet->getCell($idColumnLetter . $row)->getValue();
-            $pointsValue = $worksheet->getCell($pointsColumnLetter . $row)->getValue();
+            $pointsValue = $worksheet->getCell($pointsColumnLetter . $row)->getCalculatedValue();
             
             if ($idValue === null || $idValue === '') {
                 continue;
             }
             
-            try {
-                $idString = is_scalar($idValue) ? (string) $idValue : '';
-                if ($idString === '') {
-                    continue;
-                }
-                
-                $uuid = Uuid::fromString($idString);
-                $playerChallengeAnswer = $this->entityManager->find(PlayerChallengeAnswer::class, $uuid);
-                
-                if ($playerChallengeAnswer === null) {
-                    $missingIds[] = $idString;
-                    continue;
-                }
-                
-                $points = is_scalar($pointsValue) ? (int) $pointsValue : 0;
-                $playerChallengeAnswer->evaluate($points);
-                $importedCount++;
-                
-            } catch (Throwable) {
-                $idString = is_scalar($idValue) ? (string) $idValue : 'invalid';
-                $missingIds[] = $idString;
+            $idString = is_scalar($idValue) ? (string) $idValue : '';
+
+            if ($idString === '') {
+                continue;
             }
+
+            if (Uuid::isValid($idString) === false) {
+                $missingIds[] = $idString;
+                continue;
+            }
+
+            try {
+                $playerChallengeAnswer = $this->playerChallengeAnswerRepository->get(Uuid::fromString($idString));
+            } catch (PlayerChallengeAnswerNotFound) {
+                $missingIds[] = $idString;
+                continue;
+            }
+
+            $points = is_scalar($pointsValue) ? (int) $pointsValue : 0;
+            $playerChallengeAnswer->evaluate($points);
+            $importedCount++;
         }
         
         $this->entityManager->flush();
