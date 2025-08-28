@@ -8,8 +8,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use FantasyAcademy\API\Exceptions\ImportFailed;
 use FantasyAcademy\API\Exceptions\ImportResultsWarning;
 use FantasyAcademy\API\Exceptions\PlayerChallengeAnswerNotFound;
+use FantasyAcademy\API\Repository\ChallengeRepository;
 use FantasyAcademy\API\Repository\PlayerChallengeAnswerRepository;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
@@ -18,6 +20,8 @@ readonly final class ChallengesResultsImport
     public function __construct(
         private EntityManagerInterface $entityManager,
         private PlayerChallengeAnswerRepository $playerChallengeAnswerRepository,
+        private ChallengeRepository $challengeRepository,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -52,7 +56,8 @@ readonly final class ChallengesResultsImport
         
         $idColumnIndex = array_search('id', $headerRow);
         $pointsColumnIndex = array_search('points', $headerRow);
-        
+        $challengeIdColumnIndex = array_search('challenge_id', $headerRow);
+
         if ($idColumnIndex === false) {
             throw new ImportFailed('Column "id" not found in the Points sheet.');
         }
@@ -60,7 +65,13 @@ readonly final class ChallengesResultsImport
         if ($pointsColumnIndex === false) {
             throw new ImportFailed('Column "points" not found in the Points sheet.');
         }
-        
+
+        if ($challengeIdColumnIndex === false) {
+            throw new ImportFailed('Column "challenge_id" not found in the Points sheet.');
+        }
+
+        /** @var array<string, string> $challengeIds */
+        $challengeIds = [];
         $missingIds = [];
         $importedCount = 0;
         
@@ -71,11 +82,17 @@ readonly final class ChallengesResultsImport
             
             $idColumnLetter = $this->convertColumnIndexToLetter($idColumnIndex);
             $pointsColumnLetter = $this->convertColumnIndexToLetter($pointsColumnIndex);
-            
+            $challengeIdColumnLetter = $this->convertColumnIndexToLetter($challengeIdColumnIndex);
+
             $idValue = $worksheet->getCell($idColumnLetter . $row)->getValue();
             $pointsValue = $worksheet->getCell($pointsColumnLetter . $row)->getCalculatedValue();
-            
+            $challengeIdValue = $worksheet->getCell($challengeIdColumnLetter . $row)->getValue();
+
             if ($idValue === null || $idValue === '') {
+                continue;
+            }
+
+            if ($challengeIdValue === null || $challengeIdValue === '') {
                 continue;
             }
             
@@ -90,6 +107,18 @@ readonly final class ChallengesResultsImport
                 continue;
             }
 
+            $challengeIdString = is_scalar($challengeIdValue) ? (string) $challengeIdValue : '';
+
+            if ($challengeIdString === '') {
+                continue;
+            }
+
+            if (Uuid::isValid($challengeIdString) === false) {
+                continue;
+            }
+
+            $challengeIds[$challengeIdString] = $challengeIdString;
+
             try {
                 $playerChallengeAnswer = $this->playerChallengeAnswerRepository->get(Uuid::fromString($idString));
             } catch (PlayerChallengeAnswerNotFound) {
@@ -100,6 +129,11 @@ readonly final class ChallengesResultsImport
             $points = is_scalar($pointsValue) ? (int) $pointsValue : 0;
             $playerChallengeAnswer->evaluate($points);
             $importedCount++;
+        }
+
+        foreach ($challengeIds as $challengeId) {
+            $challenge = $this->challengeRepository->get(Uuid::fromString($challengeId));
+            $challenge->evaluate($this->clock->now());
         }
         
         $this->entityManager->flush();

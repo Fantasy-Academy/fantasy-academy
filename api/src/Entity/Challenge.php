@@ -84,4 +84,9 @@ class Challenge
         readonly public float $skillDiscipline,
     ) {
     }
+
+    public function evaluate(DateTimeImmutable $evaluatedAt): void
+    {
+        $this->evaluatedAt = $evaluatedAt;
+    }
 }
