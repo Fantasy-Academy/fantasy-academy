@@ -76,7 +76,7 @@ readonly final class ChallengesResultsImport
         $importedCount = 0;
         
         for ($row = 2; $row <= $highestRow; $row++) {
-            if (!is_int($idColumnIndex) || !is_int($pointsColumnIndex)) {
+            if (!is_int($idColumnIndex) || !is_int($pointsColumnIndex) || !is_int($challengeIdColumnIndex)) {
                 continue;
             }
             
