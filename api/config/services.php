@@ -48,6 +48,7 @@ return static function(ContainerConfigurator $configurator): void
     // Services
     $services->load('FantasyAcademy\\API\\Services\\', __DIR__ . '/../src/Services/**/{*.php}');
     $services->load('FantasyAcademy\\API\\Query\\', __DIR__ . '/../src/Query/**/{*.php}');
+    $services->load('FantasyAcademy\\API\\FormType\\', __DIR__ . '/../src/FormType/**/{*.php}');
 
     // API
     $services->load('FantasyAcademy\\API\\Controller\\', __DIR__ . '/../src/Controller/**/{*.php}');

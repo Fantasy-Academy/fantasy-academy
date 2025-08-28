@@ -9,6 +9,7 @@ namespace FantasyAcademy\API\Result;
  *     id: string,
  *     user_id: string,
  *     challenge_id: string,
+ *     name: string,
  *     points: int|numeric-string,
  * }
  */
@@ -18,6 +19,7 @@ readonly final class PlayerChallengeAnswerRow
         public string $id,
         public string $userId,
         public string $challengeId,
+        public string $name,
         public int $points,
     ) {
     }
@@ -31,6 +33,7 @@ readonly final class PlayerChallengeAnswerRow
             id: $data['id'],
             userId: $data['user_id'],
             challengeId: $data['challenge_id'],
+            name: $data['name'],
             points: (int) $data['points'],
         );
     }

@@ -28,6 +28,7 @@ SELECT
   pca.id,
   pca.user_id,
   pca.challenge_id,
+  c.name,
   pca.points
 FROM player_challenge_answer AS pca
 JOIN challenge AS c

@@ -1,0 +1,13 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Export answers{% endblock %}
+
+{% block content %}
+    <h1 class="h2 mb-4">Export answers</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.challengeIds) }}
+
+    <button class="btn btn-primary mt-3">Export to Excel</button>
+    {{ form_end(form) }}
+{% endblock %}
