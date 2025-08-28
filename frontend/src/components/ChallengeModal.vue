@@ -33,13 +33,13 @@
 
           <!-- Description -->
           <p class="mb-4 text-blue-black font-alexandria">
-            {{ challenge.description }}
+            <span class="hint-content" v-html="challenge.description"></span>
           </p>
 
           <!-- Hint -->
           <div v-if="challenge.hintText || hintImgSrc"
             class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm">
-            <div v-if="challenge.hintText" class="hint-content prose prose-sm max-w-none" v-html="challenge.hintText" />
+            <div v-if="challenge.hintText" class="prose prose-sm max-w-none">{{ challenge.hintText }}</div>
             <img v-if="hintImgSrc" :src="hintImgSrc" alt="Hint"
               class="max-h-48 w-full rounded object-contain bg-dark-white" @error="onImgError" />
           </div>

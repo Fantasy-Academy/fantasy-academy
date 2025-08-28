@@ -5,34 +5,45 @@
   line-height: 1.5;
 }
 
-.hint-content p {
-  margin: 0.5rem 0;
+/* Reset všech elementů uvnitř */
+.hint-content * {
+  margin: 0;
+  padding: 0;
 }
 
+/* Nadpisy */
 .hint-content h1,
 .hint-content h2,
 .hint-content h3 {
   font-family: 'Bebas Neue', sans-serif;
   font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .hint-content h1 { font-size: 1.5rem; }
 .hint-content h2 { font-size: 1.25rem; }
 .hint-content h3 { font-size: 1.1rem; }
 
+/* Seznamy */
 .hint-content ul,
 .hint-content ol {
-  margin: 0.5rem 0 0.5rem 1.5rem;
+  list-style-position: inside;   /* odrážky/číslování zůstanou uvnitř boxu */
+  list-style-type: disc;         /* pro ul → odrážky */
+  margin: 0;
   padding: 0;
 }
 
-.hint-content li {
-  margin: 0.25rem 0;
+.hint-content ol {
+  list-style-type: decimal;      /* pro ol → čísla */
 }
 
+.hint-content li {
+  margin: 0;                     /* žádný spacing */
+  padding: 0;                    /* žádný spacing */
+  line-height: 1.4;
+}
+
+/* Strong + code */
 .hint-content strong {
   font-weight: 600;
   color: #000;
