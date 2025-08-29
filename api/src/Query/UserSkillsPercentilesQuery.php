@@ -119,6 +119,9 @@ SQL;
         );
     }
 
+    /**
+     * @throws UserNotFound
+     */
     public function forPlayer(string $playerId): UserSkillsPercentilesRow
     {
         $sql = <<<SQL

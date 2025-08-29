@@ -95,7 +95,7 @@ SQL;
         try {
             $skillsRow = $this->userSkillsPercentilesQuery->forPlayer($userId->toString());
 
-            return $this->skillsTransformer->transformPercentilesRowToPlayerSkills($skillsRow);
+            return $this->skillsTransformer->transformToPlayerSkills($skillsRow, $userId->toString());
         } catch (UserNotFound) {
             return [];
         }

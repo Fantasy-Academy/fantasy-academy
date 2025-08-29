@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Services;
 
+use FantasyAcademy\API\Exceptions\UserNotFound;
+use FantasyAcademy\API\Query\UserDisciplineQuery;
 use FantasyAcademy\API\Result\UserSkillsPercentilesRow;
 use FantasyAcademy\API\Value\PlayerSkill;
 use FantasyAcademy\API\Value\Skill;
 
 readonly final class SkillsTransformer
 {
+    public function __construct(
+        private UserDisciplineQuery $userDisciplineQuery,
+    ) {
+    }
     /**
      * @return array<PlayerSkill>
      */
@@ -57,5 +63,27 @@ readonly final class SkillsTransformer
                 percentageChange: null,
             ),
         ];
+    }
+
+    /**
+     * @return array<PlayerSkill>
+     */
+    public function transformToPlayerSkills(UserSkillsPercentilesRow $row, string $userId): array
+    {
+        $skills = $this->transformPercentilesRowToPlayerSkills($row);
+
+        try {
+            $disciplinePercentage = $this->userDisciplineQuery->forPlayer($userId);
+
+            $skills[] = new PlayerSkill(
+                name: Skill::Discipline->value,
+                percentage: (int) round($disciplinePercentage),
+                percentageChange: null,
+            );
+        } catch (UserNotFound) {
+            // If discipline data is not available, don't add the skill
+        }
+
+        return $skills;
     }
 }
