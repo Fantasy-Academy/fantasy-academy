@@ -73,7 +73,7 @@ SQL;
 
         $availableChallengesCount = $this->getAvailableChallengesCount($userId);
 
-        return LoggedUserResponse::fromArray($row, $availableChallengesCount);
+        return LoggedUserResponse::fromArray($row, $availableChallengesCount, []);
     }
 
     private function getAvailableChallengesCount(Uuid $userId): int
