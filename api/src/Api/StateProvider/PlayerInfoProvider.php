@@ -10,6 +10,9 @@ use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Api\Response\PlayerInfoResponse;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
+use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
+use FantasyAcademy\API\Services\SkillsTransformer;
+use FantasyAcademy\API\Value\PlayerSkill;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -23,6 +26,8 @@ readonly final class PlayerInfoProvider implements ProviderInterface
     public function __construct(
         private Security $security,
         private Connection $database,
+        private UserSkillsPercentilesQuery $userSkillsPercentilesQuery,
+        private SkillsTransformer $skillsTransformer,
     ) {}
 
     /**
@@ -77,6 +82,22 @@ SQL;
             throw new UserNotFound();
         }
 
-        return PlayerInfoResponse::fromArray($row, $userId);
+        $skills = $this->getPlayerSkills($playerId);
+
+        return PlayerInfoResponse::fromArray($row, $userId, $skills);
+    }
+
+    /**
+     * @return array<PlayerSkill>
+     */
+    private function getPlayerSkills(Uuid $userId): array
+    {
+        try {
+            $skillsRow = $this->userSkillsPercentilesQuery->forPlayer($userId->toString());
+
+            return $this->skillsTransformer->transformPercentilesRowToPlayerSkills($skillsRow);
+        } catch (UserNotFound) {
+            return [];
+        }
     }
 }

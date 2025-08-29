@@ -19,15 +19,15 @@ enum Skill: string
     public static function fromSkillName(string $skillName): self
     {
         return match (true) {
-            str_contains($skillName, 'analytical') => self::LongTermVision,
-            str_contains($skillName, 'strategic_planning') => self::LongTermVision,
-            str_contains($skillName, 'adaptability') => self::LongTermVision,
-            str_contains($skillName, 'premier_league_knowledge') => self::LongTermVision,
-            str_contains($skillName, 'risk_management') => self::LongTermVision,
-            str_contains($skillName, 'decision_making_under_pressure') => self::LongTermVision,
-            str_contains($skillName, 'financial_management') => self::LongTermVision,
+            str_contains($skillName, 'analytical') => self::Analytical,
+            str_contains($skillName, 'strategic_planning') => self::StrategicPlanning,
+            str_contains($skillName, 'adaptability') => self::Adaptability,
+            str_contains($skillName, 'premier_league_knowledge') => self::PremierLeagueKnowledge,
+            str_contains($skillName, 'risk_management') => self::RiskManagement,
+            str_contains($skillName, 'decision_making_under_pressure') => self::DecisionMakingUnderPressure,
+            str_contains($skillName, 'financial_management') => self::FinancialManagement,
             str_contains($skillName, 'long_term_vision') => self::LongTermVision,
-            str_contains($skillName, 'discipline') => self::LongTermVision,
+            str_contains($skillName, 'discipline') => self::Discipline,
             default => throw new \Exception('Unknown skill'),
         };
     }

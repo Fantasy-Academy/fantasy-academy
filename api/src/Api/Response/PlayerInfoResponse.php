@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
 use FantasyAcademy\API\Api\StateProvider\PlayerInfoProvider;
 use FantasyAcademy\API\Value\PlayerSeasonStatistics;
+use FantasyAcademy\API\Value\PlayerSkill;
 use FantasyAcademy\API\Value\PlayerStatistics;
 use Symfony\Component\Uid\Uuid;
 
@@ -46,8 +47,9 @@ readonly final class PlayerInfoResponse
 
     /**
      * @param PlayerInfoResponseRow $data
+     * @param array<PlayerSkill> $skills
      */
-    public static function fromArray(array $data, null|Uuid $userId): self
+    public static function fromArray(array $data, null|Uuid $userId, array $skills): self
     {
         return new self(
             id: Uuid::fromString($data['id']),
@@ -58,7 +60,7 @@ readonly final class PlayerInfoResponse
                 rank: $data['rank'],
                 challengesAnswered: $data['challenges_answered'],
                 points: $data['points'],
-                skills: [],
+                skills: $skills,
             ),
             seasonsStatistics: [
                 new PlayerSeasonStatistics(

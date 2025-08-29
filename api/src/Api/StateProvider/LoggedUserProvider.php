@@ -10,6 +10,9 @@ use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Api\Response\LoggedUserResponse;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
+use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
+use FantasyAcademy\API\Services\SkillsTransformer;
+use FantasyAcademy\API\Value\PlayerSkill;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -23,6 +26,8 @@ readonly final class LoggedUserProvider implements ProviderInterface
     public function __construct(
         private Security $security,
         private Connection $database,
+        private UserSkillsPercentilesQuery $userSkillsPercentilesQuery,
+        private SkillsTransformer $skillsTransformer,
     ) {}
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
@@ -73,7 +78,9 @@ SQL;
 
         $availableChallengesCount = $this->getAvailableChallengesCount($userId);
 
-        return LoggedUserResponse::fromArray($row, $availableChallengesCount, []);
+        $skills = $this->getPlayerSkills($userId);
+
+        return LoggedUserResponse::fromArray($row, $availableChallengesCount, $skills);
     }
 
     private function getAvailableChallengesCount(Uuid $userId): int
@@ -98,5 +105,19 @@ SQL;
             ->fetchOne();
 
         return $result;
+    }
+
+    /**
+     * @return array<PlayerSkill>
+     */
+    private function getPlayerSkills(Uuid $userId): array
+    {
+        try {
+            $skillsRow = $this->userSkillsPercentilesQuery->forPlayer($userId->toString());
+
+            return $this->skillsTransformer->transformPercentilesRowToPlayerSkills($skillsRow);
+        } catch (UserNotFound) {
+            return [];
+        }
     }
 }
