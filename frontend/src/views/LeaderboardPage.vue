@@ -101,6 +101,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import { apiGetLeaderboards } from '@/api/leaderboards';
+import { toFriendlyError } from '@/utils/errorHandler';
 
 document.title = 'Fantasy Academy | Leaderboard';
 
@@ -144,7 +145,14 @@ async function loadInitial() {
     const list = await fetchPage(page.value);
     items.value = list ?? [];
   } catch (e) {
-    error.value = e?.message || 'Failed to load leaderboard';
+    const fe = toFriendlyError(e);
+    console.warn('[LeaderboardPage] loadInitial FAIL', {
+      status: e?.status,
+      message: fe.userMessage,
+      rawMessage: e?.message,
+      data: e?.data,
+    });
+    error.value = fe.userMessage || 'Nepodařilo se načíst žebříček.';
   } finally {
     initialLoading.value = false;
   }
@@ -170,7 +178,14 @@ async function loadMore() {
     items.value = merged;
     page.value = next;
   } catch (e) {
-    error.value = e?.message || 'Failed to load more';
+    const fe = toFriendlyError(e);
+    console.warn('[LeaderboardPage] loadMore FAIL', {
+      status: e?.status,
+      message: fe.userMessage,
+      rawMessage: e?.message,
+      data: e?.data,
+    });
+    error.value = fe.userMessage || 'Nepodařilo se načíst více dat.';
   } finally {
     loadingMore.value = false;
   }

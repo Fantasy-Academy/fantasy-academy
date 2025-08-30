@@ -1,6 +1,7 @@
 // src/composables/useChallenges.js
 import { ref } from 'vue';
 import { apiListChallenges } from '@/api/challenges';
+import { toFriendlyError } from '@/utils/errorHandler';
 
 function normalizeList(raw) {
   const list = Array.isArray(raw) ? raw : [];
@@ -31,12 +32,20 @@ export function useChallenges() {
   async function loadChallenges({ page = 1, auth = true, params = {} } = {}) {
     loading.value = true;
     error.value = null;
+
     try {
       const { items, total } = await apiListChallenges({ page, auth, params });
       challenges.value = normalizeList(items);
       totalCount.value = total;
-    } catch (err) {
-      error.value = err?.message || 'Nepodařilo se načíst výzvy';
+    } catch (e) {
+      const fe = toFriendlyError(e);
+      console.warn('[useChallenges] loadChallenges FAIL', {
+        status: e?.status,
+        message: fe.userMessage,
+        rawMessage: e?.message,
+        data: e?.data,
+      });
+      error.value = fe.userMessage || 'Nepodařilo se načíst výzvy';
     } finally {
       loading.value = false;
     }

@@ -15,8 +15,10 @@
       </div>
 
       <!-- Error -->
-      <div v-if="formError"
-        class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
+      <div
+        v-if="formError"
+        class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral"
+      >
         {{ formError }}
       </div>
 
@@ -24,14 +26,22 @@
       <form @submit.prevent="onSubmit" novalidate class="space-y-4">
         <div>
           <label class="mb-1 block text-sm font-medium text-blue-black">E-mail</label>
-          <input v-model.trim="email" type="email" placeholder="name@example.com"
+          <input
+            v-model.trim="email"
+            type="email"
+            placeholder="name@example.com"
             class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-golden-yellow"
-            :class="emailError ? 'border-vibrant-coral' : 'border-charcoal/20'" autocomplete="email" />
+            :class="emailError ? 'border-vibrant-coral' : 'border-charcoal/20'"
+            autocomplete="email"
+          />
           <p v-if="emailError" class="mt-1 text-sm text-vibrant-coral">{{ emailError }}</p>
         </div>
 
-        <button type="submit" :disabled="loading"
-          class="w-full rounded-lg bg-blue-black px-4 py-2 font-semibold text-white shadow-main hover:opacity-90 disabled:opacity-60 cursor-pointer">
+        <button
+          type="submit"
+          :disabled="loading"
+          class="w-full rounded-lg bg-blue-black px-4 py-2 font-semibold text-white shadow-main hover:opacity-90 disabled:opacity-60 cursor-pointer"
+        >
           {{ loading ? 'Sending…' : 'Send reset code' }}
         </button>
       </form>
@@ -52,6 +62,7 @@
 <script setup>
 import { ref } from 'vue';
 import { apiRequestResetCode } from '@/api/password';
+import { toFriendlyError } from '@/utils/errorHandler';
 
 document.title = 'Fantasy Academy | Forgot Password';
 
@@ -61,8 +72,8 @@ const success = ref(false);
 const formError = ref('');
 const emailError = ref('');
 
-function isValidEmail(v) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+function isValidEmail(v = '') {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).trim());
 }
 
 async function onSubmit() {
@@ -70,23 +81,27 @@ async function onSubmit() {
   emailError.value = '';
   success.value = false;
 
-  if (!email.value) {
+  const em = String(email.value ?? '').trim();
+
+  if (!em) {
     emailError.value = 'Please enter your email.';
     return;
   }
-  if (!isValidEmail(email.value)) {
+  if (!isValidEmail(em)) {
     emailError.value = 'Invalid email format.';
     return;
   }
 
   loading.value = true;
   try {
-    const res = await apiRequestResetCode(email.value);
-    console.log('[ForgotPassword] success, raw response:', res);
+    await apiRequestResetCode(em);
     success.value = true;
+    formError.value = '';
   } catch (e) {
-    console.error('[ForgotPassword] error:', e);
-    formError.value = e?.message || 'Failed to request reset code.';
+    const fe = toFriendlyError(e);
+    formError.value = fe.userMessage || 'Failed to request reset code.';
+  } finally {
+    loading.value = false;
   }
 }
 </script>

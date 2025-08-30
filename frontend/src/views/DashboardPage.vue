@@ -209,6 +209,7 @@ import { useChallenges } from '@/composables/useChallenges';
 import { resolvedImage, onImgError } from '@/utils/imageHelpers';
 import ChallengeModal from '@/components/ChallengeModal.vue';
 import { apiFetch } from '@/api/http';
+import { toFriendlyError } from '@/utils/errorHandler';
 
 document.title = 'Fantasy Academy | Dashboard';
 
@@ -242,7 +243,7 @@ const initials = computed(() => {
 const { challenges, loading: loadingChallenges, error: errorChallenges, loadChallenges } = useChallenges();
 onMounted(() => loadChallenges());
 
-// filtrování výzev (aby "Available" opravdu sedělo)
+// filtrování výzev
 const availableChallenges = computed(() =>
   (challenges.value || []).filter(c => c.isStarted && !c.isExpired && !c.isAnswered)
 );
@@ -264,7 +265,7 @@ function openChallenge(id) {
 }
 function afterSubmit() {
   showModal.value = false;
-  loadChallenges(); // refresh po odeslání
+  loadChallenges();
 }
 
 /* Leaderboards */
@@ -279,7 +280,14 @@ async function loadLeaderboards() {
     const list = Array.isArray(data) ? data : (Array.isArray(data?.member) ? data.member : []);
     lb.value = list;
   } catch (e) {
-    errorLb.value = e?.message || 'Failed to load leaderboard';
+    const fe = toFriendlyError(e);
+    console.warn('[DashboardPage] loadLeaderboards FAIL', {
+      status: e?.status,
+      message: fe.userMessage,
+      rawMessage: e?.message,
+      data: e?.data,
+    });
+    errorLb.value = fe.userMessage || 'Failed to load leaderboard';
   } finally {
     loadingLb.value = false;
   }
@@ -289,7 +297,6 @@ const top5 = computed(() => (lb.value || []).slice(0, 5));
 
 /* UI helpers */
 function badgeBg(index) {
-  // decentní odstíny, ladí s tvými barvami
   return [
     'bg-golden-yellow/30 text-blue-black',
     'bg-dark-white text-blue-black',

@@ -141,6 +141,7 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { useValidation } from '@/composables/useValidation';
+import { toFriendlyError } from '@/utils/errorHandler';
 
 const name = ref('');
 const email = ref('');
@@ -172,15 +173,23 @@ async function handleRegister() {
   if (Object.values(errors.value).some(Boolean)) return;
 
   try {
-    await register(name.value, email.value, password.value);
+    // trim pro jistotu před odesláním
+    await register(name.value.trim(), email.value.trim(), password.value);
     router.push(route.query.redirect || '/dashboard');
   } catch (e) {
-    if (e?.data?.violations?.length) {
-      serverViolations.value = e.data.violations;
-    } else if (e?.message) {
-      formError.value = e.message;
+    const fe = toFriendlyError(e);
+
+    // pokud API poslalo detailní porušení (např. Symfony/Api Platform "violations")
+    const v =
+      e?.data?.violations ||
+      fe.details?.violations ||
+      [];
+
+    if (Array.isArray(v) && v.length) {
+      serverViolations.value = v;
+      formError.value = ''; // necháme jen pole porušení
     } else {
-      formError.value = 'Registration failed.';
+      formError.value = fe.userMessage || 'Registration failed.';
     }
   }
 }

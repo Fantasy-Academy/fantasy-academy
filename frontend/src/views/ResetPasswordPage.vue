@@ -1,3 +1,4 @@
+<!-- src/views/ResetPasswordPage.vue -->
 <template>
   <section class="mx-auto max-w-md px-4 py-10">
     <div class="rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
@@ -6,13 +7,23 @@
         Code: <strong>{{ code || '—' }}</strong>, Email: <strong>{{ email || '—' }}</strong>
       </p>
 
-      <div v-if="error" class="mt-3 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
+      <!-- Error -->
+      <div
+        v-if="error"
+        class="mt-3 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral"
+      >
         {{ error }}
       </div>
-      <div v-if="success" class="mt-3 rounded-xl border border-pistachio/30 bg-pistachio/10 p-3 text-pistachio">
+
+      <!-- Success -->
+      <div
+        v-if="success"
+        class="mt-3 rounded-xl border border-pistachio/30 bg-pistachio/10 p-3 text-pistachio"
+      >
         Password changed. Logging you in…
       </div>
 
+      <!-- Form -->
       <form class="mt-5 space-y-3" @submit.prevent="onSubmit" novalidate>
         <div>
           <label class="block text-sm font-medium text-blue-black mb-1">New password</label>
@@ -45,6 +56,7 @@ import { apiResetPassword } from '@/api/password';
 import { apiLogin } from '@/api/auth';          
 import { setToken } from '@/services/tokenService';
 import { useAuth } from '@/composables/useAuth';
+import { toFriendlyError } from '@/utils/errorHandler';
 
 const route = useRoute();
 const router = useRouter();
@@ -64,7 +76,7 @@ document.title = 'Fantasy Academy | Reset Password';
 function validate() {
   passwordError.value = '';
   if (!password.value || password.value.length < 6) {
-    passwordError.value = 'Min. 6 znaků.';
+    passwordError.value = 'Password must have at least 6 characters.';
   }
   return !passwordError.value;
 }
@@ -93,7 +105,8 @@ async function onSubmit() {
       router.replace('/login');
     }
   } catch (e) {
-    error.value = e?.message || 'Reset failed.';
+    const fe = toFriendlyError(e);
+    error.value = fe.userMessage || 'Reset failed. Please try again.';
   } finally {
     loading.value = false;
   }
