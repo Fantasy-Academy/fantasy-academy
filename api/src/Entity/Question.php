@@ -10,8 +10,10 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
 use FantasyAcademy\API\Value\QuestionType;
@@ -22,6 +24,9 @@ use Symfony\Component\Uid\Uuid;
 #[Entity]
 class Question
 {
+    #[Column(type: AnswerDoctrineType::NAME, nullable: true)]
+    public null|Answer $correctAnswer = null;
+
     public function __construct(
         #[Id]
         #[Immutable]

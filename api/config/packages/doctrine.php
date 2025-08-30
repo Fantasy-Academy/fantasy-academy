@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\UuidArrayDoctrineType;
@@ -18,6 +19,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 UuidArrayDoctrineType::NAME => UuidArrayDoctrineType::class,
                 NumericQuestionConstraintDoctrineType::NAME => NumericQuestionConstraintDoctrineType::class,
                 ChoiceQuestionConstraintDoctrineType::NAME => ChoiceQuestionConstraintDoctrineType::class,
+                AnswerDoctrineType::NAME => AnswerDoctrineType::class,
             ],
         ],
         'orm' => [
