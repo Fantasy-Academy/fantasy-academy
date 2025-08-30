@@ -37,6 +37,8 @@ readonly final class Question
         public null|ChoiceQuestionConstraint $choiceConstraint,
         public null|DateTimeImmutable $answeredAt,
         public null|Answer $answer,
+        public null|Answer $myAnswer,
+        public null|Answer $correctAnswer,
     ) {}
 
     /**
@@ -68,6 +70,8 @@ readonly final class Question
             choiceConstraint: $choiceConstraint,
             answeredAt: $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null,
             answer: $row['answered_at'] !== null ? Answer::fromArray($row) : null,
+            myAnswer: $row['answered_at'] !== null ? Answer::fromArray($row) : null,
+            correctAnswer: null,
         );
     }
 }
