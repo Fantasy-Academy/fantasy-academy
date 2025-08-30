@@ -2,22 +2,23 @@
   <section class="mx-auto max-w-5xl px-4 py-8">
     <!-- Header -->
     <div class="mb-6 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main">
-      <div class="flex items-center gap-4">
-        <div
-          class="grid h-16 w-16 place-items-center rounded-full bg-golden-yellow text-2xl font-extrabold text-blue-black"
-        >
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="grid h-16 w-16 place-items-center rounded-full bg-golden-yellow text-2xl font-extrabold text-blue-black">
           {{ initials }}
         </div>
-        <div class="min-w-0">
-          <h1 class="font-bebas-neue text-3xl tracking-wide">{{ player?.name || 'Player' }}</h1>
+
+        <div class="min-w-0 flex-1">
+          <h1 class="font-bebas-neue text-3xl tracking-wide truncate">{{ player?.name || 'Player' }}</h1>
           <p class="font-alexandria text-dark-white/80">
             Registered: <span class="font-semibold text-white">{{ registered }}</span>
           </p>
         </div>
-        <div class="ml-auto">
+
+        <!-- Back button (goes below on mobile) -->
+        <div class="w-full sm:w-auto sm:ml-auto">
           <router-link
             to="/leaderboard"
-            class="rounded-lg border border-dark-white/30 bg-white px-4 py-2 font-semibold text-blue-black hover:bg-dark-white shadow-sm"
+            class="block w-full text-center rounded-lg border border-dark-white/30 bg-white px-4 py-2 font-semibold text-blue-black hover:bg-dark-white shadow-sm"
           >
             Back to leaderboard
           </router-link>
@@ -33,7 +34,7 @@
 
     <template v-else-if="player">
       <!-- KPIs -->
-      <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
           <p class="text-sm text-cool-gray font-alexandria">Total points</p>
           <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
@@ -57,7 +58,7 @@
         <h2 class="mb-3 font-bebas-neue text-2xl text-blue-black">Skills</h2>
         <ul class="space-y-3">
           <li v-for="(s, i) in overall.skills" :key="i" class="rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center gap-3 justify-between">
               <p class="font-semibold text-blue-black font-alexandria">{{ s.name }}</p>
               <div class="flex items-center gap-3 text-sm font-alexandria">
                 <span class="font-extrabold text-blue-black">{{ s.percentage }}%</span>
@@ -73,10 +74,59 @@
         </ul>
       </div>
 
-      <!-- Seasonal stats -->
+      <!-- Seasons (responsive) -->
       <div>
         <h2 class="mb-3 font-bebas-neue text-2xl text-blue-black">Seasons</h2>
-        <div class="overflow-x-auto rounded-xl border border-charcoal/10 bg-white shadow-sm">
+
+        <!-- Mobile: stacked cards -->
+        <ul v-if="(player.seasonsStatistics?.length || 0) > 0" class="sm:hidden space-y-3">
+          <li
+            v-for="(s, i) in player.seasonsStatistics"
+            :key="i"
+            class="rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm"
+          >
+            <div class="flex items-center justify-between">
+              <p class="font-alexandria font-semibold text-blue-black">Season</p>
+              <p class="font-alexandria text-blue-black">{{ s.seasonNumber }}</p>
+            </div>
+            <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+              <div class="rounded-lg bg-dark-white/60 p-2">
+                <p class="text-cool-gray">Rank</p>
+                <p class="font-alexandria text-blue-black">{{ s.rank ?? '—' }}</p>
+              </div>
+              <div class="rounded-lg bg-dark-white/60 p-2">
+                <p class="text-cool-gray">Challenges</p>
+                <p class="font-alexandria text-blue-black">{{ s.challengesAnswered }}</p>
+              </div>
+              <div class="rounded-lg bg-dark-white/60 p-2">
+                <p class="text-cool-gray">Points</p>
+                <p class="font-alexandria text-blue-black">{{ s.points }}</p>
+              </div>
+              <div class="rounded-lg bg-dark-white/60 p-2">
+                <p class="text-cool-gray">Top skills</p>
+                <div class="mt-1 flex flex-wrap gap-2">
+                  <span
+                    v-for="(sk, j) in (s.skills || []).slice(0, 3)"
+                    :key="j"
+                    class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-blue-black"
+                  >
+                    {{ sk.name }}
+                    <span class="text-cool-gray font-normal">{{ sk.percentage }}%</span>
+                  </span>
+                  <span v-if="(s.skills?.length || 0) > 3" class="text-xs text-cool-gray">
+                    +{{ s.skills.length - 3 }} more
+                  </span>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div v-else class="sm:hidden rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray">
+          No seasonal data.
+        </div>
+
+        <!-- Desktop/Tablet: table -->
+        <div class="hidden sm:block overflow-x-auto rounded-xl border border-charcoal/10 bg-white shadow-sm">
           <table class="min-w-full text-left text-sm">
             <thead class="bg-dark-white text-cool-gray">
               <tr>
