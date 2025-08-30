@@ -20,11 +20,10 @@
         </div>
 
         <template v-else-if="challenge">
-          <!-- Readonly info banner -->
+          <!-- Readonly info banner (ONLY when expired) -->
           <div v-if="readOnly"
             class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-800 text-sm font-medium">
-            <template v-if="challenge.isExpired">This challenge has expired. Answers are read-only.</template>
-            <template v-else>You've already answered this challenge. Answers are read-only.</template>
+            This challenge has expired. Answers are read-only.
           </div>
 
           <!-- Main challenge image (optional) -->
@@ -39,21 +38,27 @@
           <!-- Hint -->
           <div v-if="challenge.hintText || hintImgSrc"
             class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm">
-            <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
-            </div>
-            <img v-if="hintImgSrc" :src="hintImgSrc" alt="Hint"
-              class="max-h-48 w-full rounded object-contain bg-dark-white cursor-zoom-in" @error="onImgError"
-              @click="openImage(hintImgSrc)" />
+            <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText"></div>
+            <img
+              v-if="hintImgSrc"
+              :src="hintImgSrc"
+              alt="Hint"
+              class="max-h-48 w-full rounded object-contain bg-dark-white cursor-zoom-in"
+              @error="onImgError"
+              @click="openImage(hintImgSrc)"
+            />
           </div>
 
           <!-- Questions -->
-          <div v-for="q in questions" :key="q.id"
-            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
-            <!-- READ-ONLY block if challenge or question is locked -->
+          <div
+            v-for="q in questions"
+            :key="q.id"
+            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm"
+          >
+            <!-- READ-ONLY block (only when challenge expired) -->
             <template v-if="isQuestionReadOnly(q)">
               <p class="mb-2 font-semibold text-blue-black font-alexandria">{{ q.text }}</p>
 
-              <!-- Render read-only answer preview by type -->
               <div class="text-sm text-blue-black">
                 <!-- single_select -->
                 <template v-if="q.type === 'single_select'">
@@ -65,8 +70,11 @@
                 <!-- multi_select -->
                 <template v-else-if="q.type === 'multi_select'">
                   <div class="flex flex-wrap gap-2">
-                    <span v-for="(lbl, i) in roMultiLabels(q)" :key="i"
-                      class="inline-flex items-center rounded bg-dark-white px-2 py-1">
+                    <span
+                      v-for="(lbl, i) in roMultiLabels(q)"
+                      :key="i"
+                      class="inline-flex items-center rounded bg-dark-white px-2 py-1"
+                    >
                       {{ lbl }}
                     </span>
                     <span v-if="roMultiLabels(q).length === 0">—</span>
@@ -102,31 +110,47 @@
                 </template>
               </div>
 
-              <!-- answered flag -->
               <p v-if="q.answeredAt" class="mt-2 text-xs text-cool-gray">
                 Answered at: {{ new Date(q.answeredAt).toLocaleString() }}
               </p>
             </template>
 
-            <!-- EDITABLE block -->
+            <!-- EDITABLE block (always editable while NOT expired) -->
             <template v-else>
               <!-- single_select -->
-              <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)"
-                v-model="answers[q.id]" />
+              <QuestionSingleSelect
+                v-if="q.type === 'single_select'"
+                :question="toSingleSelectUI(q)"
+                v-model="answers[q.id]"
+              />
 
               <!-- multi_select -->
-              <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)"
-                v-model="answers[q.id]" />
+              <QuestionMultiSelect
+                v-else-if="q.type === 'multi_select'"
+                :question="toMultiSelectUI(q)"
+                v-model="answers[q.id]"
+              />
 
               <!-- text -->
-              <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text, hint: null }"
-                v-model="answers[q.id]" />
+              <QuestionText
+                v-else-if="q.type === 'text'"
+                :question="{ id: q.id, text: q.text, hint: null }"
+                v-model="answers[q.id]"
+              />
 
               <!-- numeric -->
-              <QuestionNumeric v-else-if="q.type === 'numeric'" :question="toNumericUI(q)" v-model="answers[q.id]" />
+              <QuestionNumeric
+                v-else-if="q.type === 'numeric'"
+                :question="toNumericUI(q)"
+                v-model="answers[q.id]"
+              />
 
               <!-- sort -->
-              <QuestionSort v-else-if="q.type === 'sort'" :question="toSortUI(q)" v-model="sortModels[q.id]" />
+              <QuestionSort
+                v-else-if="q.type === 'sort'"
+                :question="toSortUI(q)"
+                v-model="sortModels[q.id]"
+              />
 
               <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
 
@@ -146,19 +170,33 @@
         </button>
 
         <!-- Hide submit in read-only mode -->
-        <button v-if="!readOnly"
+        <button
+          v-if="!readOnly"
           class="rounded-lg bg-vibrant-coral px-4 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 disabled:opacity-60 shadow-sm transition"
-          :disabled="submitting || !challenge" @click="handleSubmit">
+          :disabled="submitting || !challenge"
+          @click="handleSubmit"
+        >
           {{ submitting ? 'Submitting…' : 'Submit answers' }}
         </button>
       </footer>
     </div>
+
     <!-- Fullscreen image modal -->
-    <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
-      @click="closeImage">
-      <img :src="zoomedImage" alt="Zoomed image" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg cursor-zoom-out"
-        @click.stop />
-      <button class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-golden-yellow" @click="closeImage">
+    <div
+      v-if="zoomedImage"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+      @click="closeImage"
+    >
+      <img
+        :src="zoomedImage"
+        alt="Zoomed image"
+        class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg cursor-zoom-out"
+        @click.stop
+      />
+      <button
+        class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-golden-yellow"
+        @click="closeImage"
+      >
         ✕
       </button>
     </div>
@@ -191,10 +229,9 @@ const loading = ref(false);
 const error = ref(null);
 const challenge = ref(null);
 const questions = ref([]);       // API form
-const answers = reactive({});  // map questionId -> model
-const sortModels = reactive({});  // map questionId -> [{ id,label } ...] for UI sort
-const qErrors = reactive({});  // map questionId -> error string
-
+const answers = reactive({});    // map questionId -> model
+const sortModels = reactive({}); // map questionId -> [{ id,label } ...] for UI sort
+const qErrors = reactive({});    // map questionId -> error string
 const submitting = ref(false);
 
 const log = (...a) => console.log('[ChallengeModal]', ...a);
@@ -206,15 +243,16 @@ const hintImgSrc = computed(() =>
   challenge.value?.hintImage ? resolvedImage({ image: challenge.value.hintImage }) : null
 );
 
-/** Global read-only mode for the whole challenge */
-const readOnly = computed(() =>
-  !!challenge.value && (challenge.value.isExpired || challenge.value.isAnswered || challenge.value.isEvaluated)
-);
+/**
+ * READ-ONLY LOGIC
+ * - Global readOnly ONLY when challenge is expired.
+ * - Previously answered questions REMAIN EDITABLE while not expired.
+ */
+const readOnly = computed(() => !!challenge.value && !!challenge.value.isExpired);
 
-/** Is a single question locked (already answered) */
-function isQuestionReadOnly(q) {
-  // whole-challenge lock OR per-question lock
-  return readOnly.value || !!q.answeredAt || !!q.answer;
+function isQuestionReadOnly(_q) {
+  // Only lock questions when the whole challenge is expired.
+  return readOnly.value;
 }
 
 /** UI mappers */
@@ -291,16 +329,10 @@ function hintForSelect(minSel, maxSel) {
   return null;
 }
 
-//zoom in hint image
+// zoom in hint image
 const zoomedImage = ref(null);
-
-function openImage(src) {
-  zoomedImage.value = src;
-}
-
-function closeImage() {
-  zoomedImage.value = null;
-}
+function openImage(src) { zoomedImage.value = src; }
+function closeImage() { zoomedImage.value = null; }
 
 /** Init models per question type */
 function initAnswerModels(apiQuestions) {
@@ -309,6 +341,7 @@ function initAnswerModels(apiQuestions) {
   apiQuestions.forEach(q => {
     switch (q.type) {
       case 'single_select': {
+        // If server returns previous answer, prefill it – still editable if not expired
         const preset = q.answer?.selectedChoiceId || null;
         answers[q.id] = preset;
         break;
@@ -355,12 +388,12 @@ watch(
   { deep: true }
 );
 
-/** Validation — skip locked questions */
+/** Validation — only for NOT expired (editable) questions */
 function validateAnswers() {
   Object.keys(qErrors).forEach(k => delete qErrors[k]);
 
   for (const q of questions.value) {
-    if (isQuestionReadOnly(q)) continue; // don't validate locked ones
+    if (isQuestionReadOnly(q)) continue; // skip validation for read-only (expired)
 
     const val = answers[q.id];
 
@@ -465,8 +498,8 @@ async function fetchChallenge() {
       hintText: data.hintText ?? null,
       hintImage: data.hintImage ?? null,
       isExpired: !!data.isExpired,
-      isAnswered: !!data.isAnswered,
-      isEvaluated: !!data.isEvaluated,
+      isAnswered: !!data.isAnswered,   // stále načítáme, ale NEPOUŽÍVÁME k uzamčení
+      isEvaluated: !!data.isEvaluated, // stejné
       isStarted: !!data.isStarted,
     };
     questions.value = Array.isArray(data.questions) ? data.questions : [];
@@ -479,10 +512,10 @@ async function fetchChallenge() {
   }
 }
 
-/** Submit (Answer.challenge schema) — skip locked questions */
+/** Submit (Answer.challenge schema) — send ALL editable (not expired) answers */
 async function handleSubmit() {
   if (!challenge.value) return;
-  if (readOnly.value) return; // extra safety
+  if (readOnly.value) return; // expired → no submit
 
   if (!validateAnswers()) return;
 
