@@ -498,8 +498,8 @@ async function fetchChallenge() {
       hintText: data.hintText ?? null,
       hintImage: data.hintImage ?? null,
       isExpired: !!data.isExpired,
-      isAnswered: !!data.isAnswered,   // stále načítáme, ale NEPOUŽÍVÁME k uzamčení
-      isEvaluated: !!data.isEvaluated, // stejné
+      isAnswered: !!data.isAnswered,
+      isEvaluated: !!data.isEvaluated,
       isStarted: !!data.isStarted,
     };
     questions.value = Array.isArray(data.questions) ? data.questions : [];
