@@ -58,7 +58,7 @@ const showModal = ref(false);
 const selectedId = ref(null);
 
 // filter state: all | active | completed | expired
-const activeFilter = ref('all');
+const activeFilter = ref('active');
 
 // helpers to derive status from challenge
 const isCompleted = (c) => !!c.isAnswered; // or c.isEvaluated if that’s your definition
