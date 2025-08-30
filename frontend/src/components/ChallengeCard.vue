@@ -5,13 +5,13 @@
   >
     <!-- Image -->
     <div
-      class="flex h-28 w-full sm:w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-white"
+      class="flex h-auto w-full sm:h-28 sm:w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square"
     >
       <img
         v-if="resolvedImage(challenge)"
         :src="resolvedImage(challenge)"
         :alt="challenge.name"
-        class="h-full w-full object-cover"
+        class="h-full w-full object-contain sm:object-cover"
         loading="lazy"
         @error="onImgError"
       />

@@ -35,7 +35,13 @@
           <li
             v-for="(p, i) in items"
             :key="p.playerId || i"
-            class="grid grid-cols-12 gap-6 px-8 py-6 hover:bg-dark-white/50 sm:items-center"
+            class="grid grid-cols-12 gap-6 px-8 py-6 hover:bg-dark-white/50 sm:items-center cursor-pointer focus:outline-none focus:bg-dark-white/60"
+            role="button"
+            tabindex="0"
+            :aria-label="`Open player ${p.playerName}`"
+            @click="onRowClick(p.playerId)"
+            @keydown.enter.prevent="onRowClick(p.playerId)"
+            @keydown.space.prevent="onRowClick(p.playerId)"
           >
             <!-- Rank badge -->
             <div class="col-span-12 mb-3 flex items-center gap-4 sm:col-span-2 sm:mb-0">
@@ -45,12 +51,9 @@
               <span class="text-sm text-cool-gray sm:hidden">Rank</span>
             </div>
 
-            <!-- Player -->
+            <!-- Player (no inner link; the whole row is clickable) -->
             <div class="col-span-12 sm:col-span-6">
-              <router-link
-                class="inline-flex max-w-full items-center gap-4 rounded-lg px-2 py-1 font-alexandria text-blue-black hover:text-vibrant-coral"
-                :to="`/player/${p.playerId}`"
-              >
+              <div class="inline-flex max-w-full items-center gap-4 rounded-lg px-2 py-1 font-alexandria text-blue-black">
                 <div
                   class="grid h-12 w-12 shrink-0 place-items-center rounded-full"
                   :class="p.isMyself ? 'bg-golden-yellow text-blue-black' : 'bg-dark-white text-blue-black'"
@@ -61,7 +64,7 @@
                   {{ p.playerName }}
                   <span v-if="p.isMyself" class="text-sm text-vibrant-coral">(you)</span>
                 </span>
-              </router-link>
+              </div>
             </div>
 
             <!-- Points -->
@@ -100,10 +103,13 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { apiGetLeaderboards } from '@/api/leaderboards';
 import { toFriendlyError } from '@/utils/errorHandler';
 
 document.title = 'Fantasy Academy | Leaderboard';
+
+const router = useRouter();
 
 const items = ref([]);
 const initialLoading = ref(false);
@@ -129,6 +135,11 @@ function badgeBg(rank, indexInList) {
   if (r === 2) return 'bg-gray-200';
   if (r === 3) return 'bg-amber-200';
   return 'bg-dark-white';
+}
+
+function onRowClick(playerId) {
+  if (!playerId) return;
+  router.push(`/player/${playerId}`);
 }
 
 async function fetchPage(n) {
