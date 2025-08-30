@@ -39,9 +39,11 @@
           <!-- Hint -->
           <div v-if="challenge.hintText || hintImgSrc"
             class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm">
-            <div v-if="challenge.hintText" class="prose prose-sm max-w-none">{{ challenge.hintText }}</div>
+            <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
+            </div>
             <img v-if="hintImgSrc" :src="hintImgSrc" alt="Hint"
-              class="max-h-48 w-full rounded object-contain bg-dark-white" @error="onImgError" />
+              class="max-h-48 w-full rounded object-contain bg-dark-white cursor-zoom-in" @error="onImgError"
+              @click="openImage(hintImgSrc)" />
           </div>
 
           <!-- Questions -->
@@ -150,6 +152,15 @@
           {{ submitting ? 'Submitting…' : 'Submit answers' }}
         </button>
       </footer>
+    </div>
+    <!-- Fullscreen image modal -->
+    <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+      @click="closeImage">
+      <img :src="zoomedImage" alt="Zoomed image" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg cursor-zoom-out"
+        @click.stop />
+      <button class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-golden-yellow" @click="closeImage">
+        ✕
+      </button>
     </div>
   </div>
 </template>
@@ -278,6 +289,17 @@ function hintForSelect(minSel, maxSel) {
   if (minSel) return `Select at least ${minSel} option(s).`;
   if (maxSel) return `Select at most ${maxSel} option(s).`;
   return null;
+}
+
+//zoom in hint image
+const zoomedImage = ref(null);
+
+function openImage(src) {
+  zoomedImage.value = src;
+}
+
+function closeImage() {
+  zoomedImage.value = null;
 }
 
 /** Init models per question type */
