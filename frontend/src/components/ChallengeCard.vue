@@ -3,10 +3,10 @@
     class="flex flex-col sm:flex-row gap-5 rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm transition hover:shadow-main cursor-pointer"
     @click="$emit('select', challenge.id)">
     <!-- Image -->
-    <div
-      class="flex w-full sm:w-28 sm:h-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square">
+    <div class="flex items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square 
+         w-full max-w-[120px] max-h-[120px] sm:w-28 sm:h-28 shrink-0 mx-auto sm:mx-0">
       <img v-if="resolvedImage(challenge)" :src="resolvedImage(challenge)" :alt="challenge.name"
-        class="max-w-full max-h-full object-contain sm:object-cover" loading="lazy" @error="onImgError" />
+        class="h-full w-full object-contain" loading="lazy" @error="onImgError" />
       <span v-else class="text-xs text-cool-gray">No image</span>
     </div>
 
