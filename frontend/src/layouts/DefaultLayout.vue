@@ -1,8 +1,14 @@
 <template>
-  <div class="flex flex-col min-h-screen">
+  <!-- full-bleed wrapper -->
+  <div class="min-h-screen w-full overflow-x-hidden flex flex-col">
     <Header />
 
-    <main class="flex-grow max-w-6xl mx-auto p-4">
+    <!-- content area: úzké na mobilech, bez limitu od md+ -->
+    <main
+      class="flex-grow w-full mx-auto min-w-0
+             px-4 sm:px-6 md:px-8 lg:px-12
+             max-w-[640px] md:max-w-none"
+    >
       <slot />
     </main>
 

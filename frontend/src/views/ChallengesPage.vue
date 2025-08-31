@@ -1,5 +1,5 @@
 <template>
-  <section class="mx-auto max-w-6xl px-4 py-8">
+  <section class="w-full max-w-6xl mx-auto px-4 py-8">
     <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-3xl font-bold text-blue-black">Challenges</h1>
 
@@ -34,7 +34,7 @@
     </div>
 
     <!-- List -->
-    <div class="space-y-4" v-else>
+    <div v-else class="flex flex-col gap-2">
       <ChallengeCard v-for="c in filteredChallenges" :key="c.id" :challenge="c" @select="openChallenge(c.id)" />
     </div>
 

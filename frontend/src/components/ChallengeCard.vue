@@ -4,7 +4,7 @@
     @click="$emit('select', challenge.id)">
     <!-- Image -->
     <div class="flex items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square 
-         w-full max-w-[120px] max-h-[120px] sm:w-28 sm:h-28 shrink-0 mx-auto sm:mx-0">
+         max-w-[80px] max-h-[80px] sm:w-28 sm:h-28 shrink-0 mx-auto sm:mx-0">
       <img v-if="resolvedImage(challenge)" :src="resolvedImage(challenge)" :alt="challenge.name"
         class="h-full w-full object-contain" loading="lazy" @error="onImgError" />
       <span v-else class="text-xs text-cool-gray">No image</span>
