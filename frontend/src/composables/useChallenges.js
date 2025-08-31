@@ -1,4 +1,3 @@
-// src/composables/useChallenges.js
 import { ref } from 'vue';
 import { apiListChallenges } from '@/api/challenges';
 import { toFriendlyError } from '@/utils/errorHandler';
@@ -45,7 +44,7 @@ export function useChallenges() {
         rawMessage: e?.message,
         data: e?.data,
       });
-      error.value = fe.userMessage || 'Nepodařilo se načíst výzvy';
+      error.value = fe.userMessage || 'I`m not able to load challenges';
     } finally {
       loading.value = false;
     }
