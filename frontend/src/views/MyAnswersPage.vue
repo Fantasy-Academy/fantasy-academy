@@ -47,7 +47,7 @@
                 <!-- Answer -->
                 <div class="flex flex-row items-center gap-1">
                     <p class="mt-1 text-md text-cool-gray">
-                        Your Answer:
+                        You answered:
                     </p>
                     <p class="mt-1 text-sm text-cool-gray">
                         {{ a.answerText }}

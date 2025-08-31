@@ -298,31 +298,35 @@ function closeImage() { zoomedImage.value = null; }
 function initAnswerModels(apiQuestions) {
   Object.keys(qErrors).forEach(k => delete qErrors[k]);
 
+  // === NEW: helper, který preferuje myAnswer ===
+  const getAns = (q) => q?.myAnswer ?? q?.answer ?? null;
+
   apiQuestions.forEach(q => {
+    const a = getAns(q); // ← používejme myAnswer / answer
+
     switch (q.type) {
       case 'single_select': {
-        // If server returns previous answer, prefill it – still editable if not expired
-        const preset = q.answer?.selectedChoiceId || null;
+        const preset = a?.selectedChoiceId || null;
         answers[q.id] = preset;
         break;
       }
       case 'multi_select': {
-        const preset = Array.isArray(q.answer?.selectedChoiceIds) ? q.answer.selectedChoiceIds : [];
+        const preset = Array.isArray(a?.selectedChoiceIds) ? a.selectedChoiceIds : [];
         answers[q.id] = preset;
         break;
       }
       case 'text': {
-        answers[q.id] = q.answer?.textAnswer ?? '';
+        answers[q.id] = a?.textAnswer ?? '';
         break;
       }
       case 'numeric': {
-        const num = typeof q.answer?.numericAnswer === 'number' ? q.answer.numericAnswer : null;
+        const num = (typeof a?.numericAnswer === 'number') ? a.numericAnswer : null;
         answers[q.id] = num;
         break;
       }
       case 'sort': {
         const base = (q.choiceConstraint?.choices || []).map(c => c.id);
-        const preset = Array.isArray(q.answer?.orderedChoiceIds) ? q.answer.orderedChoiceIds : base;
+        const preset = Array.isArray(a?.orderedChoiceIds) ? a.orderedChoiceIds : base;
         answers[q.id] = preset.slice();
 
         const opts = (q.choiceConstraint?.choices || []).map(c => ({ id: c.id, label: c.text }));
@@ -423,18 +427,28 @@ function choiceMap(q) {
   (q.choiceConstraint?.choices || []).forEach(c => map.set(c.id, c.text));
   return map;
 }
+
 function roSingleLabel(q) {
-  const id = q.answer?.selectedChoiceId ?? null;
+  const id =
+    q.myAnswer?.selectedChoiceId ??
+    q.answer?.selectedChoiceId ??
+    null;
   if (!id) return null;
   return choiceMap(q).get(id) || id;
 }
+
 function roMultiLabels(q) {
-  const ids = Array.isArray(q.answer?.selectedChoiceIds) ? q.answer.selectedChoiceIds : [];
+  const ids = Array.isArray(q.myAnswer?.selectedChoiceIds)
+    ? q.myAnswer.selectedChoiceIds
+    : (Array.isArray(q.answer?.selectedChoiceIds) ? q.answer.selectedChoiceIds : []);
   const map = choiceMap(q);
   return ids.map(id => map.get(id) || id);
 }
+
 function roSortLabels(q) {
-  const ids = Array.isArray(q.answer?.orderedChoiceIds) ? q.answer.orderedChoiceIds : [];
+  const ids = Array.isArray(q.myAnswer?.orderedChoiceIds)
+    ? q.myAnswer.orderedChoiceIds
+    : (Array.isArray(q.answer?.orderedChoiceIds) ? q.answer.orderedChoiceIds : []);
   const map = choiceMap(q);
   return ids.map(id => map.get(id) || id);
 }

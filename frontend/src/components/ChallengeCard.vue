@@ -1,20 +1,12 @@
 <template>
   <article
     class="flex flex-col sm:flex-row gap-5 rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm transition hover:shadow-main cursor-pointer"
-    @click="$emit('select', challenge.id)"
-  >
+    @click="$emit('select', challenge.id)">
     <!-- Image -->
     <div
-      class="flex h-auto w-full sm:h-28 sm:w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square"
-    >
-      <img
-        v-if="resolvedImage(challenge)"
-        :src="resolvedImage(challenge)"
-        :alt="challenge.name"
-        class="h-full w-full object-contain sm:object-cover"
-        loading="lazy"
-        @error="onImgError"
-      />
+      class="flex w-full sm:w-28 sm:h-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square">
+      <img v-if="resolvedImage(challenge)" :src="resolvedImage(challenge)" :alt="challenge.name"
+        class="max-w-full max-h-full object-contain sm:object-cover" loading="lazy" @error="onImgError" />
       <span v-else class="text-xs text-cool-gray">No image</span>
     </div>
 
@@ -32,22 +24,14 @@
           {{ challenge.maxPoints }} pts
         </span>
 
-        <span
-          v-if="challenge.isAnswered"
-          class="rounded-full bg-pistachio/20 px-3 py-1 text-pistachio font-semibold"
-        >
+        <span v-if="challenge.isAnswered" class="rounded-full bg-pistachio/20 px-3 py-1 text-pistachio font-semibold">
           Answered
         </span>
-        <span
-          v-else-if="challenge.isExpired"
-          class="rounded-full bg-vibrant-coral/10 px-3 py-1 text-vibrant-coral font-semibold"
-        >
+        <span v-else-if="challenge.isExpired"
+          class="rounded-full bg-vibrant-coral/10 px-3 py-1 text-vibrant-coral font-semibold">
           Expired
         </span>
-        <span
-          v-else
-          class="rounded-full bg-golden-yellow/20 px-3 py-1 text-golden-yellow font-semibold"
-        >
+        <span v-else class="rounded-full bg-golden-yellow/20 px-3 py-1 text-golden-yellow font-semibold">
           Active
         </span>
 
