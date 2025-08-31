@@ -1,6 +1,6 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-main border border-charcoal/10">
+  <div v-if="show" @click="$emit('close')" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-main border border-charcoal/10" @click.stop>
       <!-- Header -->
       <header
         class="flex items-center justify-between rounded-t-2xl px-5 py-4 bg-gradient-to-r from-blue-black to-charcoal text-dark-white">
@@ -38,23 +38,16 @@
           <!-- Hint -->
           <div v-if="challenge.hintText || hintImgSrc"
             class="mb-5 rounded-xl border border-charcoal/10 bg-white p-3 text-sm shadow-sm">
-            <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText"></div>
-            <img
-              v-if="hintImgSrc"
-              :src="hintImgSrc"
-              alt="Hint"
-              class="max-h-48 w-full rounded object-contain bg-dark-white cursor-zoom-in"
-              @error="onImgError"
-              @click="openImage(hintImgSrc)"
-            />
+            <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
+            </div>
+            <img v-if="hintImgSrc" :src="hintImgSrc" alt="Hint"
+              class="max-h-48 w-full rounded object-contain bg-dark-white cursor-zoom-in" @error="onImgError"
+              @click="openImage(hintImgSrc)" />
           </div>
 
           <!-- Questions -->
-          <div
-            v-for="q in questions"
-            :key="q.id"
-            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm"
-          >
+          <div v-for="q in questions" :key="q.id"
+            class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
             <!-- READ-ONLY block (only when challenge expired) -->
             <template v-if="isQuestionReadOnly(q)">
               <p class="mb-2 font-semibold text-blue-black font-alexandria">{{ q.text }}</p>
@@ -70,11 +63,8 @@
                 <!-- multi_select -->
                 <template v-else-if="q.type === 'multi_select'">
                   <div class="flex flex-wrap gap-2">
-                    <span
-                      v-for="(lbl, i) in roMultiLabels(q)"
-                      :key="i"
-                      class="inline-flex items-center rounded bg-dark-white px-2 py-1"
-                    >
+                    <span v-for="(lbl, i) in roMultiLabels(q)" :key="i"
+                      class="inline-flex items-center rounded bg-dark-white px-2 py-1">
                       {{ lbl }}
                     </span>
                     <span v-if="roMultiLabels(q).length === 0">—</span>
@@ -118,39 +108,22 @@
             <!-- EDITABLE block (always editable while NOT expired) -->
             <template v-else>
               <!-- single_select -->
-              <QuestionSingleSelect
-                v-if="q.type === 'single_select'"
-                :question="toSingleSelectUI(q)"
-                v-model="answers[q.id]"
-              />
+              <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)"
+                v-model="answers[q.id]" />
 
               <!-- multi_select -->
-              <QuestionMultiSelect
-                v-else-if="q.type === 'multi_select'"
-                :question="toMultiSelectUI(q)"
-                v-model="answers[q.id]"
-              />
+              <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)"
+                v-model="answers[q.id]" />
 
               <!-- text -->
-              <QuestionText
-                v-else-if="q.type === 'text'"
-                :question="{ id: q.id, text: q.text, hint: null }"
-                v-model="answers[q.id]"
-              />
+              <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text, hint: null }"
+                v-model="answers[q.id]" />
 
               <!-- numeric -->
-              <QuestionNumeric
-                v-else-if="q.type === 'numeric'"
-                :question="toNumericUI(q)"
-                v-model="answers[q.id]"
-              />
+              <QuestionNumeric v-else-if="q.type === 'numeric'" :question="toNumericUI(q)" v-model="answers[q.id]" />
 
               <!-- sort -->
-              <QuestionSort
-                v-else-if="q.type === 'sort'"
-                :question="toSortUI(q)"
-                v-model="sortModels[q.id]"
-              />
+              <QuestionSort v-else-if="q.type === 'sort'" :question="toSortUI(q)" v-model="sortModels[q.id]" />
 
               <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
 
@@ -170,33 +143,20 @@
         </button>
 
         <!-- Hide submit in read-only mode -->
-        <button
-          v-if="!readOnly"
+        <button v-if="!readOnly"
           class="rounded-lg bg-vibrant-coral px-4 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 disabled:opacity-60 shadow-sm transition"
-          :disabled="submitting || !challenge"
-          @click="handleSubmit"
-        >
+          :disabled="submitting || !challenge" @click="handleSubmit">
           {{ submitting ? 'Submitting…' : 'Submit answers' }}
         </button>
       </footer>
     </div>
 
     <!-- Fullscreen image modal -->
-    <div
-      v-if="zoomedImage"
-      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
-      @click="closeImage"
-    >
-      <img
-        :src="zoomedImage"
-        alt="Zoomed image"
-        class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg cursor-zoom-out"
-        @click.stop
-      />
-      <button
-        class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-golden-yellow"
-        @click="closeImage"
-      >
+    <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+      @click="closeImage">
+      <img :src="zoomedImage" alt="Zoomed image" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg cursor-zoom-out"
+        @click.stop />
+      <button class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-golden-yellow" @click="closeImage">
         ✕
       </button>
     </div>
