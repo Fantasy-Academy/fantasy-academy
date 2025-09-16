@@ -1,4 +1,3 @@
-// src/api/http.js
 import { getToken } from '@/services/tokenService';
 
 const BASE_URL =
@@ -40,7 +39,6 @@ export async function apiFetch(path, opts = {}) {
   }
 
   if (API_DEBUG) {
-    // maskni token a zaloguj jen shrnutí requestu
     const authHeader = headers.Authorization ? `${headers.Authorization.slice(0, 16)}…` : undefined;
     // group pro přehlednost
     // (collapsed, ať to nekazí konzoli)

@@ -1,5 +1,5 @@
 <template>
-  <section class="mx-auto max-w-md px-4 py-10">
+  <AuthLayout>
     <!-- Card -->
     <div class="rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
       <header class="mb-6">
@@ -56,13 +56,14 @@
         </router-link>
       </div>
     </div>
-  </section>
+  </AuthLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { apiRequestResetCode } from '@/api/password';
 import { toFriendlyError } from '@/utils/errorHandler';
+import AuthLayout from '../layouts/AuthLayout.vue';
 
 document.title = 'Fantasy Academy | Forgot Password';
 

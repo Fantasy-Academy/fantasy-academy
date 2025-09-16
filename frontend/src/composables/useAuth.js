@@ -1,4 +1,3 @@
-// src/composables/useAuth.js
 import { ref, computed } from 'vue';
 import { toFriendlyError } from '@/utils/errorHandler';
 

@@ -1,11 +1,12 @@
 <template>
-  <div class="mx-auto max-w-md px-4 py-10">
+  <AuthLayout>
     <SignupForm />
-  </div>
+  </AuthLayout>
 </template>
 
 <script setup>
 import SignupForm from '../components/SignupForm.vue';
+import AuthLayout from '../layouts/AuthLayout.vue';
 
 document.title = 'Fantasy Academy | Signup';
 </script>
