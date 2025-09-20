@@ -1,16 +1,23 @@
 <template>
   <div>
     <label class="block font-medium mb-2">{{ question.text }}</label>
-    <div v-for="opt in question.options" :key="opt.id" class="flex items-center mb-1">
-      <input
-        type="checkbox"
-        :value="opt.value"
-        v-model="localValue"
-        class="mr-2"
-      />
-      <span>{{ opt.label }}</span>
-    </div>
-          <!-- 🔹 Popis (pokud existuje) -->
+
+    <div
+      v-for="opt in question.options"
+      :key="opt.id"
+      class="flex flex-col mb-3"
+    >
+      <div class="flex items-center mb-1">
+        <input
+          type="checkbox"
+          :value="opt.value"
+          v-model="localValue"
+          class="mr-2"
+        />
+        <span>{{ opt.label }}</span>
+      </div>
+
+      <!-- 🔹 Popis (pokud existuje) -->
       <p v-if="opt.description" class="mt-1 text-sm text-cool-gray">
         {{ opt.description }}
       </p>
@@ -22,21 +29,32 @@
         alt=""
         class="mt-2 max-h-32 w-full object-contain rounded-lg border border-charcoal/10"
       />
-    <p v-if="question.hint" class="text-sm text-gray-500 mt-1">{{ question.hint }}</p>
+    </div>
+
+    <p v-if="question.hint" class="text-sm text-gray-500 mt-1">
+      {{ question.hint }}
+    </p>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps({
-  question: Object,
-  modelValue: Array
-});
-const emit = defineEmits(['update:modelValue']);
+  question: {
+    type: Object,
+    default: () => ({ options: [] }) // pro jistotu, aby nikdy nebylo undefined
+  },
+  modelValue: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const emit = defineEmits(['update:modelValue'])
 
 const localValue = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
-});
+})
 </script>
