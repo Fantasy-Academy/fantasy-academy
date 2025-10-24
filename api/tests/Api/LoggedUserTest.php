@@ -8,7 +8,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
 use FantasyAcademy\API\Tests\TestingLogin;
 
-final class PlayerInfoTest extends ApiTestCase
+final class LoggedUserTest extends ApiTestCase
 {
     public function testPlayerInfoRequiresAuthentication(): void
     {
