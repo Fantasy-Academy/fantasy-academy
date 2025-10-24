@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Api;
+namespace FantasyAcademy\API\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
