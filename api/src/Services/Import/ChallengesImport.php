@@ -230,7 +230,6 @@ readonly final class ChallengesImport
             skillDecisionMakingUnderPressure: $this->makePercentage($row['skill_decisionmakingunderpressure']),
             skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
             skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
-            skillDiscipline: $this->makePercentage($row['skill_discipline']),
         );
 
         $this->entityManager->persist($challenge);
