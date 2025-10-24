@@ -27,7 +27,7 @@ final class PlayerInfoTest extends ApiTestCase
             'id' => UserFixture::USER_4_ID,
             'isMyself' => false,
             'name' => 'User 4',
-            'registeredAt' => '2025-10-17T22:26:37+00:00',
+            'registeredAt' => '2025-05-30T12:00:00+00:00',
             'overallStatistics' => [
                 'rank' => null,
                 'challengesAnswered' => 0,
@@ -64,11 +64,11 @@ final class PlayerInfoTest extends ApiTestCase
             'id' => UserFixture::USER_3_ID,
             'isMyself' => true,
             'name' => 'User 3',
-            'registeredAt' => '2025-10-17T22:26:37+00:00',
+            'registeredAt' => '2025-05-30T12:00:00+00:00',
             'overallStatistics' => [
-                'rank' => 3,
+                'rank' => 1,
                 'challengesAnswered' => 3,
-                'points' => 0,
+                'points' => 1700,
                 'skills' => [
                     [
                         'name' => 'Analytical',
@@ -120,9 +120,9 @@ final class PlayerInfoTest extends ApiTestCase
             'seasonsStatistics' => [
                 [
                     'seasonNumber' => 1,
-                    'rank' => 3,
+                    'rank' => 1,
                     'challengesAnswered' => 3,
-                    'points' => 0,
+                    'points' => 1700,
                     'skills' => [],
                 ],
             ],

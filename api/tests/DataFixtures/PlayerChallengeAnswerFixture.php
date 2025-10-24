@@ -64,6 +64,10 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // User 4 has no answers - nothing to do
 
+        // Evaluate the expired challenges
+        $expiredChallenge1->evaluate($this->clock->now());
+        $expiredChallenge2->evaluate($this->clock->now());
+
         $manager->flush();
     }
 
@@ -96,6 +100,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             orderedChoiceIds: null,
         );
 
+        $answer1->evaluate(800);
         $manager->persist($answer1);
 
         // Answer expired challenge 2
@@ -138,6 +143,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             orderedChoiceIds: null,
         );
 
+        $answer2->evaluate(600);
+
         $manager->persist($answer2);
     }
 
@@ -169,6 +176,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             selectedChoiceIds: null,
             orderedChoiceIds: null,
         );
+
+        $answer1->evaluate(900);
 
         $manager->persist($answer1);
 
@@ -211,6 +220,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             orderedChoiceIds: null,
         );
 
+        $answer2->evaluate(700);
+
         $manager->persist($answer2);
     }
 
@@ -247,6 +258,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             orderedChoiceIds: null,
         );
 
+        $answer1->evaluate(900);
+
         $manager->persist($answer1);
 
         // Answer expired challenge 2
@@ -278,6 +291,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             orderedChoiceIds: null,
         );
 
+
         $answer2->answerQuestion(
             $answeredAt,
             $question10,
@@ -287,6 +301,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             selectedChoiceIds: null,
             orderedChoiceIds: null,
         );
+
+        $answer2->evaluate(800);
 
         $manager->persist($answer2);
 
