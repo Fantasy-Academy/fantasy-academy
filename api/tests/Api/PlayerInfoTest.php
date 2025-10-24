@@ -34,21 +34,68 @@ final class PlayerInfoTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertJsonContains([
-            'id' => UserFixture::USER_2_ID,
+            'id' => '00000000-0000-0000-0001-000000000002',
             'name' => 'User 2',
-            'email' => UserFixture::USER_2_EMAIL,
-            'availableChallenges' => 4,
+            'email' => 'user@example.com',
+            'registeredAt' => '2025-10-17T22:26:37+00:00',
+            'availableChallenges' => 3,
             'overallStatistics' => [
-                'rank' => null,
-                'challengesAnswered' => 0,
+                'rank' => 2,
+                'challengesAnswered' => 2,
                 'points' => 0,
-                'skills' => [],
+                'skills' => [
+                    [
+                        'name' => 'Analytical',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Strategic Planning',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Adaptability',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Premier League Knowledge',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Risk Management',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Decision Making Under Pressure',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Financial Management',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Long Term Vision',
+                        'percentage' => 100,
+                        'percentageChange' => NULL,
+                    ],
+                    [
+                        'name' => 'Discipline',
+                        'percentage' => 40,
+                        'percentageChange' => NULL,
+                    ],
+                ],
             ],
             'seasonsStatistics' => [
                 [
                     'seasonNumber' => 1,
-                    'rank' => null,
-                    'challengesAnswered' => 0,
+                    'rank' => 2,
+                    'challengesAnswered' => 2,
                     'points' => 0,
                     'skills' => [],
                 ],

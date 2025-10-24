@@ -26,6 +26,12 @@ final class UserFixture extends Fixture
     public const string USER_2_ID = '00000000-0000-0000-0001-000000000002';
     public const string USER_2_EMAIL = 'user@example.com';
 
+    public const string USER_3_ID = '00000000-0000-0000-0001-000000000003';
+    public const string USER_3_EMAIL = 'user3@example.com';
+
+    public const string USER_4_ID = '00000000-0000-0000-0001-000000000004';
+    public const string USER_4_EMAIL = 'user4@example.com';
+
     public function load(ObjectManager $manager): void
     {
         $registeredAt = $this->clock->now()->modify('-1 week');
@@ -58,6 +64,36 @@ final class UserFixture extends Fixture
         $user2->changePassword($hashedPassword);
 
         $manager->persist($user2);
+
+
+        $user3 = new User(
+            Uuid::fromString(self::USER_3_ID),
+            self::USER_3_EMAIL,
+            $registeredAt,
+            'User 3',
+            true,
+            [User::ROLE_USER],
+        );
+
+        $hashedPassword = $this->passwordHasher->hashPassword($user3, self::USER_PASSWORD);
+        $user3->changePassword($hashedPassword);
+
+        $manager->persist($user3);
+
+
+        $user4 = new User(
+            Uuid::fromString(self::USER_4_ID),
+            self::USER_4_EMAIL,
+            $registeredAt,
+            'User 4',
+            true,
+            [User::ROLE_USER],
+        );
+
+        $hashedPassword = $this->passwordHasher->hashPassword($user4, self::USER_PASSWORD);
+        $user4->changePassword($hashedPassword);
+
+        $manager->persist($user4);
 
         $manager->flush();
     }
