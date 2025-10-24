@@ -2,33 +2,56 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Tests\Api;
+namespace Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
 use FantasyAcademy\API\Tests\TestingLogin;
 
 /**
- * @covers \FantasyAcademy\API\Api\LoggedUser\LoggedUserProvider
- * @covers \FantasyAcademy\API\Api\LoggedUser\LoggedUserResponse
+ * @covers \FantasyAcademy\API\Api\PlayerInfo\PlayerInfoProvider
+ * @covers \FantasyAcademy\API\Api\PlayerInfo\PlayerInfoResponse
  */
-final class LoggedUserTest extends ApiTestCase
+final class PlayerInfoTest extends ApiTestCase
 {
-    public function testPlayerInfoRequiresAuthentication(): void
+    public function testPlayerInfoReturnsData(): void
     {
         $client = self::createClient();
 
-        $client->request('GET', '/api/me');
+        $client->request('GET', '/api/player/' . UserFixture::USER_4_ID);
 
-        $this->assertResponseStatusCodeSame(401);
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertJsonContains([
+            'id' => UserFixture::USER_4_ID,
+            'isMyself' => false,
+            'name' => 'User 4',
+            'registeredAt' => '2025-10-17T22:26:37+00:00',
+            'overallStatistics' => [
+                'rank' => null,
+                'challengesAnswered' => 0,
+                'points' => 0,
+                'skills' => [],
+            ],
+            'seasonsStatistics' => [
+                [
+                    'seasonNumber' => 1,
+                    'rank' => null,
+                    'challengesAnswered' => 0,
+                    'points' => 0,
+                    'skills' => [],
+                ],
+            ],
+        ]);
     }
 
-    public function testPlayerInfoReturnsDataForAuthenticatedUser(): void
+    public function testPlayerInfoReturnsDataWithMyself(): void
     {
         $client = self::createClient();
-        $token = TestingLogin::getJwt($client, UserFixture::USER_2_EMAIL);
+        $token = TestingLogin::getJwt($client, UserFixture::USER_3_EMAIL);
 
-        $client->request('GET', '/api/me', [
+        $client->request('GET', '/api/player/' . UserFixture::USER_3_ID, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
             ],
@@ -38,14 +61,13 @@ final class LoggedUserTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertJsonContains([
-            'id' => '00000000-0000-0000-0001-000000000002',
-            'name' => 'User 2',
-            'email' => 'user@example.com',
+            'id' => UserFixture::USER_3_ID,
+            'isMyself' => true,
+            'name' => 'User 3',
             'registeredAt' => '2025-10-17T22:26:37+00:00',
-            'availableChallenges' => 3,
             'overallStatistics' => [
-                'rank' => 2,
-                'challengesAnswered' => 2,
+                'rank' => 3,
+                'challengesAnswered' => 3,
                 'points' => 0,
                 'skills' => [
                     [
@@ -90,7 +112,7 @@ final class LoggedUserTest extends ApiTestCase
                     ],
                     [
                         'name' => 'Discipline',
-                        'percentage' => 40,
+                        'percentage' => 60,
                         'percentageChange' => NULL,
                     ],
                 ],
@@ -98,8 +120,8 @@ final class LoggedUserTest extends ApiTestCase
             'seasonsStatistics' => [
                 [
                     'seasonNumber' => 1,
-                    'rank' => 2,
-                    'challengesAnswered' => 2,
+                    'rank' => 3,
+                    'challengesAnswered' => 3,
                     'points' => 0,
                     'skills' => [],
                 ],
