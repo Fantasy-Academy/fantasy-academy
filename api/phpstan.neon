@@ -29,3 +29,9 @@ parameters:
     ignoreErrors:
         - "#Symfony\\\\Config\\\\Framework\\\\Messenger\\\\TransportConfig::options#"
         - "#should return non-empty-string but returns string#"
+        -
+            identifier: symfonyContainer.privateService
+            path: tests/*
+        -
+            message: "#function json_decode expects string, string\\|false given#"
+            path: tests/*

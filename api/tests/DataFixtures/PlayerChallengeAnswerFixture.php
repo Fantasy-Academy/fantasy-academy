@@ -36,22 +36,35 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // Load users
         $user1 = $manager->find(User::class, Uuid::fromString(UserFixture::USER_1_ID));
+        assert($user1 !== null);
         $user2 = $manager->find(User::class, Uuid::fromString(UserFixture::USER_2_ID));
+        assert($user2 !== null);
         $user3 = $manager->find(User::class, Uuid::fromString(UserFixture::USER_3_ID));
+        assert($user3 !== null);
 
         // Load challenges
         $expiredChallenge1 = $manager->find(Challenge::class, Uuid::fromString(ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID));
+        assert($expiredChallenge1 !== null);
         $expiredChallenge2 = $manager->find(Challenge::class, Uuid::fromString(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID));
+        assert($expiredChallenge2 !== null);
         $currentChallenge1 = $manager->find(Challenge::class, Uuid::fromString(CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID));
+        assert($currentChallenge1 !== null);
 
         // Load questions
         $question7 = $manager->find(Question::class, Uuid::fromString(ExpiredChallengeFixture::QUESTION_7_ID));
+        assert($question7 !== null);
         $question8 = $manager->find(Question::class, Uuid::fromString(ExpiredChallenge2Fixture::QUESTION_8_ID));
+        assert($question8 !== null);
         $question9 = $manager->find(Question::class, Uuid::fromString(ExpiredChallenge2Fixture::QUESTION_9_ID));
+        assert($question9 !== null);
         $question10 = $manager->find(Question::class, Uuid::fromString(ExpiredChallenge2Fixture::QUESTION_10_ID));
+        assert($question10 !== null);
         $question1 = $manager->find(Question::class, Uuid::fromString(CurrentChallenge1Fixture::QUESTION_1_ID));
+        assert($question1 !== null);
         $question2 = $manager->find(Question::class, Uuid::fromString(CurrentChallenge1Fixture::QUESTION_2_ID));
+        assert($question2 !== null);
         $question3 = $manager->find(Question::class, Uuid::fromString(CurrentChallenge1Fixture::QUESTION_3_ID));
+        assert($question3 !== null);
 
         // User 1 (admin@example.com) - answers both expired challenges
         $this->createAnswersForUser1($manager, $user1, $expiredChallenge1, $expiredChallenge2, $answeredAt, $question7, $question8, $question9, $question10);
