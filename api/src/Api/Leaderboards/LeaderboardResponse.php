@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\Response;
+namespace FantasyAcademy\API\Api\Leaderboards;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
-use FantasyAcademy\API\Api\StateProvider\LeaderboardsProvider;
 use FantasyAcademy\API\Value\PlayerSkill;
 use Symfony\Component\Uid\Uuid;
 

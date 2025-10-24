@@ -52,7 +52,7 @@ return static function(ContainerConfigurator $configurator): void
 
     // API
     $services->load('FantasyAcademy\\API\\Controller\\', __DIR__ . '/../src/Controller/**/{*.php}');
-    $services->load('FantasyAcademy\\API\\Api\\StateProvider\\', __DIR__ . '/../src/Api/StateProvider/**/{*.php}');
+    $services->load('FantasyAcademy\\API\\Api\\', __DIR__ . '/../src/Api/**/{*Provider.php}');
 
     /** @see https://github.com/doctrine/migrations/issues/1406 */
     $services->set(FixDoctrineMigrationTableSchema::class)

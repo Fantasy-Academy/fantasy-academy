@@ -2,18 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\Response;
+namespace FantasyAcademy\API\Api\Challenges;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use DateTimeImmutable;
-use FantasyAcademy\API\Api\StateProvider\ChallengeDetailProvider;
-use FantasyAcademy\API\Value\Question;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * @phpstan-import-type QuestionRow from Question
- * @phpstan-type ChallengeDetailResponseRow array{
+ * @phpstan-type ChallengeResponseRow array{
  *     id: string,
  *     name: string,
  *     short_description: string,
@@ -25,22 +22,17 @@ use Symfony\Component\Uid\Uuid;
  *     max_points: int,
  *     evaluated_at: null|string,
  *     answered_at: null|string,
- *     hint_text: null|string,
- *     hint_image: null|string,
  * }
  */
 #[ApiResource(
-    shortName: 'Challenge detail',
+    shortName: 'Challenges',
 )]
-#[Get(
-    uriTemplate: '/challenges/{id}',
-    provider: ChallengeDetailProvider::class,
+#[GetCollection(
+    uriTemplate: '/challenges',
+    provider: ChallengesProvider::class,
 )]
-readonly final class ChallengeDetailResponse
+readonly final class ChallengeResponse
 {
-    /**
-     * @param array<Question> $questions
-     */
     public function __construct(
         public Uuid $id,
         public string $name,
@@ -56,17 +48,13 @@ readonly final class ChallengeDetailResponse
         public bool $isExpired,
         public bool $isAnswered,
         public bool $isEvaluated,
-        public array $questions,
-        public null|string $hintText,
-        public null|string $hintImage,
     ) {
     }
 
     /**
-     * @param ChallengeDetailResponseRow $row
-     * @param array<QuestionRow> $questions
+     * @param ChallengeResponseRow $row
      */
-    public static function fromArray(array $row, DateTimeImmutable $now, array $questions): self
+    public static function fromArray(array $row, DateTimeImmutable $now): self
     {
         $answeredAt = $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null;
         $startsAt = new DateTimeImmutable($row['starts_at']);
@@ -87,12 +75,6 @@ readonly final class ChallengeDetailResponse
             isExpired: $now->getTimestamp() > $expiresAt->getTimestamp(),
             isAnswered: $answeredAt !== null,
             isEvaluated: $row['evaluated_at'] !== null,
-            questions: array_map(
-                callback: fn (array $row): Question => Question::fromArray($row),
-                array: $questions,
-            ),
-            hintText: $row['hint_text'],
-            hintImage: $row['hint_image'],
         );
     }
 }

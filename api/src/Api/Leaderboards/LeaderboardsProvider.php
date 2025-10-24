@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\StateProvider;
+namespace FantasyAcademy\API\Api\Leaderboards;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
-use FantasyAcademy\API\Api\Response\LeaderboardResponse;
 use FantasyAcademy\API\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;

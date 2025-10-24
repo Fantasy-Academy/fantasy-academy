@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\StateProvider;
+namespace FantasyAcademy\API\Api\Challenges;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
-use FantasyAcademy\API\Api\Response\ChallengeResponse;
 use FantasyAcademy\API\Entity\User;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;

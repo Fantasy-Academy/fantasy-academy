@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\StateProvider;
+namespace FantasyAcademy\API\Api\ChallengeDetail;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
-use FantasyAcademy\API\Api\Response\ChallengeDetailResponse;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\ChallengeNotFound;
 use FantasyAcademy\API\Value\Question;

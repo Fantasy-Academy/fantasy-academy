@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Api\StateProvider;
+namespace FantasyAcademy\API\Api\PlayerInfo;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
-use FantasyAcademy\API\Api\Response\LoggedUserResponse;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
@@ -17,11 +16,11 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * @phpstan-import-type LoggedUserResponseRow from LoggedUserResponse
+ * @phpstan-import-type PlayerInfoResponseRow from PlayerInfoResponse
  *
- * @implements ProviderInterface<LoggedUserResponse>
+ * @implements ProviderInterface<PlayerInfoResponse>
  */
-readonly final class LoggedUserProvider implements ProviderInterface
+readonly final class PlayerInfoProvider implements ProviderInterface
 {
     public function __construct(
         private Security $security,
@@ -30,15 +29,21 @@ readonly final class LoggedUserProvider implements ProviderInterface
         private SkillsTransformer $skillsTransformer,
     ) {}
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
+    /**
+     * @param array{id?: Uuid} $uriVariables
+     */
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): PlayerInfoResponse
     {
+        /** @var null|User $user */
         $user = $this->security->getUser();
-        assert($user instanceof User);
 
-        return $this->getPlayerInfo($user->id);
+        assert(isset($uriVariables['id']));
+        $playerId = $uriVariables['id'];
+
+        return $this->getPlayerInfo($playerId, $user?->id);
     }
 
-    private function getPlayerInfo(Uuid $userId): LoggedUserResponse
+    private function getPlayerInfo(Uuid $playerId, null|Uuid $userId): PlayerInfoResponse
     {
         $query = <<<SQL
 WITH agg AS (
@@ -65,10 +70,10 @@ LEFT JOIN ranked r ON r.user_id = u.id
 WHERE u.id = :playerId;
 SQL;
 
-        /** @var false|LoggedUserResponseRow $row */
+        /** @var false|PlayerInfoResponseRow $row */
         $row = $this->database
             ->executeQuery($query, [
-                'playerId' => $userId->toString(),
+                'playerId' => $playerId->toString(),
             ])
             ->fetchAssociative();
 
@@ -76,35 +81,9 @@ SQL;
             throw new UserNotFound();
         }
 
-        $availableChallengesCount = $this->getAvailableChallengesCount($userId);
+        $skills = $this->getPlayerSkills($playerId);
 
-        $skills = $this->getPlayerSkills($userId);
-
-        return LoggedUserResponse::fromArray($row, $availableChallengesCount, $skills);
-    }
-
-    private function getAvailableChallengesCount(Uuid $userId): int
-    {
-        $query = <<<SQL
-SELECT COUNT(*) AS available_challenges
-FROM challenge c
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM player_challenge_answer pca
-  WHERE pca.user_id = :userId
-    AND pca.challenge_id = c.id
-    AND pca.answered_at IS NOT NULL
-);
-SQL;
-
-        /** @var int $result */
-        $result = $this->database
-            ->executeQuery($query, [
-                'userId' => $userId->toString(),
-            ])
-            ->fetchOne();
-
-        return $result;
+        return PlayerInfoResponse::fromArray($row, $userId, $skills);
     }
 
     /**
