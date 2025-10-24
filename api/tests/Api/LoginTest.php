@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Tests\API;
+namespace FantasyAcademy\API\Tests\Api;
 
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
