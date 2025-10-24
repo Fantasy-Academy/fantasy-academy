@@ -11,8 +11,8 @@ use Symfony\Component\Uid\Uuid;
  *     text_answer: null|string,
  *     numeric_answer: null|string,
  *     selected_choice_id: null|string,
- *     selected_choice_ids: null|string,
- *     ordered_choice_ids: null|string,
+ *     selected_choice_ids: null|array<string>,
+ *     ordered_choice_ids: null|array<string>,
  * }
  */
 readonly final class Answer
@@ -37,21 +37,17 @@ readonly final class Answer
         $selectedChoiceIds = null;
         $orderedChoiceIds = null;
 
-        if (json_validate($data['selected_choice_ids'] ?? '')) {
-            /** @var array<string> $selectedChoiceIdsData */
-            $selectedChoiceIdsData = json_decode($data['selected_choice_ids'], associative: true);
+        if (is_array($data['selected_choice_ids'] ?? null)) {
             $selectedChoiceIds = array_map(
                 callback: fn (string $uuid): Uuid => Uuid::fromString($uuid),
-                array: $selectedChoiceIdsData,
+                array: $data['selected_choice_ids'],
             );
         }
 
-        if (json_validate($data['ordered_choice_ids'] ?? '')) {
-            /** @var array<string> $orderedChoiceIdsData */
-            $orderedChoiceIdsData = json_decode($data['ordered_choice_ids'], associative: true);
-            $selectedChoiceIds = array_map(
+        if (is_array($data['ordered_choice_ids'] ?? null)) {
+            $orderedChoiceIds = array_map(
                 callback: fn (string $uuid): Uuid => Uuid::fromString($uuid),
-                array: $orderedChoiceIdsData,
+                array: $data['ordered_choice_ids'],
             );
         }
 
@@ -62,5 +58,36 @@ readonly final class Answer
             selectedChoiceIds: $selectedChoiceIds,
             orderedChoiceIds: $orderedChoiceIds,
         );
+    }
+
+    /**
+     * @return AnswerRow
+     */
+    public function toArray(): array
+    {
+        $selectedChoiceIds = null;
+        $orderedChoiceIds = null;
+
+        if ($this->selectedChoiceIds !== null) {
+            $selectedChoiceIds = array_map(
+                callback: fn (Uuid $uuid): string => $uuid->toString(),
+                array: $this->selectedChoiceIds,
+            );
+        }
+
+        if ($this->orderedChoiceIds !== null) {
+            $orderedChoiceIds = array_map(
+                callback: fn (Uuid $uuid): string => $uuid->toString(),
+                array: $this->orderedChoiceIds,
+            );
+        }
+
+        return [
+            'text_answer' => $this->textAnswer,
+            'numeric_answer' => $this->numericAnswer !== null ? (string) $this->numericAnswer : null,
+            'selected_choice_id' => $this->selectedChoiceId?->toString(),
+            'selected_choice_ids' => $selectedChoiceIds,
+            'ordered_choice_ids' => $orderedChoiceIds,
+        ];
     }
 }
