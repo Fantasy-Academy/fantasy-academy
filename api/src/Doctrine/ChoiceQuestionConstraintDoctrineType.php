@@ -7,14 +7,82 @@ namespace FantasyAcademy\API\Doctrine;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\JsonbType;
+use FantasyAcademy\API\Value\Choice;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
+use Symfony\Component\Uid\Uuid;
 
 /**
- * @phpstan-import-type ChoiceQuestionConstraintArray from ChoiceQuestionConstraint
+ * @phpstan-type ChoiceArray array{
+ *     id: string,
+ *     text: string,
+ *     description: null|string,
+ *     image: null|string,
+ * }
+ * @phpstan-type ChoiceQuestionConstraintArray array{
+ *     choices: array<ChoiceArray>,
+ *     min_selections: null|int,
+ *     max_selections: null|int,
+ * }
  */
 final class ChoiceQuestionConstraintDoctrineType extends JsonbType
 {
     public const string NAME = 'choice_question_constraint';
+
+    /**
+     * @param ChoiceArray $data
+     */
+    public static function createChoiceFromArray(array $data): Choice
+    {
+        return new Choice(
+            id: Uuid::fromString($data['id']),
+            text: $data['text'],
+            description: $data['description'],
+            image: $data['image'],
+        );
+    }
+
+    /**
+     * @return ChoiceArray
+     */
+    public static function transformChoiceToArray(Choice $value): array
+    {
+        return [
+            'id' => $value->id->toString(),
+            'text' => $value->text,
+            'description' => $value->description,
+            'image' => $value->image,
+        ];
+    }
+
+    /**
+     * @param ChoiceQuestionConstraintArray $data
+     */
+    public static function createChoiceQuestionConstraintFromArray(array $data): ChoiceQuestionConstraint
+    {
+        return new ChoiceQuestionConstraint(
+            choices: array_map(
+                callback: fn (array $choiceData): Choice => self::createChoiceFromArray($choiceData),
+                array: $data['choices'],
+            ),
+            minSelections: $data['min_selections'],
+            maxSelections: $data['max_selections'],
+        );
+    }
+
+    /**
+     * @return ChoiceQuestionConstraintArray
+     */
+    public static function transformChoiceQuestionConstraintToArray(ChoiceQuestionConstraint $value): array
+    {
+        return [
+            'choices' => array_map(
+                callback: fn (Choice $choice): array => self::transformChoiceToArray($choice),
+                array: $value->choices,
+            ),
+            'min_selections' => $value->minSelections,
+            'max_selections' => $value->maxSelections,
+        ];
+    }
 
     /**
      * @throws ConversionException
@@ -28,7 +96,7 @@ final class ChoiceQuestionConstraintDoctrineType extends JsonbType
         /** @var ChoiceQuestionConstraintArray $jsonData */
         $jsonData = parent::convertToPHPValue($value, $platform);
 
-        return ChoiceQuestionConstraint::fromArray($jsonData);
+        return self::createChoiceQuestionConstraintFromArray($jsonData);
     }
 
     /**
@@ -41,7 +109,7 @@ final class ChoiceQuestionConstraintDoctrineType extends JsonbType
             return null;
         }
 
-        $data = $value->toArray();
+        $data = self::transformChoiceQuestionConstraintToArray($value);
 
         return parent::convertToDatabaseValue($data, $platform);
     }

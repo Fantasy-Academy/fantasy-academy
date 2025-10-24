@@ -10,11 +10,36 @@ use Doctrine\DBAL\Types\JsonbType;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
 
 /**
- * @phpstan-import-type NumericQuestionConstraintArray from NumericQuestionConstraint
+ * @phpstan-type NumericQuestionConstraintArray array{
+ *     min: null|int,
+ *     max: null|int,
+ * }
  */
 final class NumericQuestionConstraintDoctrineType extends JsonbType
 {
     public const string NAME = 'numeric_question_constraint';
+
+    /**
+     * @param NumericQuestionConstraintArray $data
+     */
+    public static function createNumericQuestionConstraintFromArray(array $data): NumericQuestionConstraint
+    {
+        return new NumericQuestionConstraint(
+            min: $data['min'],
+            max: $data['max'],
+        );
+    }
+
+    /**
+     * @return NumericQuestionConstraintArray
+     */
+    public static function transformNumericQuestionConstraintToArray(NumericQuestionConstraint $value): array
+    {
+        return [
+            'min' => $value->min,
+            'max' => $value->max,
+        ];
+    }
 
     /**
      * @throws ConversionException
@@ -28,7 +53,7 @@ final class NumericQuestionConstraintDoctrineType extends JsonbType
         /** @var NumericQuestionConstraintArray $jsonData */
         $jsonData = parent::convertToPHPValue($value, $platform);
 
-        return NumericQuestionConstraint::fromArray($jsonData);
+        return self::createNumericQuestionConstraintFromArray($jsonData);
     }
 
     /**
@@ -41,7 +66,7 @@ final class NumericQuestionConstraintDoctrineType extends JsonbType
             return null;
         }
 
-        $data = $value->toArray();
+        $data = self::transformNumericQuestionConstraintToArray($value);
 
         return parent::convertToDatabaseValue($data, $platform);
     }
