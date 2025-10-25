@@ -361,6 +361,65 @@ final class ChallengesImportTest extends ApiTestCase
         $this->assertNull($question->choiceConstraint->maxSelections);
     }
 
+    public function testImportWithCorrectAnswers(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_with_correct_answers.xlsx');
+
+        $this->importer->importFile($file);
+        $this->entityManager->clear();
+
+        // Verify text question with correct answer
+        $question1 = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000002'));
+        $this->assertInstanceOf(Question::class, $question1);
+        $this->assertNotNull($question1->correctAnswer);
+        $this->assertEquals('Example text answer', $question1->correctAnswer->textAnswer);
+        $this->assertNull($question1->correctAnswer->numericAnswer);
+
+        // Verify numeric question with correct answer
+        $question2 = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000003'));
+        $this->assertInstanceOf(Question::class, $question2);
+        $this->assertNotNull($question2->correctAnswer);
+        $this->assertEquals(42.0, $question2->correctAnswer->numericAnswer);
+        $this->assertNull($question2->correctAnswer->textAnswer);
+    }
+
+    public function testUpdateExistingChallengeWithCorrectAnswers(): void
+    {
+        // First import: create a challenge without correct answers
+        $file1 = $this->createUploadedFile('challenge_import_valid.xlsx');
+        $this->importer->importFile($file1);
+        $this->entityManager->clear();
+
+        // Verify question exists without correct answer
+        $question = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000006'));
+        $this->assertInstanceOf(Question::class, $question);
+        $this->assertNull($question->correctAnswer);
+
+        // Second import: update the challenge with correct answers
+        // The update modifies the existing challenge in place, preserving UUIDs
+        $file2 = $this->createUploadedFile('challenge_import_update_with_correct_answers.xlsx');
+        $this->importer->importFile($file2);
+        $this->entityManager->clear();
+
+        // Verify question was updated with correct answer
+        // UUIDs are preserved during update: Challenge: UUID 1, Choices: 3-5, Question: 6
+        $updatedQuestion = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000006'));
+        $this->assertInstanceOf(Question::class, $updatedQuestion);
+        $this->assertNotNull($updatedQuestion->correctAnswer);
+        $this->assertNotNull($updatedQuestion->correctAnswer->selectedChoiceId);
+        // Verify the choice text matches
+        $this->assertNotNull($updatedQuestion->choiceConstraint);
+        $salahChoice = null;
+        foreach ($updatedQuestion->choiceConstraint->choices as $choice) {
+            if ($choice->text === 'Mohamed Salah') {
+                $salahChoice = $choice;
+                break;
+            }
+        }
+        $this->assertNotNull($salahChoice);
+        $this->assertEquals($salahChoice->id, $updatedQuestion->correctAnswer->selectedChoiceId);
+    }
+
     private function createUploadedFile(string $filename): UploadedFile
     {
         $path = __DIR__ . '/../../imports/challenge/' . $filename;

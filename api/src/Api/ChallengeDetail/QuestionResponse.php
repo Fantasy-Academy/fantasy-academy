@@ -25,6 +25,7 @@ use Symfony\Component\Uid\Uuid;
  *     image: null|string,
  *     numeric_constraint: null|string,
  *     choice_constraint: null|string,
+ *     correct_answer: null|string,
  *     challenge_id: string,
  *     answered_at: null|string,
  *     text_answer: null|string,
@@ -97,6 +98,13 @@ readonly final class QuestionResponse
             $myAnswer = AnswerDoctrineType::createAnswerFromArray($answerData);
         }
 
+        $correctAnswer = null;
+        if (is_string($row['correct_answer']) && json_validate($row['correct_answer'])) {
+            /** @var array{text_answer: null|string, numeric_answer: null|string, selected_choice_id: null|string, selected_choice_ids: null|array<string>, ordered_choice_ids: null|array<string>} $correctAnswerData */
+            $correctAnswerData = json_decode($row['correct_answer'], associative: true);
+            $correctAnswer = AnswerDoctrineType::createAnswerFromArray($correctAnswerData);
+        }
+
         return new self(
             id: Uuid::fromString($row['id']),
             text: $row['text'],
@@ -106,7 +114,7 @@ readonly final class QuestionResponse
             choiceConstraint: $choiceConstraint,
             answeredAt: $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null,
             myAnswer: $myAnswer,
-            correctAnswer: null,
+            correctAnswer: $correctAnswer,
         );
     }
 }

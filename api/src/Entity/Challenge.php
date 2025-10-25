@@ -27,66 +27,106 @@ class Challenge
         public Uuid $id,
 
         #[Column(type: Types::TEXT)]
-        readonly public string $name,
+        public string $name,
 
         #[Column(type: Types::TEXT)]
-        readonly public string $shortDescription,
+        public string $shortDescription,
 
         #[Column(type: Types::TEXT)]
-        readonly public string $description,
+        public string $description,
 
         #[Column(nullable: true)]
-        readonly public null|string $image,
+        public null|string $image,
 
         #[Column]
         readonly public DateTimeImmutable $addedAt,
 
         #[Column]
-        readonly public DateTimeImmutable $startsAt,
+        public DateTimeImmutable $startsAt,
 
         #[Column]
-        readonly public DateTimeImmutable $expiresAt,
+        public DateTimeImmutable $expiresAt,
 
         #[Column]
-        readonly public int $maxPoints,
+        public int $maxPoints,
 
         #[Column(type: Types::TEXT, nullable: true)]
-        readonly public null|string $hintText,
+        public null|string $hintText,
 
         #[Column(nullable: true)]
-        readonly public null|string $hintImage,
+        public null|string $hintImage,
 
         #[Column]
-        readonly public float $skillAnalytical,
+        public float $skillAnalytical,
 
         #[Column]
-        readonly public float $skillStrategicPlanning,
+        public float $skillStrategicPlanning,
 
         #[Column]
-        readonly public float $skillAdaptability,
+        public float $skillAdaptability,
 
         #[Column]
-        readonly public float $skillPremierLeagueKnowledge,
+        public float $skillPremierLeagueKnowledge,
 
         #[Column]
-        readonly public float $skillRiskManagement,
+        public float $skillRiskManagement,
 
         #[Column]
-        readonly public float $skillDecisionMakingUnderPressure,
+        public float $skillDecisionMakingUnderPressure,
 
         #[Column]
-        readonly public float $skillFinancialManagement,
+        public float $skillFinancialManagement,
 
         #[Column]
-        readonly public float $skillLongTermVision,
+        public float $skillLongTermVision,
 
         #[Column(options: ['default' => true])]
-        readonly public bool $showStatisticsContinuously = true,
+        public bool $showStatisticsContinuously = true,
     ) {
     }
 
     public function evaluate(DateTimeImmutable $evaluatedAt): void
     {
         $this->evaluatedAt = $evaluatedAt;
+    }
+
+    public function update(
+        string $name,
+        string $shortDescription,
+        string $description,
+        null|string $image,
+        DateTimeImmutable $startsAt,
+        DateTimeImmutable $expiresAt,
+        int $maxPoints,
+        null|string $hintText,
+        null|string $hintImage,
+        float $skillAnalytical,
+        float $skillStrategicPlanning,
+        float $skillAdaptability,
+        float $skillPremierLeagueKnowledge,
+        float $skillRiskManagement,
+        float $skillDecisionMakingUnderPressure,
+        float $skillFinancialManagement,
+        float $skillLongTermVision,
+        bool $showStatisticsContinuously,
+    ): void {
+        $this->name = $name;
+        $this->shortDescription = $shortDescription;
+        $this->description = $description;
+        $this->image = $image;
+        $this->startsAt = $startsAt;
+        $this->expiresAt = $expiresAt;
+        $this->maxPoints = $maxPoints;
+        $this->hintText = $hintText;
+        $this->hintImage = $hintImage;
+        $this->skillAnalytical = $skillAnalytical;
+        $this->skillStrategicPlanning = $skillStrategicPlanning;
+        $this->skillAdaptability = $skillAdaptability;
+        $this->skillPremierLeagueKnowledge = $skillPremierLeagueKnowledge;
+        $this->skillRiskManagement = $skillRiskManagement;
+        $this->skillDecisionMakingUnderPressure = $skillDecisionMakingUnderPressure;
+        $this->skillFinancialManagement = $skillFinancialManagement;
+        $this->skillLongTermVision = $skillLongTermVision;
+        $this->showStatisticsContinuously = $showStatisticsContinuously;
     }
 }

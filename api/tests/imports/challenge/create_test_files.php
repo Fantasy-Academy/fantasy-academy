@@ -59,6 +59,58 @@ function createBaseSpreadsheet(): Spreadsheet
     return $spreadsheet;
 }
 
+// Helper function to create a spreadsheet with correct answer columns
+function createBaseSpreadsheetWithCorrectAnswers(): Spreadsheet
+{
+    $spreadsheet = new Spreadsheet();
+
+    // Challenges sheet (first sheet)
+    $challengesSheet = $spreadsheet->getActiveSheet();
+    $challengesSheet->setTitle('Challenges');
+    $challengesSheet->fromArray([
+        'ID',
+        'Name',
+        'Short Description',
+        'Description',
+        'Image',
+        'Max Points',
+        'Starts At',
+        'Expires At',
+        'Hint Text',
+        'Hint Image',
+        'Skill Analytical',
+        'Skill StrategicPlanning',
+        'Skill Adaptability',
+        'Skill PremierLeagueKnowledge',
+        'Skill RiskManagement',
+        'Skill DecisionMakingUnderPressure',
+        'Skill FinancialManagement',
+        'Skill LongTermVision',
+    ], null, 'A1');
+
+    // Questions sheet (second sheet)
+    $questionsSheet = $spreadsheet->createSheet();
+    $questionsSheet->setTitle('Questions');
+    $questionsSheet->fromArray([
+        'Challenge ID',
+        'Text',
+        'Type',
+        'Image',
+        'Numeric Type Min',
+        'Numeric Type Max',
+        'Choices',
+        'Choices Min Selections',
+        'Choices Max Selections',
+        'Correct Text Answer',
+        'Correct Numeric Answer',
+        'Correct Selected Choice Text',
+        'Correct Selected Choice Texts',
+        'Correct Ordered Choice Texts',
+    ], null, 'A1');
+
+    return $spreadsheet;
+}
+
 // Valid import file with 2 challenges and various question types
 function createValidFile(): void
 {
@@ -456,6 +508,183 @@ function createInvalidJsonChoicesFile(): void
     $writer->save(__DIR__ . '/challenge_import_invalid_json_choices.xlsx');
 }
 
+// Import with correct answers (new challenge)
+function createImportWithCorrectAnswersFile(): void
+{
+    $spreadsheet = createBaseSpreadsheetWithCorrectAnswers();
+
+    $challengesSheet = $spreadsheet->getSheet(0);
+    $challengesSheet->fromArray([
+        'C003',
+        'Correct Answer Test Challenge',
+        'Testing correct answers',
+        'This challenge tests importing questions with correct answers.',
+        null,
+        '1000',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        null,
+        null,
+        '20', '20', '20', '20', '20', '20', '20', '20',
+    ], null, 'A2');
+
+    $questionsSheet = $spreadsheet->getSheet(1);
+
+    // Text question with correct answer
+    $questionsSheet->fromArray([
+        'C003',
+        'What is your strategy?',
+        'text',
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        'Example text answer', // Correct text answer
+        null,
+        null,
+        null,
+        null,
+    ], null, 'A2');
+
+    // Numeric question with correct answer
+    $questionsSheet->fromArray([
+        'C003',
+        'How many points do you expect?',
+        'numeric',
+        null,
+        '0',
+        '100',
+        null,
+        null,
+        null,
+        null,
+        '42', // Correct numeric answer
+        null,
+        null,
+        null,
+    ], null, 'A3');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_with_correct_answers.xlsx');
+}
+
+// Update existing challenge with correct answers
+function createUpdateWithCorrectAnswersFile(): void
+{
+    $spreadsheet = createBaseSpreadsheetWithCorrectAnswers();
+
+    // Use actual UUID from first import (C001 -> UUID 001)
+    $challengesSheet = $spreadsheet->getSheet(0);
+    $challengesSheet->fromArray([
+        '01933333-0000-7000-8000-000000000001', // Actual UUID from first import
+        'The Transfer Window Challenge',
+        'Make smart transfers',
+        'You have £100m to build your dream team. Choose wisely and maximize your points.',
+        'https://example.com/transfer.jpg',
+        '1000',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        'Consider player form and fixtures',
+        'https://example.com/hint.jpg',
+        '25',
+        '30',
+        '15',
+        '40',
+        '20',
+        '25',
+        '35',
+        '10',
+    ], null, 'A2');
+
+    $questionsSheet = $spreadsheet->getSheet(1);
+
+    // Single select question with correct answer
+    $questionsSheet->fromArray([
+        '01933333-0000-7000-8000-000000000001', // Challenge UUID
+        'Who will you transfer in as your premium midfielder?',
+        'single_select',
+        null,
+        null,
+        null,
+        json_encode([
+            ['text' => 'Mohamed Salah', 'description' => 'Liverpool star with great form', 'image' => 'https://example.com/salah.jpg'],
+            ['text' => 'Kevin De Bruyne', 'description' => 'Man City playmaker', 'image' => null],
+            ['text' => 'Bruno Fernandes', 'description' => 'Manchester United captain'],
+        ]),
+        '1',
+        '1',
+        null,
+        null,
+        'Mohamed Salah', // Correct choice answer
+        null,
+        null,
+    ], null, 'A2');
+
+    // Multi select question
+    $questionsSheet->fromArray([
+        '01933333-0000-7000-8000-000000000001', // Challenge UUID
+        'Select your defensive picks (choose 2)',
+        'multi_select',
+        null,
+        null,
+        null,
+        json_encode([
+            ['text' => 'William Saliba', 'description' => 'Arsenal defender'],
+            ['text' => 'Virgil van Dijk', 'description' => 'Liverpool defender'],
+            ['text' => 'Ruben Dias', 'description' => 'Man City defender'],
+            ['text' => 'Cristian Romero', 'description' => 'Spurs defender'],
+        ]),
+        '2',
+        '2',
+        null,
+        null,
+        null,
+        null,
+        null,
+    ], null, 'A3');
+
+    // Numeric question with correct answer
+    $questionsSheet->fromArray([
+        '01933333-0000-7000-8000-000000000001', // Challenge UUID
+        'How many goals will your team score this gameweek?',
+        'numeric',
+        null,
+        '0',
+        '50',
+        null,
+        null,
+        null,
+        null,
+        '25', // Correct numeric answer
+        null,
+        null,
+        null,
+    ], null, 'A4');
+
+    // Text question with correct answer
+    $questionsSheet->fromArray([
+        '01933333-0000-7000-8000-000000000001', // Challenge UUID
+        'Explain your transfer strategy in one sentence',
+        'text',
+        'https://example.com/strategy.jpg',
+        null,
+        null,
+        null,
+        null,
+        null,
+        'Focus on form and fixtures', // Correct text answer
+        null,
+        null,
+        null,
+        null,
+    ], null, 'A5');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_update_with_correct_answers.xlsx');
+}
+
 // Create all test files
 echo "Generating Excel test files...\n";
 
@@ -488,6 +717,12 @@ createInvalidQuestionTypeFile();
 
 echo "Creating challenge_import_invalid_json_choices.xlsx...\n";
 createInvalidJsonChoicesFile();
+
+echo "Creating challenge_import_with_correct_answers.xlsx...\n";
+createImportWithCorrectAnswersFile();
+
+echo "Creating challenge_import_update_with_correct_answers.xlsx...\n";
+createUpdateWithCorrectAnswersFile();
 
 echo "\n✅ All test files generated successfully!\n";
 echo "Files created in: " . __DIR__ . "\n";

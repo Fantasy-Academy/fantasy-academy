@@ -53,4 +53,22 @@ class Question
         public null|ChoiceQuestionConstraint $choiceConstraint,
     ) {
     }
+
+    public function update(
+        null|NumericQuestionConstraint $numericConstraint = null,
+        null|ChoiceQuestionConstraint $choiceConstraint = null,
+        null|Answer $correctAnswer = null,
+    ): void {
+        if ($numericConstraint !== null) {
+            $this->numericConstraint = $numericConstraint;
+        }
+
+        if ($choiceConstraint !== null) {
+            $this->choiceConstraint = $choiceConstraint;
+        }
+
+        if ($correctAnswer !== null) {
+            $this->correctAnswer = $correctAnswer;
+        }
+    }
 }

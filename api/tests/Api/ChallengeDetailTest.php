@@ -189,6 +189,12 @@ final class ChallengeDetailTest extends ApiTestCase
             $this->assertArrayHasKey('textAnswer', $answerStat['answer']);
             $this->assertIsString($answerStat['answer']['textAnswer']);
         }
+
+        // Verify correct answer is present
+        $this->assertArrayHasKey('correctAnswer', $question);
+        $this->assertIsArray($question['correctAnswer']);
+        $this->assertArrayHasKey('textAnswer', $question['correctAnswer']);
+        $this->assertEquals('This is the correct text answer', $question['correctAnswer']['textAnswer']);
     }
 
     public function testStatisticsShownWhenShowStatisticsContinuouslyIsTrue(): void
@@ -249,6 +255,12 @@ final class ChallengeDetailTest extends ApiTestCase
         $this->assertEquals(1, $blueStats['count']);
         $this->assertIsNumeric($blueStats['percentage']);
         $this->assertEquals(33.33, round((float) $blueStats['percentage'], 2));
+
+        // Verify correct answer is present for choice question
+        $this->assertArrayHasKey('correctAnswer', $question);
+        $this->assertIsArray($question['correctAnswer']);
+        $this->assertArrayHasKey('selectedChoiceId', $question['correctAnswer']);
+        $this->assertEquals(CurrentChallenge2Fixture::CHOICE_20_ID, $question['correctAnswer']['selectedChoiceId']);
     }
 
     public function testNoStatisticsWhenShowStatisticsContinuouslyIsFalse(): void
@@ -273,6 +285,33 @@ final class ChallengeDetailTest extends ApiTestCase
         // Verify statistics are NULL for unevaluated challenge with showStatisticsContinuously=false
         foreach ($responseData['questions'] as $question) {
             $this->assertNull($question['statistics']);
+        }
+    }
+
+    public function testCorrectAnswerIsNullWhenNotProvided(): void
+    {
+        $client = self::createClient();
+        $token = TestingLogin::getJwt($client, UserFixture::USER_3_EMAIL);
+
+        $response = $client->request('GET', '/api/challenges/' . CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertIsArray($responseData);
+        $this->assertIsArray($responseData['questions']);
+
+        // Verify correctAnswer is NULL when not set on questions
+        foreach ($responseData['questions'] as $question) {
+            $this->assertIsArray($question);
+            $this->assertArrayHasKey('correctAnswer', $question);
+            $this->assertNull($question['correctAnswer']);
         }
     }
 }

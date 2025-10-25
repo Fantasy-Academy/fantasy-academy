@@ -50,6 +50,11 @@ readonly final class ChallengeTemplateExport
             'choices',
             'choices_min_selections',
             'choices_max_selections',
+            'correct_text_answer',
+            'correct_numeric_answer',
+            'correct_selected_choice_text',
+            'correct_selected_choice_texts',
+            'correct_ordered_choice_texts',
         ]);
 
         return $spreadsheet;
