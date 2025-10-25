@@ -57,10 +57,9 @@ final class ExpiredChallenge3Fixture extends Fixture
             image: 'https://placecats.com/600/400',
             numericConstraint: null,
             choiceConstraint: null,
-        );
-
-        $question->correctAnswer = new Answer(
-            textAnswer: 'Correct answer for unevaluated challenge',
+            correctAnswer: new Answer(
+                textAnswer: 'Correct answer for unevaluated challenge',
+            ),
         );
 
         $manager->persist($question);

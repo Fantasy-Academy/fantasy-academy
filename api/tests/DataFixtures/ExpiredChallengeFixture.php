@@ -57,10 +57,9 @@ final class ExpiredChallengeFixture extends Fixture
             image: 'https://placecats.com/600/400',
             numericConstraint: null,
             choiceConstraint: null,
-        );
-
-        $question->correctAnswer = new Answer(
-            textAnswer: 'This is the correct text answer',
+            correctAnswer: new Answer(
+                textAnswer: 'This is the correct text answer',
+            ),
         );
 
         $manager->persist($question);

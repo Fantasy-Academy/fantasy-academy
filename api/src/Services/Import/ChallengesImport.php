@@ -371,6 +371,8 @@ readonly final class ChallengesImport
             $choiceConstraint = $this->createChoiceConstraint($row);
         }
 
+        $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
+
         $question = new Question(
             id: $this->provideIdentity->next(),
             challenge: $challenge,
@@ -379,12 +381,8 @@ readonly final class ChallengesImport
             image: $row['image'],
             numericConstraint: $numericConstraint,
             choiceConstraint: $choiceConstraint,
+            correctAnswer: $correctAnswer,
         );
-
-        $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
-        if ($correctAnswer !== null) {
-            $question->correctAnswer = $correctAnswer;
-        }
 
         $this->entityManager->persist($question);
 

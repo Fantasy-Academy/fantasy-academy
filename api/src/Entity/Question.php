@@ -43,12 +43,15 @@ class Question
         #[Column(nullable: true)]
         readonly public null|string $image,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: NumericQuestionConstraintDoctrineType::NAME, nullable: true)]
         public null|NumericQuestionConstraint $numericConstraint,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: ChoiceQuestionConstraintDoctrineType::NAME, nullable: true)]
         public null|ChoiceQuestionConstraint $choiceConstraint,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: AnswerDoctrineType::NAME, nullable: true)]
         public null|Answer $correctAnswer = null,
     ) {
