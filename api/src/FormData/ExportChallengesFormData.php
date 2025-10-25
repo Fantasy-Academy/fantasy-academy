@@ -7,7 +7,7 @@ namespace FantasyAcademy\API\FormData;
 use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-final class ExportAnswersFormData
+final class ExportChallengesFormData
 {
     /**
      * @var array<string>

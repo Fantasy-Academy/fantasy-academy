@@ -48,7 +48,10 @@
                             <a class="nav-link {{ current_route == 'import_results' ? 'active' }}" href="{{ path('import_results') }}">Import results</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ current_route == 'export_answers' ? 'active' }}" href="{{ path('export_answers') }}">Export</a>
+                            <a class="nav-link {{ current_route == 'export_answers' ? 'active' }}" href="{{ path('export_answers') }}">Export answers</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ current_route == 'export_challenges' ? 'active' }}" href="{{ path('export_challenges') }}">Export challenges</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-lg-auto">

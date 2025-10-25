@@ -24,9 +24,6 @@ use Symfony\Component\Uid\Uuid;
 #[Entity]
 class Question
 {
-    #[Column(type: AnswerDoctrineType::NAME, nullable: true)]
-    public null|Answer $correctAnswer = null;
-
     public function __construct(
         #[Id]
         #[Immutable]
@@ -51,6 +48,9 @@ class Question
 
         #[Column(type: ChoiceQuestionConstraintDoctrineType::NAME, nullable: true)]
         public null|ChoiceQuestionConstraint $choiceConstraint,
+
+        #[Column(type: AnswerDoctrineType::NAME, nullable: true)]
+        public null|Answer $correctAnswer = null,
     ) {
     }
 

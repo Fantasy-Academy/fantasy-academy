@@ -7,6 +7,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use FantasyAcademy\API\Entity\Challenge;
 use FantasyAcademy\API\Entity\Question;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\Choice;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
@@ -90,6 +91,10 @@ final class ExpiredChallenge2Fixture extends Fixture
             ),
         );
 
+        $question8->correctAnswer = new Answer(
+            selectedChoiceId: Uuid::fromString(self::CHOICE_9_ID), // Red
+        );
+
         $manager->persist($question8);
 
         $question9 = new Question(
@@ -115,6 +120,13 @@ final class ExpiredChallenge2Fixture extends Fixture
             ),
         );
 
+        $question9->correctAnswer = new Answer(
+            selectedChoiceIds: [
+                Uuid::fromString(self::CHOICE_12_ID), // 7
+                Uuid::fromString(self::CHOICE_13_ID), // 13
+            ],
+        );
+
         $manager->persist($question9);
 
         $question10 = new Question(
@@ -128,6 +140,10 @@ final class ExpiredChallenge2Fixture extends Fixture
                 max: 100,
             ),
             choiceConstraint: null,
+        );
+
+        $question10->correctAnswer = new Answer(
+            numericAnswer: 42.0,
         );
 
         $manager->persist($question10);

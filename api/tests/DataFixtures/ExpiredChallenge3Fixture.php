@@ -7,6 +7,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use FantasyAcademy\API\Entity\Challenge;
 use FantasyAcademy\API\Entity\Question;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\QuestionType;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Uid\Uuid;
@@ -56,6 +57,10 @@ final class ExpiredChallenge3Fixture extends Fixture
             image: 'https://placecats.com/600/400',
             numericConstraint: null,
             choiceConstraint: null,
+        );
+
+        $question->correctAnswer = new Answer(
+            textAnswer: 'Correct answer for unevaluated challenge',
         );
 
         $manager->persist($question);
