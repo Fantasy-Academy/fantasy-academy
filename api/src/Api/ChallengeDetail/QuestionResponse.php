@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FantasyAcademy\API\Value;
+namespace FantasyAcademy\API\Api\ChallengeDetail;
 
 use DateTimeImmutable;
 use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
+use FantasyAcademy\API\Value\Answer;
+use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
+use FantasyAcademy\API\Value\NumericQuestionConstraint;
+use FantasyAcademy\API\Value\QuestionStatistics;
+use FantasyAcademy\API\Value\QuestionType;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -29,7 +34,7 @@ use Symfony\Component\Uid\Uuid;
  *     ordered_choice_ids: null|string,
  * }
  */
-readonly final class Question
+readonly final class QuestionResponse
 {
     public function __construct(
         public Uuid $id,
@@ -41,6 +46,7 @@ readonly final class Question
         public null|DateTimeImmutable $answeredAt,
         public null|Answer $myAnswer,
         public null|Answer $correctAnswer,
+        public null|QuestionStatistics $statistics = null,
     ) {}
 
     /**

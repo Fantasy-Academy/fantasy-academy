@@ -42,7 +42,7 @@ readonly final class ChallengesProvider implements ProviderInterface
     private function getChallenges(null|Uuid $userId): array
     {
         $query = <<<SQL
-SELECT challenge.*, player_challenge_answer.answered_at
+SELECT challenge.*, player_challenge_answer.answered_at, player_challenge_answer.points AS my_points
 FROM challenge
 LEFT JOIN player_challenge_answer ON challenge.id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
 SQL;

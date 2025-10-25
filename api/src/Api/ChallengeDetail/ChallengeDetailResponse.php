@@ -7,11 +7,9 @@ namespace FantasyAcademy\API\Api\ChallengeDetail;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
-use FantasyAcademy\API\Value\Question;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * @phpstan-import-type QuestionRow from Question
  * @phpstan-type ChallengeDetailResponseRow array{
  *     id: string,
  *     name: string,
@@ -27,6 +25,7 @@ use Symfony\Component\Uid\Uuid;
  *     hint_text: null|string,
  *     hint_image: null|string,
  *     my_points: null|int,
+ *     show_statistics_continuously: bool,
  * }
  */
 #[ApiResource(
@@ -39,7 +38,7 @@ use Symfony\Component\Uid\Uuid;
 readonly final class ChallengeDetailResponse
 {
     /**
-     * @param array<Question> $questions
+     * @param array<QuestionResponse> $questions
      */
     public function __construct(
         public Uuid $id,
@@ -65,7 +64,7 @@ readonly final class ChallengeDetailResponse
 
     /**
      * @param ChallengeDetailResponseRow $row
-     * @param array<QuestionRow> $questions
+     * @param array<QuestionResponse> $questions
      */
     public static function fromArray(array $row, DateTimeImmutable $now, array $questions): self
     {
@@ -88,10 +87,7 @@ readonly final class ChallengeDetailResponse
             isExpired: $now->getTimestamp() > $expiresAt->getTimestamp(),
             isAnswered: $answeredAt !== null,
             isEvaluated: $row['evaluated_at'] !== null,
-            questions: array_map(
-                callback: fn (array $row): Question => Question::fromArray($row),
-                array: $questions,
-            ),
+            questions: $questions,
             hintText: $row['hint_text'],
             hintImage: $row['hint_image'],
             myPoints: $row['my_points'],
