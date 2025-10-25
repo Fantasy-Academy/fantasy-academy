@@ -7,7 +7,6 @@ namespace FantasyAcademy\API\Api\ChallengeDetail;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
-use FantasyAcademy\API\Value\Question;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -39,7 +38,7 @@ use Symfony\Component\Uid\Uuid;
 readonly final class ChallengeDetailResponse
 {
     /**
-     * @param array<Question> $questions
+     * @param array<QuestionResponse> $questions
      */
     public function __construct(
         public Uuid $id,
@@ -65,7 +64,7 @@ readonly final class ChallengeDetailResponse
 
     /**
      * @param ChallengeDetailResponseRow $row
-     * @param array<Question> $questions
+     * @param array<QuestionResponse> $questions
      */
     public static function fromArray(array $row, DateTimeImmutable $now, array $questions): self
     {

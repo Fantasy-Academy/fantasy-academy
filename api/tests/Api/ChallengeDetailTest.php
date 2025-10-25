@@ -181,9 +181,13 @@ final class ChallengeDetailTest extends ApiTestCase
             $this->assertArrayHasKey('answer', $answerStat);
             $this->assertArrayHasKey('count', $answerStat);
             $this->assertArrayHasKey('percentage', $answerStat);
-            $this->assertIsString($answerStat['answer']);
+            $this->assertIsArray($answerStat['answer']);
             $this->assertIsInt($answerStat['count']);
             $this->assertIsFloat($answerStat['percentage']);
+
+            // For text answers, verify the textAnswer field is populated
+            $this->assertArrayHasKey('textAnswer', $answerStat['answer']);
+            $this->assertIsString($answerStat['answer']['textAnswer']);
         }
     }
 
@@ -224,9 +228,15 @@ final class ChallengeDetailTest extends ApiTestCase
         $blueStats = null;
         foreach ($question['statistics']['answers'] as $answerStat) {
             $this->assertIsArray($answerStat);
-            if ($answerStat['answer'] === CurrentChallenge2Fixture::CHOICE_20_ID) { // Red
+            $this->assertArrayHasKey('answer', $answerStat);
+            $this->assertIsArray($answerStat['answer']);
+
+            // Check if this answer is for the Red choice
+            if (isset($answerStat['answer']['selectedChoiceId']) &&
+                $answerStat['answer']['selectedChoiceId'] === CurrentChallenge2Fixture::CHOICE_20_ID) {
                 $redStats = $answerStat;
-            } elseif ($answerStat['answer'] === CurrentChallenge2Fixture::CHOICE_21_ID) { // Blue
+            } elseif (isset($answerStat['answer']['selectedChoiceId']) &&
+                      $answerStat['answer']['selectedChoiceId'] === CurrentChallenge2Fixture::CHOICE_21_ID) {
                 $blueStats = $answerStat;
             }
         }

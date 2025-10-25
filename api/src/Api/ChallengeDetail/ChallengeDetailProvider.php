@@ -7,10 +7,10 @@ namespace FantasyAcademy\API\Api\ChallengeDetail;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
+use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\ChallengeNotFound;
 use FantasyAcademy\API\Value\AnswerStatistic;
-use FantasyAcademy\API\Value\Question;
 use FantasyAcademy\API\Value\QuestionStatistics;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -18,7 +18,7 @@ use Symfony\Component\Uid\Uuid;
 
 /**
  * @phpstan-import-type ChallengeDetailResponseRow from ChallengeDetailResponse
- * @phpstan-import-type QuestionRow from Question
+ * @phpstan-import-type QuestionRow from QuestionResponse
  *
  * @implements ProviderInterface<ChallengeDetailResponse>
  */
@@ -78,7 +78,7 @@ SQL;
     }
 
     /**
-     * @return array<Question>
+     * @return array<QuestionResponse>
      */
     private function getQuestions(Uuid $challengeId, null|Uuid $userId, bool $shouldShowStatistics): array
     {
@@ -103,10 +103,10 @@ SQL;
             $questionId = Uuid::fromString($row['id']);
             $statistics = $shouldShowStatistics ? $this->getQuestionStatistics($questionId) : null;
 
-            $question = Question::fromArray($row);
+            $question = QuestionResponse::fromArray($row);
 
             // We need to create a new Question with statistics
-            $questions[] = new Question(
+            $questions[] = new QuestionResponse(
                 id: $question->id,
                 text: $question->text,
                 type: $question->type,
@@ -161,25 +161,38 @@ SQL;
         // Build answer statistics
         $answerStats = [];
         foreach ($results as $result) {
-            // Determine the answer representation based on which field is populated
-            $answerRepresentation = '';
-            if ($result['text_answer'] !== '') {
-                $answerRepresentation = $result['text_answer'];
-            } elseif ($result['numeric_answer'] !== '') {
-                $answerRepresentation = $result['numeric_answer'];
-            } elseif ($result['selected_choice_id'] !== '') {
-                $answerRepresentation = $result['selected_choice_id'];
-            } elseif ($result['selected_choice_ids'] !== '') {
-                $answerRepresentation = $result['selected_choice_ids'];
-            } elseif ($result['ordered_choice_ids'] !== '') {
-                $answerRepresentation = $result['ordered_choice_ids'];
+            // Parse JSON arrays for choice fields
+            $selectedChoiceIds = null;
+            $orderedChoiceIds = null;
+
+            if ($result['selected_choice_ids'] !== '' && json_validate($result['selected_choice_ids'])) {
+                /** @var null|array<string> $decoded */
+                $decoded = json_decode($result['selected_choice_ids'], associative: true);
+                $selectedChoiceIds = $decoded;
             }
+
+            if ($result['ordered_choice_ids'] !== '' && json_validate($result['ordered_choice_ids'])) {
+                /** @var null|array<string> $decoded */
+                $decoded = json_decode($result['ordered_choice_ids'], associative: true);
+                $orderedChoiceIds = $decoded;
+            }
+
+            // Construct Answer object using the helper
+            $answerData = [
+                'text_answer' => $result['text_answer'] !== '' ? $result['text_answer'] : null,
+                'numeric_answer' => $result['numeric_answer'] !== '' ? $result['numeric_answer'] : null,
+                'selected_choice_id' => $result['selected_choice_id'] !== '' ? $result['selected_choice_id'] : null,
+                'selected_choice_ids' => $selectedChoiceIds,
+                'ordered_choice_ids' => $orderedChoiceIds,
+            ];
+
+            $answer = AnswerDoctrineType::createAnswerFromArray($answerData);
 
             $count = (int) $result['answer_count'];
             $percentage = ($count / $totalAnswers) * 100;
 
             $answerStats[] = new AnswerStatistic(
-                answer: $answerRepresentation,
+                answer: $answer,
                 count: $count,
                 percentage: $percentage,
             );

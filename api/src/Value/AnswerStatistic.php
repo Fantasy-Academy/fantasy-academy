@@ -10,7 +10,7 @@ namespace FantasyAcademy\API\Value;
 readonly final class AnswerStatistic
 {
     public function __construct(
-        public string $answer,
+        public Answer $answer,
         public int $count,
         public float $percentage,
     ) {}
