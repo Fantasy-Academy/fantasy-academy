@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\FormType;
 
-use FantasyAcademy\API\FormData\ExportAnswersFormData;
+use FantasyAcademy\API\FormData\ExportChallengesFormData;
 use FantasyAcademy\API\Result\ChallengeRow;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -12,9 +12,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * @extends AbstractType<ExportAnswersFormData>
+ * @extends AbstractType<ExportChallengesFormData>
  */
-final class ExportAnswersFormType extends AbstractType
+final class ExportChallengesFormType extends AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -40,7 +40,7 @@ final class ExportAnswersFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ExportAnswersFormData::class,
+            'data_class' => ExportChallengesFormData::class,
             'challenges' => [],
         ]);
 

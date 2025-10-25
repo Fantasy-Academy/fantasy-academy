@@ -73,10 +73,9 @@ final class CurrentChallenge2Fixture extends Fixture
                     ),
                 ],
             ),
-        );
-
-        $question->correctAnswer = new Answer(
-            selectedChoiceId: Uuid::fromString(self::CHOICE_20_ID),
+            correctAnswer: new Answer(
+                selectedChoiceId: Uuid::fromString(self::CHOICE_20_ID),
+            ),
         );
 
         $manager->persist($question);

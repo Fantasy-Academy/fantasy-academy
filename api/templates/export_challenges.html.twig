@@ -1,0 +1,80 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Export challenges{% endblock %}
+
+{% block content %}
+    <h1 class="h2 mb-4">Export challenges</h1>
+
+    {{ form_start(form) }}
+
+    <div class="mb-3">
+        <h5 class="mb-3">Select challenges to export:</h5>
+
+        <div class="row g-3">
+            {% for challenge in challenges %}
+                <div class="col-md-6 col-lg-4">
+                    <label class="challenge-card d-block">
+                        <input
+                            type="checkbox"
+                            name="{{ form.challengeIds.vars.full_name }}[]"
+                            value="{{ challenge.id }}"
+                            class="position-absolute"
+                            style="opacity: 0; pointer-events: none;"
+                        >
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="challenge-name">
+                                    {{ challenge.name }}
+                                </div>
+
+                                <div class="challenge-dates">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-calendar-range" viewBox="0 0 16 16">
+                                        <path d="M9 7a1 1 0 0 1 1-1h5v2h-5a1 1 0 0 1-1-1M1 9h4a1 1 0 0 1 0 2H1z"/>
+                                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                                    </svg>
+                                    {{ challenge.startsAt|date('d.m.Y') }} → {{ challenge.expiresAt|date('d.m.Y') }}
+                                </div>
+
+                                <div>
+                                    {% if challenge.evaluatedAt %}
+                                        <span class="badge bg-success evaluation-badge">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                            </svg>
+                                            Evaluated: {{ challenge.evaluatedAt|date('d.m.Y') }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary evaluation-badge">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-clock" viewBox="0 0 16 16">
+                                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
+                                            </svg>
+                                            Not evaluated
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# Tell Symfony this field is rendered manually #}
+        {% do form.challengeIds.setRendered %}
+    </div>
+
+    {# Display validation errors for the field #}
+    {{ form_errors(form.challengeIds) }}
+
+    {# Render any remaining form fields (like CSRF token) #}
+    {{ form_rest(form) }}
+
+    <button type="submit" class="btn btn-primary btn-lg mt-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-spreadsheet" viewBox="0 0 16 16">
+            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5zM3 12v-2h2v2zm0 1h2v2H4a1 1 0 0 1-1-1zm3 2v-2h3v2zm4 0v-2h3v1a1 1 0 0 1-1 1zm3-3h-3v-2h3zm-7 0v-2h3v2z"/>
+        </svg>
+        Export to Excel
+    </button>
+    {{ form_end(form) }}
+{% endblock %}
