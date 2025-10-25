@@ -22,6 +22,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
     public const string USER_3_EXPIRED_CHALLENGE_1_ANSWER_ID = '00000000-0000-0000-0005-000000000005';
     public const string USER_3_EXPIRED_CHALLENGE_2_ANSWER_ID = '00000000-0000-0000-0005-000000000006';
     public const string USER_3_CURRENT_CHALLENGE_1_ANSWER_ID = '00000000-0000-0000-0005-000000000007';
+    public const string USER_1_EXPIRED_CHALLENGE_3_ANSWER_ID = '00000000-0000-0000-0005-000000000008';
 
     public function __construct(
         readonly private ClockInterface $clock,
@@ -34,6 +35,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
             UserFixture::class,
             ExpiredChallengeFixture::class,
             ExpiredChallenge2Fixture::class,
+            ExpiredChallenge3Fixture::class,
             CurrentChallenge1Fixture::class,
         ];
     }
@@ -55,6 +57,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
         assert($expiredChallenge1 !== null);
         $expiredChallenge2 = $manager->find(Challenge::class, Uuid::fromString(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID));
         assert($expiredChallenge2 !== null);
+        $expiredChallenge3 = $manager->find(Challenge::class, Uuid::fromString(ExpiredChallenge3Fixture::EXPIRED_CHALLENGE_3_ID));
+        assert($expiredChallenge3 !== null);
         $currentChallenge1 = $manager->find(Challenge::class, Uuid::fromString(CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID));
         assert($currentChallenge1 !== null);
 
@@ -67,6 +71,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
         assert($question9 !== null);
         $question10 = $manager->find(Question::class, Uuid::fromString(ExpiredChallenge2Fixture::QUESTION_10_ID));
         assert($question10 !== null);
+        $question11 = $manager->find(Question::class, Uuid::fromString(ExpiredChallenge3Fixture::QUESTION_11_ID));
+        assert($question11 !== null);
         $question1 = $manager->find(Question::class, Uuid::fromString(CurrentChallenge1Fixture::QUESTION_1_ID));
         assert($question1 !== null);
         $question2 = $manager->find(Question::class, Uuid::fromString(CurrentChallenge1Fixture::QUESTION_2_ID));
@@ -74,8 +80,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
         $question3 = $manager->find(Question::class, Uuid::fromString(CurrentChallenge1Fixture::QUESTION_3_ID));
         assert($question3 !== null);
 
-        // User 1 (admin@example.com) - answers both expired challenges
-        $this->createAnswersForUser1($manager, $user1, $expiredChallenge1, $expiredChallenge2, $answeredAt, $question7, $question8, $question9, $question10);
+        // User 1 (admin@example.com) - answers all three expired challenges
+        $this->createAnswersForUser1($manager, $user1, $expiredChallenge1, $expiredChallenge2, $expiredChallenge3, $answeredAt, $question7, $question8, $question9, $question10, $question11);
 
         // User 2 (user@example.com) - answers both expired challenges
         $this->createAnswersForUser2($manager, $user2, $expiredChallenge1, $expiredChallenge2, $answeredAt, $question7, $question8, $question9, $question10);
@@ -85,7 +91,8 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // User 4 has no answers - nothing to do
 
-        // Evaluate the expired challenges
+        // Evaluate only the first two expired challenges
+        // Challenge 3 will remain unevaluated to test import evaluation
         $expiredChallenge1->evaluate($this->clock->now());
         $expiredChallenge2->evaluate($this->clock->now());
 
@@ -97,11 +104,13 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
         User $user,
         Challenge $expiredChallenge1,
         Challenge $expiredChallenge2,
+        Challenge $expiredChallenge3,
         \DateTimeImmutable $answeredAt,
         Question $question7,
         Question $question8,
         Question $question9,
         Question $question10,
+        Question $question11,
     ): void
     {
         // Answer expired challenge 1
@@ -167,6 +176,27 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
         $answer2->evaluate(600);
 
         $manager->persist($answer2);
+
+        // Answer expired challenge 3 (will NOT be evaluated initially)
+        $answer3 = new PlayerChallengeAnswer(
+            id: Uuid::fromString(self::USER_1_EXPIRED_CHALLENGE_3_ANSWER_ID),
+            challenge: $expiredChallenge3,
+            user: $user,
+        );
+
+        $answer3->answerQuestion(
+            $answeredAt,
+            $question11,
+            textAnswer: 'User 1 answer to unevaluated challenge',
+            numericAnswer: null,
+            selectedChoiceId: null,
+            selectedChoiceIds: null,
+            orderedChoiceIds: null,
+        );
+
+        $answer3->evaluate(500);
+
+        $manager->persist($answer3);
     }
 
     private function createAnswersForUser2(

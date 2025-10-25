@@ -39,6 +39,10 @@ function createValidFile(): void
     $sheet->setCellValue('A6', PlayerChallengeAnswerFixture::USER_2_EXPIRED_CHALLENGE_2_ANSWER_ID);
     $sheet->setCellValue('B6', '=500+250'); // Should calculate to 750
 
+    // USER_1_EXPIRED_CHALLENGE_3_ANSWER_ID (unevaluated challenge)
+    $sheet->setCellValue('A7', PlayerChallengeAnswerFixture::USER_1_EXPIRED_CHALLENGE_3_ANSWER_ID);
+    $sheet->setCellValue('B7', 550); // Update from 500 to 550
+
     $writer = new Xlsx($spreadsheet);
     $writer->save(__DIR__ . '/results_import_valid.xlsx');
 }

@@ -13,6 +13,7 @@ use FantasyAcademy\API\Repository\PlayerChallengeAnswerRepository;
 use FantasyAcademy\API\Exceptions\ImportResultsWarning;
 use FantasyAcademy\API\Services\Import\ChallengesResultsImport;
 use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallenge2Fixture;
+use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallenge3Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallengeFixture;
 use FantasyAcademy\API\Tests\DataFixtures\PlayerChallengeAnswerFixture;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -73,33 +74,88 @@ final class ChallengesResultsImportTest extends ApiTestCase
     {
         $file = $this->createUploadedFile('results_import_valid.xlsx');
 
-        // Verify challenge is not evaluated before import
-        $challenge = $this->entityManager->find(
+        // Verify challenges 1 and 2 are already evaluated
+        $challenge1 = $this->entityManager->find(
             Challenge::class,
             Uuid::fromString(ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID)
         );
-        $this->assertInstanceOf(Challenge::class, $challenge);
-        $evaluatedAtBefore = $challenge->evaluatedAt;
+        $this->assertInstanceOf(Challenge::class, $challenge1);
+        $evaluatedAtBefore1 = $challenge1->evaluatedAt;
+        $this->assertNotNull($evaluatedAtBefore1, 'Challenge 1 should already be evaluated');
+
+        $challenge2 = $this->entityManager->find(
+            Challenge::class,
+            Uuid::fromString(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID)
+        );
+        $this->assertInstanceOf(Challenge::class, $challenge2);
+        $evaluatedAtBefore2 = $challenge2->evaluatedAt;
+        $this->assertNotNull($evaluatedAtBefore2, 'Challenge 2 should already be evaluated');
 
         $this->importer->importFile($file);
 
         // Clear and re-fetch
         $this->entityManager->clear();
-        $challenge = $this->entityManager->find(
+        $challenge1 = $this->entityManager->find(
             Challenge::class,
             Uuid::fromString(ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID)
         );
-        $this->assertInstanceOf(Challenge::class, $challenge);
+        $this->assertInstanceOf(Challenge::class, $challenge1);
 
-        // Verify challenge is now evaluated
-        $this->assertNotNull($challenge->evaluatedAt, 'Challenge should be evaluated');
-        if ($evaluatedAtBefore !== null) {
-            $this->assertGreaterThanOrEqual(
-                $evaluatedAtBefore->getTimestamp(),
-                $challenge->evaluatedAt->getTimestamp(),
-                'evaluatedAt should be updated or remain the same'
-            );
-        }
+        $challenge2 = $this->entityManager->find(
+            Challenge::class,
+            Uuid::fromString(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID)
+        );
+        $this->assertInstanceOf(Challenge::class, $challenge2);
+
+        // Verify both challenges remain evaluated (no regression)
+        $this->assertNotNull($challenge1->evaluatedAt, 'Challenge 1 should still be evaluated');
+        $this->assertNotNull($challenge2->evaluatedAt, 'Challenge 2 should still be evaluated');
+
+        // Verify evaluation timestamps were updated or remain the same
+        $this->assertGreaterThanOrEqual(
+            $evaluatedAtBefore1->getTimestamp(),
+            $challenge1->evaluatedAt->getTimestamp(),
+            'Challenge 1 evaluatedAt should be updated or remain the same'
+        );
+        $this->assertGreaterThanOrEqual(
+            $evaluatedAtBefore2->getTimestamp(),
+            $challenge2->evaluatedAt->getTimestamp(),
+            'Challenge 2 evaluatedAt should be updated or remain the same'
+        );
+    }
+
+    public function testImportEvaluatesUnevaluatedChallenge(): void
+    {
+        $file = $this->createUploadedFile('results_import_valid.xlsx');
+
+        // Verify Challenge 3 is NOT evaluated before import
+        $challenge3 = $this->entityManager->find(
+            Challenge::class,
+            Uuid::fromString(ExpiredChallenge3Fixture::EXPIRED_CHALLENGE_3_ID)
+        );
+        $this->assertInstanceOf(Challenge::class, $challenge3);
+        $this->assertNull($challenge3->evaluatedAt, 'Challenge 3 should NOT be evaluated initially');
+
+        $this->importer->importFile($file);
+
+        // Clear and re-fetch
+        $this->entityManager->clear();
+        $challenge3 = $this->entityManager->find(
+            Challenge::class,
+            Uuid::fromString(ExpiredChallenge3Fixture::EXPIRED_CHALLENGE_3_ID)
+        );
+        $this->assertInstanceOf(Challenge::class, $challenge3);
+
+        // Verify Challenge 3 is NOW evaluated after import
+        $this->assertNotNull($challenge3->evaluatedAt, 'Challenge 3 should be evaluated after import');
+
+        // Verify the answer points were updated
+        $answer = $this->entityManager->find(
+            PlayerChallengeAnswer::class,
+            Uuid::fromString(PlayerChallengeAnswerFixture::USER_1_EXPIRED_CHALLENGE_3_ANSWER_ID)
+        );
+        $this->assertInstanceOf(PlayerChallengeAnswer::class, $answer);
+        $this->assertSame(550, $answer->points, 'Points should be updated from 500 to 550');
     }
 
     public function testImportEvaluatesMultipleChallengesInOneFile(): void
