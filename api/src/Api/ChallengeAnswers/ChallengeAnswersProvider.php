@@ -24,7 +24,7 @@ readonly final class ChallengeAnswersProvider implements ProviderInterface
     ) {}
 
     /**
-     * @param array{id?: Uuid|string} $uriVariables
+     * @param array{id?: Uuid} $uriVariables
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ChallengeAnswersResponse
     {
@@ -32,7 +32,7 @@ readonly final class ChallengeAnswersProvider implements ProviderInterface
         $user = $this->security->getUser();
 
         assert(isset($uriVariables['id']));
-        $challengeId = $uriVariables['id'] instanceof Uuid ? $uriVariables['id'] : Uuid::fromString($uriVariables['id']);
+        $challengeId = $uriVariables['id'];
 
         return $this->getChallengeAnswers($challengeId, $user?->id);
     }
