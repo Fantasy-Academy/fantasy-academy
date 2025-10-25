@@ -3,3 +3,42 @@ body {
     background-size: cover;
     min-height: 100vh;
 }
+
+/* Export answers form - challenge cards */
+.challenge-card {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.challenge-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-color: #0d6efd;
+}
+
+.challenge-card input[type="checkbox"]:checked ~ .card {
+    border-color: #0d6efd;
+    background-color: #e7f3ff;
+}
+
+.challenge-card .card-body {
+    padding: 1.25rem;
+}
+
+.challenge-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #212529;
+}
+
+.challenge-dates {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.evaluation-badge {
+    font-size: 0.85rem;
+}

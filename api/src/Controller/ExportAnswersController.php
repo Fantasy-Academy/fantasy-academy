@@ -7,6 +7,7 @@ namespace FantasyAcademy\API\Controller;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\FormData\ExportAnswersFormData;
 use FantasyAcademy\API\FormType\ExportAnswersFormType;
+use FantasyAcademy\API\Query\ChallengeQuery;
 use FantasyAcademy\API\Services\Export\PlayersAnswersExport;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
@@ -23,14 +24,19 @@ final class ExportAnswersController extends AbstractController
     public function __construct(
         readonly private PlayersAnswersExport $playersAnswersExport,
         readonly private LoggerInterface $logger,
+        readonly private ChallengeQuery $challengeQuery,
     ) {
     }
 
     #[Route(path: '/admin/export-answers', name: 'export_answers')]
     public function __invoke(Request $request, #[CurrentUser] User $user): Response
     {
+        $challenges = $this->challengeQuery->getAll();
+
         $data = new ExportAnswersFormData();
-        $form = $this->createForm(ExportAnswersFormType::class, $data);
+        $form = $this->createForm(ExportAnswersFormType::class, $data, [
+            'challenges' => $challenges,
+        ]);
 
         $form->handleRequest($request);
 
@@ -64,6 +70,7 @@ final class ExportAnswersController extends AbstractController
 
         return $this->render('export_answers.html.twig', [
             'form' => $form,
+            'challenges' => $challenges,
         ]);
     }
 }
