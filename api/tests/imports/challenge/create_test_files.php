@@ -12,8 +12,6 @@ require __DIR__ . '/../../../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-$outputDir = __DIR__;
-
 // Helper function to create a spreadsheet with standard headers
 function createBaseSpreadsheet(): Spreadsheet
 {
@@ -64,8 +62,6 @@ function createBaseSpreadsheet(): Spreadsheet
 // Valid import file with 2 challenges and various question types
 function createValidFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
 
     $challengesSheet = $spreadsheet->getSheet(0);
@@ -185,14 +181,12 @@ function createValidFile(): void
     ], null, 'A6');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_valid.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_valid.xlsx');
 }
 
 // Missing challenge column (Name column removed)
 function createMissingChallengeColumnFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     // Remove the "Name" column (column B)
@@ -213,14 +207,12 @@ function createMissingChallengeColumnFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_missing_challenge_column.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_missing_challenge_column.xlsx');
 }
 
 // Missing question column (Type column removed)
 function createMissingQuestionColumnFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -250,14 +242,12 @@ function createMissingQuestionColumnFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_missing_question_column.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_missing_question_column.xlsx');
 }
 
 // Duplicate challenge ID
 function createDuplicateChallengeIdFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -289,14 +279,12 @@ function createDuplicateChallengeIdFile(): void
     ], null, 'A3');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_duplicate_challenge_id.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_duplicate_challenge_id.xlsx');
 }
 
 // Invalid challenge reference (question references non-existent challenge)
 function createInvalidChallengeReferenceFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -323,14 +311,12 @@ function createInvalidChallengeReferenceFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_invalid_challenge_reference.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_invalid_challenge_reference.xlsx');
 }
 
 // Empty challenge ID
 function createEmptyChallengeIdFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -348,14 +334,12 @@ function createEmptyChallengeIdFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_empty_challenge_id.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_empty_challenge_id.xlsx');
 }
 
 // Empty question challenge ID
 function createEmptyQuestionChallengeIdFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -382,14 +366,12 @@ function createEmptyQuestionChallengeIdFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_empty_question_challenge_id.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_empty_question_challenge_id.xlsx');
 }
 
 // Single sheet only (missing Questions sheet)
 function createSingleSheetFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = new Spreadsheet();
     $challengesSheet = $spreadsheet->getActiveSheet();
     $challengesSheet->setTitle('Challenges');
@@ -403,14 +385,12 @@ function createSingleSheetFile(): void
     // Only one sheet - no Questions sheet!
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_single_sheet.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_single_sheet.xlsx');
 }
 
 // Invalid question type
 function createInvalidQuestionTypeFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -437,14 +417,12 @@ function createInvalidQuestionTypeFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_invalid_question_type.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_invalid_question_type.xlsx');
 }
 
 // Invalid JSON choices
 function createInvalidJsonChoicesFile(): void
 {
-    global $outputDir;
-
     $spreadsheet = createBaseSpreadsheet();
     $challengesSheet = $spreadsheet->getSheet(0);
     $challengesSheet->fromArray([
@@ -475,7 +453,7 @@ function createInvalidJsonChoicesFile(): void
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($outputDir . '/challenge_import_invalid_json_choices.xlsx');
+    $writer->save(__DIR__ . '/challenge_import_invalid_json_choices.xlsx');
 }
 
 // Create all test files
@@ -512,4 +490,4 @@ echo "Creating challenge_import_invalid_json_choices.xlsx...\n";
 createInvalidJsonChoicesFile();
 
 echo "\n✅ All test files generated successfully!\n";
-echo "Files created in: $outputDir\n";
+echo "Files created in: " . __DIR__ . "\n";

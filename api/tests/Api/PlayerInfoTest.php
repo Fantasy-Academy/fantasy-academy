@@ -71,53 +71,53 @@ final class PlayerInfoTest extends ApiTestCase
             'name' => 'User 3',
             'registeredAt' => '2025-05-30T12:00:00+00:00',
             'overallStatistics' => [
-                'rank' => 1,
+                'rank' => 2,
                 'challengesAnswered' => 3,
                 'points' => 1700,
                 'skills' => [
                     [
                         'name' => 'Analytical',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Strategic Planning',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Adaptability',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Premier League Knowledge',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Risk Management',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Decision Making Under Pressure',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Financial Management',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Long Term Vision',
-                        'percentage' => 100,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Discipline',
-                        'percentage' => 60,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                 ],
@@ -125,7 +125,7 @@ final class PlayerInfoTest extends ApiTestCase
             'seasonsStatistics' => [
                 [
                     'seasonNumber' => 1,
-                    'rank' => 1,
+                    'rank' => 2,
                     'challengesAnswered' => 3,
                     'points' => 1700,
                     'skills' => [],

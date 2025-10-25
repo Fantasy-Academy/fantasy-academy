@@ -42,55 +42,55 @@ final class LoggedUserTest extends ApiTestCase
             'name' => 'User 2',
             'email' => 'user@example.com',
             'registeredAt' => '2025-05-30T12:00:00+00:00',
-            'availableChallenges' => 3,
+            'availableChallenges' => 4,
             'overallStatistics' => [
-                'rank' => 2,
+                'rank' => 3,
                 'challengesAnswered' => 2,
                 'points' => 1600,
                 'skills' => [
                     [
                         'name' => 'Analytical',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Strategic Planning',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Adaptability',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Premier League Knowledge',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Risk Management',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Decision Making Under Pressure',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Financial Management',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Long Term Vision',
-                        'percentage' => 50,
+                        'percentage' => 0,
                         'percentageChange' => NULL,
                     ],
                     [
                         'name' => 'Discipline',
-                        'percentage' => 40,
+                        'percentage' => 33,
                         'percentageChange' => NULL,
                     ],
                 ],
@@ -98,7 +98,7 @@ final class LoggedUserTest extends ApiTestCase
             'seasonsStatistics' => [
                 [
                     'seasonNumber' => 1,
-                    'rank' => 2,
+                    'rank' => 3,
                     'challengesAnswered' => 2,
                     'points' => 1600,
                     'skills' => [],
