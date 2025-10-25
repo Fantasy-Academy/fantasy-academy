@@ -59,16 +59,8 @@ class Question
         null|ChoiceQuestionConstraint $choiceConstraint = null,
         null|Answer $correctAnswer = null,
     ): void {
-        if ($numericConstraint !== null) {
-            $this->numericConstraint = $numericConstraint;
-        }
-
-        if ($choiceConstraint !== null) {
-            $this->choiceConstraint = $choiceConstraint;
-        }
-
-        if ($correctAnswer !== null) {
-            $this->correctAnswer = $correctAnswer;
-        }
+        $this->numericConstraint = $numericConstraint;
+        $this->choiceConstraint = $choiceConstraint;
+        $this->correctAnswer = $correctAnswer;
     }
 }

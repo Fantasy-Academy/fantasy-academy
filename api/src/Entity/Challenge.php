@@ -26,60 +26,78 @@ class Challenge
         #[Column(type: UuidType::NAME, unique: true)]
         public Uuid $id,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
         public string $name,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
         public string $shortDescription,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
         public string $description,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(nullable: true)]
         public null|string $image,
 
         #[Column]
         readonly public DateTimeImmutable $addedAt,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public DateTimeImmutable $startsAt,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public DateTimeImmutable $expiresAt,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public int $maxPoints,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT, nullable: true)]
         public null|string $hintText,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(nullable: true)]
         public null|string $hintImage,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillAnalytical,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillStrategicPlanning,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillAdaptability,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillPremierLeagueKnowledge,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillRiskManagement,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillDecisionMakingUnderPressure,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillFinancialManagement,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
         public float $skillLongTermVision,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(options: ['default' => true])]
         public bool $showStatisticsContinuously = true,
     ) {
