@@ -38,13 +38,11 @@ function bootstrapDatabase(string $cacheFilePath): void
     $application = new Application($kernel);
     $application->setAutoExit(false);
 
-    if (is_file($cacheFilePath)) {
-        $application->run(new ArrayInput([
-            'command' => 'doctrine:database:drop',
-            '--if-exists' => 1,
-            '--force' => 1,
-        ]));
-    }
+    $application->run(new ArrayInput([
+        'command' => 'doctrine:database:drop',
+        '--if-exists' => 1,
+        '--force' => 1,
+    ]));
 
     $application->run(new ArrayInput([
         'command' => 'doctrine:database:create',
