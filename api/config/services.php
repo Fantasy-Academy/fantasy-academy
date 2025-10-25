@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Monolog\Processor\PsrLogMessageProcessor;
 use FantasyAcademy\API\Services\Doctrine\FixDoctrineMigrationTableSchema;
+use FantasyAcademy\API\Services\ProvideIdentity;
+use FantasyAcademy\API\Services\ProvideRandomIdentity;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
@@ -49,6 +51,9 @@ return static function(ContainerConfigurator $configurator): void
     $services->load('FantasyAcademy\\API\\Services\\', __DIR__ . '/../src/Services/**/{*.php}');
     $services->load('FantasyAcademy\\API\\Query\\', __DIR__ . '/../src/Query/**/{*.php}');
     $services->load('FantasyAcademy\\API\\FormType\\', __DIR__ . '/../src/FormType/**/{*.php}');
+
+    // Explicitly alias ProvideIdentity interface to production implementation
+    $services->alias(ProvideIdentity::class, ProvideRandomIdentity::class);
 
     // API
     $services->load('FantasyAcademy\\API\\Controller\\', __DIR__ . '/../src/Controller/**/{*.php}');

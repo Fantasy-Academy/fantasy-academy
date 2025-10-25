@@ -6,10 +6,7 @@ namespace FantasyAcademy\API\Services;
 
 use Symfony\Component\Uid\Uuid;
 
-readonly class ProvideIdentity
+interface ProvideIdentity
 {
-    public function next(): Uuid
-    {
-        return Uuid::v7();
-    }
+    public function next(): Uuid;
 }

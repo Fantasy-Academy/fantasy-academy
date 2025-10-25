@@ -39,7 +39,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  *      skill_decisionmakingunderpressure: string,
  *      skill_financialmanagement: string,
  *      skill_longtermvision: string,
- *      skill_discipline: string,
  *  }
  *
  * @phpstan-type ImportQuestionRow array{
@@ -316,7 +315,7 @@ readonly final class ChallengesImport
             'id','name','short_description','description','max_points','starts_at','expires_at',
             'skill_analytical','skill_strategicplanning','skill_adaptability','skill_premierleagueknowledge',
             'skill_riskmanagement','skill_decisionmakingunderpressure','skill_financialmanagement',
-            'skill_longtermvision','skill_discipline',
+            'skill_longtermvision',
         ] as $key) {
             if (!array_key_exists($key, $row)) {
                 throw new ImportFailed(sprintf('Missing required challenge column "%s".', $key));
