@@ -7,6 +7,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use FantasyAcademy\API\Entity\Challenge;
 use FantasyAcademy\API\Entity\Question;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\Choice;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\QuestionType;
@@ -72,6 +73,10 @@ final class CurrentChallenge2Fixture extends Fixture
                     ),
                 ],
             ),
+        );
+
+        $question->correctAnswer = new Answer(
+            selectedChoiceId: Uuid::fromString(self::CHOICE_20_ID),
         );
 
         $manager->persist($question);

@@ -10,6 +10,7 @@ use FantasyAcademy\API\Entity\Challenge;
 use FantasyAcademy\API\Entity\Question;
 use FantasyAcademy\API\Exceptions\ImportFailed;
 use FantasyAcademy\API\Services\ProvideIdentity;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\Choice;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
@@ -18,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @phpstan-type ImportChallengeRow array{
@@ -52,6 +54,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  *      choices: null|string,
  *      choices_min_selections: null|string,
  *      choices_max_selections: null|string,
+ *      correct_text_answer?: null|string,
+ *      correct_numeric_answer?: null|string,
+ *      correct_selected_choice_text?: null|string,
+ *      correct_selected_choice_texts?: null|string,
+ *      correct_ordered_choice_texts?: null|string,
  *  }
  */
 readonly final class ChallengesImport
@@ -114,7 +121,7 @@ readonly final class ChallengesImport
             }
 
             $this->assertChallengeRow($row);
-            $challengesById[$id] = $this->createChallenge($row);
+            $challengesById[$id] = $this->createOrUpdateChallenge($row);
         }
 
         // Validate questions: first column must reference an existing challenge ID. Throw if not found or if empty.
@@ -131,7 +138,7 @@ readonly final class ChallengesImport
             }
 
             $this->assertQuestionRow($row);
-            $this->createQuestion($row, $challengesById[$challengeId]);
+            $this->createOrUpdateQuestion($row, $challengesById[$challengeId]);
         }
 
         $this->entityManager->flush();
@@ -208,6 +215,48 @@ readonly final class ChallengesImport
     /**
      * @param ImportChallengeRow $row
      */
+    private function createOrUpdateChallenge(array $row): Challenge
+    {
+        // Try to find existing challenge by UUID from the ID column
+        try {
+            $uuid = Uuid::fromString($row['id']);
+            $existingChallenge = $this->entityManager->find(Challenge::class, $uuid);
+
+            if ($existingChallenge instanceof Challenge) {
+                // Update existing challenge in place
+                $existingChallenge->update(
+                    name: $row['name'],
+                    shortDescription: $row['short_description'],
+                    description: $row['description'],
+                    image: $row['image'],
+                    startsAt: new DateTimeImmutable($row['starts_at']),
+                    expiresAt: new DateTimeImmutable($row['expires_at']),
+                    maxPoints: (int) $row['max_points'],
+                    hintText: $row['hint_text'],
+                    hintImage: $row['hint_image'],
+                    skillAnalytical: $this->makePercentage($row['skill_analytical']),
+                    skillStrategicPlanning: $this->makePercentage($row['skill_strategicplanning']),
+                    skillAdaptability: $this->makePercentage($row['skill_adaptability']),
+                    skillPremierLeagueKnowledge: $this->makePercentage($row['skill_premierleagueknowledge']),
+                    skillRiskManagement: $this->makePercentage($row['skill_riskmanagement']),
+                    skillDecisionMakingUnderPressure: $this->makePercentage($row['skill_decisionmakingunderpressure']),
+                    skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
+                    skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
+                    showStatisticsContinuously: $this->makeBoolean($row['show_statistics_continuously'] ?? null),
+                );
+
+                return $existingChallenge;
+            }
+        } catch (\InvalidArgumentException $e) {
+            // Not a valid UUID, will create new with generated UUID
+        }
+
+        return $this->createChallenge($row);
+    }
+
+    /**
+     * @param ImportChallengeRow $row
+     */
     private function createChallenge(array $row): Challenge
     {
         $challenge = new Challenge(
@@ -262,6 +311,50 @@ readonly final class ChallengesImport
     /**
      * @param ImportQuestionRow $row
      */
+    private function createOrUpdateQuestion(array $row, Challenge $challenge): Question
+    {
+        // Try to find existing question by matching text in the challenge
+        /** @var array<Question> $existingQuestions */
+        $existingQuestions = $this->entityManager->getRepository(Question::class)->findBy([
+            'challenge' => $challenge,
+            'text' => $row['text'],
+        ]);
+
+        $existingQuestion = count($existingQuestions) > 0 ? $existingQuestions[0] : null;
+
+        if ($existingQuestion instanceof Question) {
+            // Update existing question
+            $numericConstraint = null;
+            $choiceConstraint = null;
+
+            if ($row['numeric_type_min'] !== null || $row['numeric_type_max'] !== null) {
+                $numericConstraint = new NumericQuestionConstraint(
+                    min: $row['numeric_type_min'] !== null ? (int) $row['numeric_type_min'] : null,
+                    max: $row['numeric_type_max'] !== null ? (int) $row['numeric_type_max'] : null,
+                );
+            }
+
+            if ($row['choices'] !== null && json_validate($row['choices'])) {
+                $choiceConstraint = $this->createOrUpdateChoiceConstraint($row, $existingQuestion->choiceConstraint);
+            }
+
+            $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
+
+            $existingQuestion->update(
+                numericConstraint: $numericConstraint,
+                choiceConstraint: $choiceConstraint,
+                correctAnswer: $correctAnswer,
+            );
+
+            return $existingQuestion;
+        }
+
+        return $this->createQuestion($row, $challenge);
+    }
+
+    /**
+     * @param ImportQuestionRow $row
+     */
     private function createQuestion(array $row, Challenge $challenge): Question
     {
         $numericConstraint = null;
@@ -275,30 +368,7 @@ readonly final class ChallengesImport
         }
 
         if ($row['choices'] !== null && json_validate($row['choices'])) {
-            /**
-             * @var array<array{
-             *     text: string,
-             *     description: null|string,
-             *     image?: null|string,
-             * }> $choicesInfo
-             */
-            $choicesInfo = json_decode($row['choices'], associative: true);
-            $choices = [];
-
-            foreach ($choicesInfo as $choice) {
-                $choices[] = new Choice(
-                    id: $this->provideIdentity->next(),
-                    text: $choice['text'],
-                    description: $choice['description'],
-                    image: $choice['image'] ?? null,
-                );
-            }
-
-            $choiceConstraint = new ChoiceQuestionConstraint(
-                choices: $choices,
-                minSelections: $row['choices_min_selections'] !== null ? (int) $row['choices_min_selections'] : null,
-                maxSelections: $row['choices_max_selections'] !== null ? (int) $row['choices_max_selections'] : null,
-            );
+            $choiceConstraint = $this->createChoiceConstraint($row);
         }
 
         $question = new Question(
@@ -311,9 +381,176 @@ readonly final class ChallengesImport
             choiceConstraint: $choiceConstraint,
         );
 
+        $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
+        if ($correctAnswer !== null) {
+            $question->correctAnswer = $correctAnswer;
+        }
+
         $this->entityManager->persist($question);
 
         return $question;
+    }
+
+    /**
+     * @param ImportQuestionRow $row
+     */
+    private function createChoiceConstraint(array $row): ChoiceQuestionConstraint
+    {
+        assert($row['choices'] !== null);
+
+        /**
+         * @var array<array{
+         *     text: string,
+         *     description: null|string,
+         *     image?: null|string,
+         * }> $choicesInfo
+         */
+        $choicesInfo = json_decode($row['choices'], associative: true);
+        $choices = [];
+
+        foreach ($choicesInfo as $choice) {
+            $choices[] = new Choice(
+                id: $this->provideIdentity->next(),
+                text: $choice['text'],
+                description: $choice['description'],
+                image: $choice['image'] ?? null,
+            );
+        }
+
+        return new ChoiceQuestionConstraint(
+            choices: $choices,
+            minSelections: $row['choices_min_selections'] !== null ? (int) $row['choices_min_selections'] : null,
+            maxSelections: $row['choices_max_selections'] !== null ? (int) $row['choices_max_selections'] : null,
+        );
+    }
+
+    /**
+     * Create or update choice constraint, reusing existing choice IDs when updating.
+     *
+     * @param ImportQuestionRow $row
+     */
+    private function createOrUpdateChoiceConstraint(array $row, null|ChoiceQuestionConstraint $existingConstraint): ChoiceQuestionConstraint
+    {
+        assert($row['choices'] !== null);
+
+        /**
+         * @var array<array{
+         *     text: string,
+         *     description: null|string,
+         *     image?: null|string,
+         * }> $choicesInfo
+         */
+        $choicesInfo = json_decode($row['choices'], associative: true);
+        $choices = [];
+
+        // Build a map of existing choices by text for quick lookup
+        $existingChoicesByText = [];
+        if ($existingConstraint !== null) {
+            foreach ($existingConstraint->choices as $existingChoice) {
+                $existingChoicesByText[$existingChoice->text] = $existingChoice;
+            }
+        }
+
+        foreach ($choicesInfo as $choice) {
+            // Reuse existing choice ID if the text matches, otherwise generate new ID
+            if (isset($existingChoicesByText[$choice['text']])) {
+                $existingChoice = $existingChoicesByText[$choice['text']];
+                $choices[] = new Choice(
+                    id: $existingChoice->id,
+                    text: $choice['text'],
+                    description: $choice['description'],
+                    image: $choice['image'] ?? null,
+                );
+            } else {
+                $choices[] = new Choice(
+                    id: $this->provideIdentity->next(),
+                    text: $choice['text'],
+                    description: $choice['description'],
+                    image: $choice['image'] ?? null,
+                );
+            }
+        }
+
+        return new ChoiceQuestionConstraint(
+            choices: $choices,
+            minSelections: $row['choices_min_selections'] !== null ? (int) $row['choices_min_selections'] : null,
+            maxSelections: $row['choices_max_selections'] !== null ? (int) $row['choices_max_selections'] : null,
+        );
+    }
+
+    /**
+     * @param ImportQuestionRow $row
+     */
+    private function createCorrectAnswerFromRow(array $row, null|ChoiceQuestionConstraint $choiceConstraint): null|Answer
+    {
+        $textAnswer = $row['correct_text_answer'] ?? null;
+        $numericAnswer = $row['correct_numeric_answer'] ?? null;
+        $selectedChoiceText = $row['correct_selected_choice_text'] ?? null;
+        $selectedChoiceTexts = $row['correct_selected_choice_texts'] ?? null;
+        $orderedChoiceTexts = $row['correct_ordered_choice_texts'] ?? null;
+
+        // Check if any correct answer field is provided
+        $hasAnyCorrectAnswer = $textAnswer !== null && trim($textAnswer) !== '' ||
+            $numericAnswer !== null && trim($numericAnswer) !== '' ||
+            $selectedChoiceText !== null && trim($selectedChoiceText) !== '' ||
+            $selectedChoiceTexts !== null && trim($selectedChoiceTexts) !== '' ||
+            $orderedChoiceTexts !== null && trim($orderedChoiceTexts) !== '';
+
+        if (!$hasAnyCorrectAnswer) {
+            return null;
+        }
+
+        // Map choice texts to choice IDs if needed
+        $selectedChoiceId = null;
+        $selectedChoiceIds = null;
+        $orderedChoiceIds = null;
+
+        if ($selectedChoiceText !== null && $choiceConstraint !== null) {
+            foreach ($choiceConstraint->choices as $choice) {
+                if ($choice->text === trim($selectedChoiceText)) {
+                    $selectedChoiceId = $choice->id;
+                    break;
+                }
+            }
+        }
+
+        if ($selectedChoiceTexts !== null && json_validate($selectedChoiceTexts) && $choiceConstraint !== null) {
+            /** @var array<string> $texts */
+            $texts = json_decode($selectedChoiceTexts, associative: true);
+            $selectedChoiceIds = [];
+
+            foreach ($texts as $text) {
+                foreach ($choiceConstraint->choices as $choice) {
+                    if ($choice->text === trim($text)) {
+                        $selectedChoiceIds[] = $choice->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($orderedChoiceTexts !== null && json_validate($orderedChoiceTexts) && $choiceConstraint !== null) {
+            /** @var array<string> $texts */
+            $texts = json_decode($orderedChoiceTexts, associative: true);
+            $orderedChoiceIds = [];
+
+            foreach ($texts as $text) {
+                foreach ($choiceConstraint->choices as $choice) {
+                    if ($choice->text === trim($text)) {
+                        $orderedChoiceIds[] = $choice->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new Answer(
+            textAnswer: $textAnswer !== null && trim($textAnswer) !== '' ? trim($textAnswer) : null,
+            numericAnswer: $numericAnswer !== null && trim($numericAnswer) !== '' ? (float) $numericAnswer : null,
+            selectedChoiceId: $selectedChoiceId,
+            selectedChoiceIds: $selectedChoiceIds,
+            orderedChoiceIds: $orderedChoiceIds,
+        );
     }
 
     /**

@@ -53,4 +53,14 @@ class Question
         public null|ChoiceQuestionConstraint $choiceConstraint,
     ) {
     }
+
+    public function update(
+        null|NumericQuestionConstraint $numericConstraint = null,
+        null|ChoiceQuestionConstraint $choiceConstraint = null,
+        null|Answer $correctAnswer = null,
+    ): void {
+        $this->numericConstraint = $numericConstraint;
+        $this->choiceConstraint = $choiceConstraint;
+        $this->correctAnswer = $correctAnswer;
+    }
 }

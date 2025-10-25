@@ -26,67 +26,125 @@ class Challenge
         #[Column(type: UuidType::NAME, unique: true)]
         public Uuid $id,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
-        readonly public string $name,
+        public string $name,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
-        readonly public string $shortDescription,
+        public string $shortDescription,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
-        readonly public string $description,
+        public string $description,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(nullable: true)]
-        readonly public null|string $image,
+        public null|string $image,
 
         #[Column]
         readonly public DateTimeImmutable $addedAt,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public DateTimeImmutable $startsAt,
+        public DateTimeImmutable $startsAt,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public DateTimeImmutable $expiresAt,
+        public DateTimeImmutable $expiresAt,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public int $maxPoints,
+        public int $maxPoints,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT, nullable: true)]
-        readonly public null|string $hintText,
+        public null|string $hintText,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(nullable: true)]
-        readonly public null|string $hintImage,
+        public null|string $hintImage,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillAnalytical,
+        public float $skillAnalytical,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillStrategicPlanning,
+        public float $skillStrategicPlanning,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillAdaptability,
+        public float $skillAdaptability,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillPremierLeagueKnowledge,
+        public float $skillPremierLeagueKnowledge,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillRiskManagement,
+        public float $skillRiskManagement,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillDecisionMakingUnderPressure,
+        public float $skillDecisionMakingUnderPressure,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillFinancialManagement,
+        public float $skillFinancialManagement,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public float $skillLongTermVision,
+        public float $skillLongTermVision,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(options: ['default' => true])]
-        readonly public bool $showStatisticsContinuously = true,
+        public bool $showStatisticsContinuously = true,
     ) {
     }
 
     public function evaluate(DateTimeImmutable $evaluatedAt): void
     {
         $this->evaluatedAt = $evaluatedAt;
+    }
+
+    public function update(
+        string $name,
+        string $shortDescription,
+        string $description,
+        null|string $image,
+        DateTimeImmutable $startsAt,
+        DateTimeImmutable $expiresAt,
+        int $maxPoints,
+        null|string $hintText,
+        null|string $hintImage,
+        float $skillAnalytical,
+        float $skillStrategicPlanning,
+        float $skillAdaptability,
+        float $skillPremierLeagueKnowledge,
+        float $skillRiskManagement,
+        float $skillDecisionMakingUnderPressure,
+        float $skillFinancialManagement,
+        float $skillLongTermVision,
+        bool $showStatisticsContinuously,
+    ): void {
+        $this->name = $name;
+        $this->shortDescription = $shortDescription;
+        $this->description = $description;
+        $this->image = $image;
+        $this->startsAt = $startsAt;
+        $this->expiresAt = $expiresAt;
+        $this->maxPoints = $maxPoints;
+        $this->hintText = $hintText;
+        $this->hintImage = $hintImage;
+        $this->skillAnalytical = $skillAnalytical;
+        $this->skillStrategicPlanning = $skillStrategicPlanning;
+        $this->skillAdaptability = $skillAdaptability;
+        $this->skillPremierLeagueKnowledge = $skillPremierLeagueKnowledge;
+        $this->skillRiskManagement = $skillRiskManagement;
+        $this->skillDecisionMakingUnderPressure = $skillDecisionMakingUnderPressure;
+        $this->skillFinancialManagement = $skillFinancialManagement;
+        $this->skillLongTermVision = $skillLongTermVision;
+        $this->showStatisticsContinuously = $showStatisticsContinuously;
     }
 }
