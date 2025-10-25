@@ -113,7 +113,7 @@ final class ChallengeDetailTest extends ApiTestCase
     public function testChallengeDetailForCurrentUnansweredChallenge(): void
     {
         $client = self::createClient();
-        $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
+        $token = TestingLogin::getJwt($client, UserFixture::USER_4_EMAIL);
 
         $response = $client->request('GET', '/api/challenges/' . CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID, [
             'headers' => [
@@ -141,5 +141,128 @@ final class ChallengeDetailTest extends ApiTestCase
         $responseData = json_decode($response->getContent(), true);
         $this->assertIsArray($responseData['questions']);
         $this->assertCount(1, $responseData['questions']);
+    }
+
+    public function testStatisticsShownForEvaluatedChallenge(): void
+    {
+        $client = self::createClient();
+        $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
+
+        $response = $client->request('GET', '/api/challenges/' . ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertIsArray($responseData['questions']);
+        $this->assertCount(1, $responseData['questions']);
+
+        // Verify statistics are present for evaluated challenge
+        $question = $responseData['questions'][0];
+        $this->assertIsArray($question);
+        $this->assertArrayHasKey('statistics', $question);
+        $this->assertIsArray($question['statistics']);
+        $this->assertArrayHasKey('totalAnswers', $question['statistics']);
+        $this->assertArrayHasKey('answers', $question['statistics']);
+
+        // Question 7 has 3 text answers from 3 users
+        $this->assertEquals(3, $question['statistics']['totalAnswers']);
+        $this->assertIsArray($question['statistics']['answers']);
+        $this->assertCount(3, $question['statistics']['answers']);
+
+        // Verify each answer has the correct structure
+        foreach ($question['statistics']['answers'] as $answerStat) {
+            $this->assertIsArray($answerStat);
+            $this->assertArrayHasKey('answer', $answerStat);
+            $this->assertArrayHasKey('count', $answerStat);
+            $this->assertArrayHasKey('percentage', $answerStat);
+            $this->assertIsString($answerStat['answer']);
+            $this->assertIsInt($answerStat['count']);
+            $this->assertIsFloat($answerStat['percentage']);
+        }
+    }
+
+    public function testStatisticsShownWhenShowStatisticsContinuouslyIsTrue(): void
+    {
+        $client = self::createClient();
+        $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
+
+        $response = $client->request('GET', '/api/challenges/' . CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertIsArray($responseData['questions']);
+        $this->assertCount(1, $responseData['questions']);
+
+        // Verify statistics are present even though challenge is not evaluated
+        $question = $responseData['questions'][0];
+        $this->assertIsArray($question);
+        $this->assertArrayHasKey('statistics', $question);
+        $this->assertIsArray($question['statistics']);
+        $this->assertArrayHasKey('totalAnswers', $question['statistics']);
+        $this->assertArrayHasKey('answers', $question['statistics']);
+
+        // Question 4 has 3 answers: 2 Red, 1 Blue
+        $this->assertEquals(3, $question['statistics']['totalAnswers']);
+        $this->assertIsArray($question['statistics']['answers']);
+        $this->assertCount(2, $question['statistics']['answers']); // 2 unique answers
+
+        // Find and verify the statistics for each choice
+        $redStats = null;
+        $blueStats = null;
+        foreach ($question['statistics']['answers'] as $answerStat) {
+            $this->assertIsArray($answerStat);
+            if ($answerStat['answer'] === CurrentChallenge2Fixture::CHOICE_20_ID) { // Red
+                $redStats = $answerStat;
+            } elseif ($answerStat['answer'] === CurrentChallenge2Fixture::CHOICE_21_ID) { // Blue
+                $blueStats = $answerStat;
+            }
+        }
+
+        $this->assertNotNull($redStats, 'Red choice statistics should be present');
+        $this->assertNotNull($blueStats, 'Blue choice statistics should be present');
+        $this->assertEquals(2, $redStats['count']);
+        $this->assertIsNumeric($redStats['percentage']);
+        $this->assertEquals(66.67, round((float) $redStats['percentage'], 2));
+        $this->assertEquals(1, $blueStats['count']);
+        $this->assertIsNumeric($blueStats['percentage']);
+        $this->assertEquals(33.33, round((float) $blueStats['percentage'], 2));
+    }
+
+    public function testNoStatisticsWhenShowStatisticsContinuouslyIsFalse(): void
+    {
+        $client = self::createClient();
+        $token = TestingLogin::getJwt($client, UserFixture::USER_3_EMAIL);
+
+        $response = $client->request('GET', '/api/challenges/' . CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertIsArray($responseData['questions']);
+        $this->assertCount(3, $responseData['questions']);
+
+        // Verify statistics are NULL for unevaluated challenge with showStatisticsContinuously=false
+        foreach ($responseData['questions'] as $question) {
+            $this->assertNull($question['statistics']);
+        }
     }
 }

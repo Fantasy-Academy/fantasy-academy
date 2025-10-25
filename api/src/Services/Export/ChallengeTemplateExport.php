@@ -26,6 +26,7 @@ readonly final class ChallengeTemplateExport
             'expires_at',
             'hint_text',
             'hint_image',
+            'show_statistics_continuously',
             'skill_analytical',
             'skill_strategicplanning',
             'skill_adaptability',

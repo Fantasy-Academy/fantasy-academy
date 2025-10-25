@@ -57,6 +57,7 @@ final class CurrentChallenge1Fixture extends Fixture
             skillDecisionMakingUnderPressure: 10,
             skillFinancialManagement: 10,
             skillLongTermVision: 10,
+            showStatisticsContinuously: false,
         );
 
         $manager->persist($currentChallenge);

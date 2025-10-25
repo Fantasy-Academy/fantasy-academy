@@ -23,6 +23,8 @@ final class CurrentChallenge2Fixture extends Fixture
     public const string CURRENT_CHALLENGE_2_ID = '00000000-0000-0000-0002-000000000002';
 
     public const string QUESTION_4_ID = '00000000-0000-0000-0003-000000000004';
+    public const string CHOICE_20_ID = '00000000-0000-0000-0004-000000000020';
+    public const string CHOICE_21_ID = '00000000-0000-0000-0004-000000000021';
 
     public function load(ObjectManager $manager): void
     {
@@ -46,6 +48,7 @@ final class CurrentChallenge2Fixture extends Fixture
             skillDecisionMakingUnderPressure: 10,
             skillFinancialManagement: 10,
             skillLongTermVision: 10,
+            showStatisticsContinuously: true,
         );
 
         $manager->persist($currentChallenge);
@@ -53,23 +56,19 @@ final class CurrentChallenge2Fixture extends Fixture
         $question = new Question(
             id: Uuid::fromString(self::QUESTION_4_ID),
             challenge: $currentChallenge,
-            text: 'Sort those',
-            type: QuestionType::Sort,
+            text: 'What is your favorite color?',
+            type: QuestionType::SingleSelect,
             image: 'https://placecats.com/600/400',
             numericConstraint: null,
             choiceConstraint: new ChoiceQuestionConstraint(
                 choices: [
                     new Choice(
-                        id: Uuid::fromString(CurrentChallenge1Fixture::CHOICE_6_ID),
-                        text: '42',
+                        id: Uuid::fromString(self::CHOICE_20_ID),
+                        text: 'Red',
                     ),
                     new Choice(
-                        id: Uuid::fromString(CurrentChallenge1Fixture::CHOICE_7_ID),
-                        text: '420',
-                    ),
-                    new Choice(
-                        id: Uuid::fromString(CurrentChallenge1Fixture::CHOICE_8_ID),
-                        text: '666',
+                        id: Uuid::fromString(self::CHOICE_21_ID),
+                        text: 'Blue',
                     ),
                 ],
             ),

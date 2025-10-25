@@ -41,6 +41,7 @@ readonly final class Question
         public null|DateTimeImmutable $answeredAt,
         public null|Answer $myAnswer,
         public null|Answer $correctAnswer,
+        public null|QuestionStatistics $statistics = null,
     ) {}
 
     /**

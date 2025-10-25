@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  *      expires_at: string,
  *      hint_text: null|string,
  *      hint_image: null|string,
+ *      show_statistics_continuously: null|string,
  *      skill_analytical: string,
  *      skill_strategicplanning: string,
  *      skill_adaptability: string,
@@ -229,6 +230,7 @@ readonly final class ChallengesImport
             skillDecisionMakingUnderPressure: $this->makePercentage($row['skill_decisionmakingunderpressure']),
             skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
             skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
+            showStatisticsContinuously: $this->makeBoolean($row['show_statistics_continuously'] ?? null),
         );
 
         $this->entityManager->persist($challenge);
@@ -245,6 +247,16 @@ readonly final class ChallengesImport
         }
 
         return $number / 100;
+    }
+
+    private function makeBoolean(null|string $value): bool
+    {
+        if ($value === null || $value === '') {
+            return true; // Default to true
+        }
+
+        $normalized = strtolower(trim($value));
+        return in_array($normalized, ['true', '1', 'yes', 'y'], true);
     }
 
     /**

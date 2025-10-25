@@ -79,6 +79,9 @@ class Challenge
 
         #[Column]
         readonly public float $skillLongTermVision,
+
+        #[Column]
+        readonly public bool $showStatisticsContinuously = true,
     ) {
     }
 
