@@ -26,6 +26,7 @@ use Symfony\Component\Uid\Uuid;
 #[UniqueConstraint(fields: ['user', 'challenge'])]
 class PlayerChallengeAnswer
 {
+    #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
     #[Column(nullable: true)]
     public int|null $points = null;
 

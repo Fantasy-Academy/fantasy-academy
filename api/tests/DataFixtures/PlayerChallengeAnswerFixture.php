@@ -15,6 +15,14 @@ use Symfony\Component\Uid\Uuid;
 
 final class PlayerChallengeAnswerFixture extends Fixture implements DependentFixtureInterface
 {
+    public const string USER_1_EXPIRED_CHALLENGE_1_ANSWER_ID = '00000000-0000-0000-0005-000000000001';
+    public const string USER_1_EXPIRED_CHALLENGE_2_ANSWER_ID = '00000000-0000-0000-0005-000000000002';
+    public const string USER_2_EXPIRED_CHALLENGE_1_ANSWER_ID = '00000000-0000-0000-0005-000000000003';
+    public const string USER_2_EXPIRED_CHALLENGE_2_ANSWER_ID = '00000000-0000-0000-0005-000000000004';
+    public const string USER_3_EXPIRED_CHALLENGE_1_ANSWER_ID = '00000000-0000-0000-0005-000000000005';
+    public const string USER_3_EXPIRED_CHALLENGE_2_ANSWER_ID = '00000000-0000-0000-0005-000000000006';
+    public const string USER_3_CURRENT_CHALLENGE_1_ANSWER_ID = '00000000-0000-0000-0005-000000000007';
+
     public function __construct(
         readonly private ClockInterface $clock,
     ) {
@@ -98,7 +106,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
     {
         // Answer expired challenge 1
         $answer1 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000001'),
+            id: Uuid::fromString(self::USER_1_EXPIRED_CHALLENGE_1_ANSWER_ID),
             challenge: $expiredChallenge1,
             user: $user,
         );
@@ -118,7 +126,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // Answer expired challenge 2
         $answer2 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000002'),
+            id: Uuid::fromString(self::USER_1_EXPIRED_CHALLENGE_2_ANSWER_ID),
             challenge: $expiredChallenge2,
             user: $user,
         );
@@ -175,7 +183,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
     {
         // Answer expired challenge 1
         $answer1 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000003'),
+            id: Uuid::fromString(self::USER_2_EXPIRED_CHALLENGE_1_ANSWER_ID),
             challenge: $expiredChallenge1,
             user: $user,
         );
@@ -196,7 +204,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // Answer expired challenge 2
         $answer2 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000004'),
+            id: Uuid::fromString(self::USER_2_EXPIRED_CHALLENGE_2_ANSWER_ID),
             challenge: $expiredChallenge2,
             user: $user,
         );
@@ -256,7 +264,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
     {
         // Answer expired challenge 1
         $answer1 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000005'),
+            id: Uuid::fromString(self::USER_3_EXPIRED_CHALLENGE_1_ANSWER_ID),
             challenge: $expiredChallenge1,
             user: $user,
         );
@@ -277,7 +285,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // Answer expired challenge 2
         $answer2 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000006'),
+            id: Uuid::fromString(self::USER_3_EXPIRED_CHALLENGE_2_ANSWER_ID),
             challenge: $expiredChallenge2,
             user: $user,
         );
@@ -322,7 +330,7 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
         // Answer current challenge 1 (use current time since it's not expired)
         $currentAnsweredAt = $this->clock->now()->modify('-1 day');
         $answer3 = new PlayerChallengeAnswer(
-            id: Uuid::fromString('00000000-0000-0000-0005-000000000007'),
+            id: Uuid::fromString(self::USER_3_CURRENT_CHALLENGE_1_ANSWER_ID),
             challenge: $currentChallenge1,
             user: $user,
         );
