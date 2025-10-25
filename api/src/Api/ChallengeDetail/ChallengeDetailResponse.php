@@ -26,6 +26,7 @@ use Symfony\Component\Uid\Uuid;
  *     answered_at: null|string,
  *     hint_text: null|string,
  *     hint_image: null|string,
+ *     my_points: null|int,
  * }
  */
 #[ApiResource(
@@ -58,6 +59,7 @@ readonly final class ChallengeDetailResponse
         public array $questions,
         public null|string $hintText,
         public null|string $hintImage,
+        public null|int $myPoints,
     ) {
     }
 
@@ -92,6 +94,7 @@ readonly final class ChallengeDetailResponse
             ),
             hintText: $row['hint_text'],
             hintImage: $row['hint_image'],
+            myPoints: $row['my_points'],
         );
     }
 }

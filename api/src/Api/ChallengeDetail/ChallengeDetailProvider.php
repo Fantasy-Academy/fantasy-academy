@@ -45,7 +45,7 @@ readonly final class ChallengeDetailProvider implements ProviderInterface
     private function getChallengeDetail(Uuid $challengeId, null|Uuid $userId): ChallengeDetailResponse
     {
         $query = <<<SQL
-SELECT challenge.*, player_challenge_answer.answered_at
+SELECT challenge.*, player_challenge_answer.answered_at, player_challenge_answer.points AS my_points
 FROM challenge
 LEFT JOIN player_challenge_answer ON challenge.id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
 WHERE challenge.id = :challengeId

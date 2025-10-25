@@ -38,6 +38,7 @@ final class ChallengeDetailTest extends ApiTestCase
             'isExpired' => true,
             'isAnswered' => false,
             'isEvaluated' => true,
+            'myPoints' => null,
         ]);
     }
 
@@ -66,6 +67,7 @@ final class ChallengeDetailTest extends ApiTestCase
             'isAnswered' => true,
             'isEvaluated' => true,
             'hintText' => 'Something not that helpful',
+            'myPoints' => 800,
         ]);
 
         // Verify the question is included
@@ -99,6 +101,7 @@ final class ChallengeDetailTest extends ApiTestCase
             'isExpired' => false,
             'isAnswered' => true,
             'isEvaluated' => false,
+            'myPoints' => null,
         ]);
 
         // Verify questions are included
@@ -131,6 +134,7 @@ final class ChallengeDetailTest extends ApiTestCase
             'isExpired' => false,
             'isAnswered' => false,
             'isEvaluated' => false,
+            'myPoints' => null,
         ]);
 
         // Verify questions are included
