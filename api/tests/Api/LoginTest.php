@@ -4,28 +4,30 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Tests\Api;
 
+use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-final class LoginTest extends WebTestCase
+final class LoginTest extends ApiTestCase
 {
     public function testUserCanLoginWithValidCredentials(): void
     {
         $client = self::createClient();
 
-        $client->jsonRequest(
+        $response = $client->request(
             'POST',
             '/api/login',
             [
-                'email' => UserFixture::USER_2_EMAIL,
-                'password' => UserFixture::USER_PASSWORD,
-            ]
+                'json' => [
+                    'email' => UserFixture::USER_2_EMAIL,
+                    'password' => UserFixture::USER_PASSWORD,
+                ],
+            ],
         );
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $responseData = json_decode($response->getContent(), true);
 
         $this->assertIsArray($responseData);
         $this->assertArrayHasKey('token', $responseData);
@@ -41,18 +43,20 @@ final class LoginTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->jsonRequest(
+        $response = $client->request(
             'POST',
             '/api/login',
             [
-                'email' => UserFixture::USER_2_EMAIL,
-                'password' => 'wrong-password',
-            ]
+                'json' => [
+                    'email' => UserFixture::USER_2_EMAIL,
+                    'password' => 'wrong-password',
+                ],
+            ],
         );
 
         $this->assertResponseStatusCodeSame(401);
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $responseData = json_decode($response->getContent(false), true);
 
         $this->assertIsArray($responseData);
         $this->assertArrayHasKey('message', $responseData);
@@ -62,18 +66,20 @@ final class LoginTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->jsonRequest(
+        $response = $client->request(
             'POST',
             '/api/login',
             [
-                'email' => 'nonexistent@example.com',
-                'password' => 'any-password',
+                'json' => [
+                    'email' => 'nonexistent@example.com',
+                    'password' => 'any-password',
+                ],
             ]
         );
 
         $this->assertResponseStatusCodeSame(401);
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $responseData = json_decode($response->getContent(false), true);
 
         $this->assertIsArray($responseData);
         $this->assertArrayHasKey('message', $responseData);
@@ -83,12 +89,14 @@ final class LoginTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->jsonRequest(
+        $client->request(
             'POST',
             '/api/login',
             [
-                'password' => UserFixture::USER_PASSWORD,
-            ]
+                'json' => [
+                    'password' => UserFixture::USER_PASSWORD,
+                ],
+            ],
         );
 
         $this->assertResponseStatusCodeSame(400);
@@ -98,12 +106,14 @@ final class LoginTest extends WebTestCase
     {
         $client = self::createClient();
 
-        $client->jsonRequest(
+        $client->request(
             'POST',
             '/api/login',
             [
-                'email' => UserFixture::USER_2_EMAIL,
-            ]
+                'json' => [
+                    'email' => UserFixture::USER_2_EMAIL,
+                ],
+            ],
         );
 
         $this->assertResponseStatusCodeSame(400);

@@ -18,7 +18,11 @@ final class PlayerInfoTest extends ApiTestCase
     {
         $client = self::createClient();
 
-        $client->request('GET', '/api/player/' . UserFixture::USER_4_ID);
+        $client->request('GET', '/api/player/' . UserFixture::USER_4_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
@@ -53,6 +57,7 @@ final class PlayerInfoTest extends ApiTestCase
 
         $client->request('GET', '/api/player/' . UserFixture::USER_3_ID, [
             'headers' => [
+                'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $token,
             ],
         ]);
