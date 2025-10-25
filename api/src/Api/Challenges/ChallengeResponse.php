@@ -22,6 +22,7 @@ use Symfony\Component\Uid\Uuid;
  *     max_points: int,
  *     evaluated_at: null|string,
  *     answered_at: null|string,
+ *     my_points: null|int,
  * }
  */
 #[ApiResource(
@@ -48,6 +49,7 @@ readonly final class ChallengeResponse
         public bool $isExpired,
         public bool $isAnswered,
         public bool $isEvaluated,
+        public null|int $myPoints,
     ) {
     }
 
@@ -75,6 +77,7 @@ readonly final class ChallengeResponse
             isExpired: $now->getTimestamp() > $expiresAt->getTimestamp(),
             isAnswered: $answeredAt !== null,
             isEvaluated: $row['evaluated_at'] !== null,
+            myPoints: $row['my_points'],
         );
     }
 }
