@@ -74,9 +74,9 @@ final class ChallengesTest extends ApiTestCase
         $this->assertTrue($challengesById[ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]['isEvaluated']);
         $this->assertTrue($challengesById[ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID]['isEvaluated']);
 
-        // USER_1 did not answer CurrentChallenge1 or CurrentChallenge2
+        // USER_1 did not answer CurrentChallenge1, but did answer CurrentChallenge2
         $this->assertFalse($challengesById[CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID]['isAnswered']);
-        $this->assertFalse($challengesById[CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]['isAnswered']);
+        $this->assertTrue($challengesById[CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]['isAnswered']);
         $this->assertFalse($challengesById[CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID]['isEvaluated']);
         $this->assertFalse($challengesById[CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]['isEvaluated']);
     }

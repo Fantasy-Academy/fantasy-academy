@@ -72,7 +72,7 @@ final class PlayerInfoTest extends ApiTestCase
             'registeredAt' => '2025-05-30T12:00:00+00:00',
             'overallStatistics' => [
                 'rank' => 2,
-                'challengesAnswered' => 3,
+                'challengesAnswered' => 4,
                 'points' => 1700,
                 'skills' => [
                     [
@@ -117,7 +117,7 @@ final class PlayerInfoTest extends ApiTestCase
                     ],
                     [
                         'name' => 'Discipline',
-                        'percentage' => 50,
+                        'percentage' => 67,
                         'percentageChange' => NULL,
                     ],
                 ],
@@ -126,7 +126,7 @@ final class PlayerInfoTest extends ApiTestCase
                 [
                     'seasonNumber' => 1,
                     'rank' => 2,
-                    'challengesAnswered' => 3,
+                    'challengesAnswered' => 4,
                     'points' => 1700,
                     'skills' => [],
                 ],

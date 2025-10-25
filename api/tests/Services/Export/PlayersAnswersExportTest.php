@@ -8,6 +8,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Services\Export\PlayersAnswersExport;
 use FantasyAcademy\API\Tests\DataFixtures\CurrentChallenge1Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\CurrentChallenge2Fixture;
+use FantasyAcademy\API\Tests\DataFixtures\CurrentChallenge3Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallenge2Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallengeFixture;
 use FantasyAcademy\API\Tests\DataFixtures\PlayerChallengeAnswerFixture;
@@ -196,7 +197,7 @@ final class PlayersAnswersExportTest extends ApiTestCase
 
     public function testExportWithEmptyData(): void
     {
-        $spreadsheet = $this->exporter->exportAnswers([CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]);
+        $spreadsheet = $this->exporter->exportAnswers([CurrentChallenge3Fixture::CURRENT_CHALLENGE_3_ID]);
         $pointsSheet = $spreadsheet->getSheet(0);
         $answersSheet = $spreadsheet->getSheet(1);
 

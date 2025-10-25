@@ -42,10 +42,10 @@ final class LoggedUserTest extends ApiTestCase
             'name' => 'User 2',
             'email' => 'user@example.com',
             'registeredAt' => '2025-05-30T12:00:00+00:00',
-            'availableChallenges' => 4,
+            'availableChallenges' => 3,
             'overallStatistics' => [
                 'rank' => 3,
-                'challengesAnswered' => 2,
+                'challengesAnswered' => 3,
                 'points' => 1600,
                 'skills' => [
                     [
@@ -90,7 +90,7 @@ final class LoggedUserTest extends ApiTestCase
                     ],
                     [
                         'name' => 'Discipline',
-                        'percentage' => 33,
+                        'percentage' => 50,
                         'percentageChange' => NULL,
                     ],
                 ],
@@ -99,7 +99,7 @@ final class LoggedUserTest extends ApiTestCase
                 [
                     'seasonNumber' => 1,
                     'rank' => 3,
-                    'challengesAnswered' => 2,
+                    'challengesAnswered' => 3,
                     'points' => 1600,
                     'skills' => [],
                 ],
