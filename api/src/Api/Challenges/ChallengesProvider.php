@@ -45,6 +45,7 @@ readonly final class ChallengesProvider implements ProviderInterface
 SELECT challenge.*, player_challenge_answer.answered_at, player_challenge_answer.points AS my_points
 FROM challenge
 LEFT JOIN player_challenge_answer ON challenge.id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
+ORDER BY challenge.expires_at DESC
 SQL;
 
         /** @var array<ChallengeResponseRow> $rows */
