@@ -80,7 +80,7 @@ class Challenge
         #[Column]
         readonly public float $skillLongTermVision,
 
-        #[Column]
+        #[Column(options: ['default' => true])]
         readonly public bool $showStatisticsContinuously = true,
     ) {
     }
