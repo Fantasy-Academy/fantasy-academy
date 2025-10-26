@@ -42,28 +42,17 @@ readonly final class LeaderboardsProvider implements ProviderInterface
     private function getLeaderboards(null|Uuid $userId): array
     {
         $now = $this->clock->now();
+        $lastMondayCutoff = $this->getLastMondayCutoff($now);
 
         $query = <<<SQL
-WITH previous_monday AS (
-  SELECT
-    CASE
-      WHEN EXTRACT(DOW FROM :now::timestamp) = 1 THEN
-        -- If today is Monday, get previous Monday
-        (:now::timestamp - INTERVAL '1 week')::date + TIME '23:59:59'
-      ELSE
-        -- Get the most recent Monday
-        (:now::timestamp - ((EXTRACT(DOW FROM :now::timestamp)::int + 6) % 7 || ' days')::interval)::date + TIME '23:59:59'
-    END AS cutoff_time
-),
-previous_week_stats AS (
+WITH previous_week_stats AS (
   SELECT
     u.id AS user_id,
-    COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= pm.cutoff_time THEN pca.points ELSE 0 END), 0) AS points,
+    COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN pca.points ELSE 0 END), 0) AS points,
     ROW_NUMBER() OVER (
-      ORDER BY COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= pm.cutoff_time THEN pca.points ELSE 0 END), 0) DESC, u.name ASC
+      ORDER BY COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN pca.points ELSE 0 END), 0) DESC, u.name ASC
     ) AS rank
   FROM "user" u
-  CROSS JOIN previous_monday pm
   LEFT JOIN player_challenge_answer pca ON pca.user_id = u.id
   LEFT JOIN challenge c ON c.id = pca.challenge_id
   GROUP BY u.id, u.name
@@ -97,7 +86,7 @@ SQL;
         /** @var array<LeaderboardResponseRow> $rows */
         $rows = $this->database
             ->executeQuery($query, [
-                'now' => $now->format('Y-m-d H:i:s'),
+                'lastMondayCutoff' => $lastMondayCutoff->format('Y-m-d H:i:s'),
             ])
             ->fetchAllAssociative();
 
@@ -105,5 +94,23 @@ SQL;
             callback: fn (array $row): LeaderboardResponse => LeaderboardResponse::fromArray($row, $userId),
             array: $rows,
         );
+    }
+
+    /**
+     * Calculate the cutoff time for the previous game week (last Monday 23:59:59).
+     * Game weeks end every Monday at 23:59:59.
+     */
+    private function getLastMondayCutoff(\DateTimeImmutable $now): \DateTimeImmutable
+    {
+        $dayOfWeek = (int) $now->format('N'); // 1=Monday, 7=Sunday
+
+        if ($dayOfWeek === 1) {
+            // If today is Monday, get previous Monday
+            return $now->modify('-1 week')->setTime(23, 59, 59);
+        }
+
+        // Get the most recent Monday
+        $daysToSubtract = $dayOfWeek - 1;
+        return $now->modify("-{$daysToSubtract} days")->setTime(23, 59, 59);
     }
 }

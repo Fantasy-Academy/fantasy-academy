@@ -7,6 +7,7 @@ namespace FantasyAcademy\API\Tests\Api;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
 use FantasyAcademy\API\Tests\TestingLogin;
+use FantasyAcademy\API\Value\PlayerStatistics;
 
 /**
  * @covers \FantasyAcademy\API\Api\PlayerInfo\PlayerInfoProvider
@@ -134,5 +135,22 @@ final class PlayerInfoTest extends ApiTestCase
                 ],
             ],
         ]);
+    }
+
+    public function testPlayerStatisticsSupportsNegativeChanges(): void
+    {
+        // This test verifies that PlayerStatistics can handle negative changes
+        // even though it may be a rare scenario in production
+        $statistics = new PlayerStatistics(
+            rank: 10,
+            challengesAnswered: 5,
+            points: 500,
+            skills: [],
+            rankChange: -5,  // rank got worse (was 5, now 10)
+            pointsChange: -300,  // points decreased (had 800, now 500)
+        );
+
+        $this->assertEquals(-5, $statistics->rankChange);
+        $this->assertEquals(-300, $statistics->pointsChange);
     }
 }
