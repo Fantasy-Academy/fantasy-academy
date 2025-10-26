@@ -10,6 +10,7 @@ use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
+use FantasyAcademy\API\Services\GameWeekService;
 use FantasyAcademy\API\Services\SkillsTransformer;
 use FantasyAcademy\API\Value\PlayerSkill;
 use Psr\Clock\ClockInterface;
@@ -48,7 +49,7 @@ readonly final class PlayerInfoProvider implements ProviderInterface
     private function getPlayerInfo(Uuid $playerId, null|Uuid $userId): PlayerInfoResponse
     {
         $now = $this->clock->now();
-        $lastMondayCutoff = $this->getLastMondayCutoff($now);
+        $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
 
         $query = <<<SQL
 WITH previous_week_agg AS (
@@ -121,23 +122,5 @@ SQL;
         } catch (UserNotFound) {
             return [];
         }
-    }
-
-    /**
-     * Calculate the cutoff time for the previous game week (last Monday 23:59:59).
-     * Game weeks end every Monday at 23:59:59.
-     */
-    private function getLastMondayCutoff(\DateTimeImmutable $now): \DateTimeImmutable
-    {
-        $dayOfWeek = (int) $now->format('N'); // 1=Monday, 7=Sunday
-
-        if ($dayOfWeek === 1) {
-            // If today is Monday, get previous Monday
-            return $now->modify('-1 week')->setTime(23, 59, 59);
-        }
-
-        // Get the most recent Monday
-        $daysToSubtract = $dayOfWeek - 1;
-        return $now->modify("-{$daysToSubtract} days")->setTime(23, 59, 59);
     }
 }

@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Services\GameWeekService;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
@@ -42,7 +43,7 @@ readonly final class LeaderboardsProvider implements ProviderInterface
     private function getLeaderboards(null|Uuid $userId): array
     {
         $now = $this->clock->now();
-        $lastMondayCutoff = $this->getLastMondayCutoff($now);
+        $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
 
         $query = <<<SQL
 WITH previous_week_stats AS (
@@ -94,23 +95,5 @@ SQL;
             callback: fn (array $row): LeaderboardResponse => LeaderboardResponse::fromArray($row, $userId),
             array: $rows,
         );
-    }
-
-    /**
-     * Calculate the cutoff time for the previous game week (last Monday 23:59:59).
-     * Game weeks end every Monday at 23:59:59.
-     */
-    private function getLastMondayCutoff(\DateTimeImmutable $now): \DateTimeImmutable
-    {
-        $dayOfWeek = (int) $now->format('N'); // 1=Monday, 7=Sunday
-
-        if ($dayOfWeek === 1) {
-            // If today is Monday, get previous Monday
-            return $now->modify('-1 week')->setTime(23, 59, 59);
-        }
-
-        // Get the most recent Monday
-        $daysToSubtract = $dayOfWeek - 1;
-        return $now->modify("-{$daysToSubtract} days")->setTime(23, 59, 59);
     }
 }
