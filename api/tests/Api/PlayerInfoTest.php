@@ -74,6 +74,8 @@ final class PlayerInfoTest extends ApiTestCase
                 'rank' => 2,
                 'challengesAnswered' => 4,
                 'points' => 1700,
+                'rankChange' => 0,
+                'pointsChange' => 800,
                 'skills' => [
                     [
                         'name' => 'Analytical',

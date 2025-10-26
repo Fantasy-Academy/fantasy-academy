@@ -16,7 +16,9 @@ use Symfony\Component\Uid\Uuid;
  *     rank: int,
  *     points: int,
  *     challenges_answered: int,
- *     skills: array<PlayerSkill>
+ *     skills: array<PlayerSkill>,
+ *     rank_change: int,
+ *     points_change: int
  * }
  */
 #[ApiResource(
@@ -39,6 +41,8 @@ final class LeaderboardResponse
         public int $points,
         public int $challengesAnswered,
         public array $skills,
+        public int $rankChange,
+        public int $pointsChange,
     ) {
     }
 
@@ -55,6 +59,8 @@ final class LeaderboardResponse
             points: $data['points'],
             challengesAnswered: $data['challenges_answered'],
             skills: [], // TODO
+            rankChange: $data['rank_change'],
+            pointsChange: $data['points_change'],
         );
     }
 }

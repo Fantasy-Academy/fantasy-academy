@@ -14,6 +14,8 @@ readonly final class PlayerStatistics
         public int $challengesAnswered,
         public int $points,
         public array $skills,
+        public int $rankChange = 0,
+        public int $pointsChange = 0,
     ) {
     }
 }

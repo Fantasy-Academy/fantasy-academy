@@ -99,10 +99,12 @@ final class PlayerChallengeAnswerFixture extends Fixture implements DependentFix
 
         // User 4 has no answers - nothing to do
 
-        // Evaluate only the first two expired challenges
+        // Evaluate challenges at different times to test weekly change
+        // Challenge 1 evaluated 2 weeks ago (before last Monday) - will count in "previous week" stats
+        $expiredChallenge1->evaluate($this->clock->now()->modify('-2 weeks'));
+        // Challenge 2 evaluated 2 days ago (after last Monday) - will count in "current week" stats
+        $expiredChallenge2->evaluate($this->clock->now()->modify('-2 days'));
         // Challenge 3 will remain unevaluated to test import evaluation
-        $expiredChallenge1->evaluate($this->clock->now());
-        $expiredChallenge2->evaluate($this->clock->now());
 
         $manager->flush();
     }
