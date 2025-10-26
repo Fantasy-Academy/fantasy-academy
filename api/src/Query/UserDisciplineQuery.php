@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Query;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 
@@ -52,5 +53,97 @@ SQL;
         }
 
         return (float) $result;
+    }
+
+    /**
+     * @throws UserNotFound
+     * @return array{current: float, previous: null|float}
+     */
+    public function forPlayerWithPreviousWeek(string $playerId, DateTimeImmutable $cutoff): array
+    {
+        $sql = <<<SQL
+WITH previous_week_challenges AS (
+  SELECT COUNT(DISTINCT c.id) AS total_challenges
+  FROM "user" AS u
+  JOIN challenge AS c
+    ON c.expires_at > u.registered_at
+   AND c.evaluated_at IS NOT NULL
+   AND c.evaluated_at <= :cutoff
+  WHERE u.id = :userId
+),
+previous_week_answers AS (
+  SELECT COUNT(DISTINCT pca.challenge_id) AS answered_challenges
+  FROM "user" AS u
+  JOIN challenge AS c
+    ON c.expires_at > u.registered_at
+   AND c.evaluated_at IS NOT NULL
+   AND c.evaluated_at <= :cutoff
+  LEFT JOIN player_challenge_answer AS pca
+    ON pca.user_id = u.id
+   AND pca.challenge_id = c.id
+   AND pca.answered_at IS NOT NULL
+  WHERE u.id = :userId
+),
+current_challenges AS (
+  SELECT COUNT(DISTINCT c.id) AS total_challenges
+  FROM "user" AS u
+  JOIN challenge AS c
+    ON c.expires_at > u.registered_at
+  WHERE u.id = :userId
+),
+current_answers AS (
+  SELECT COUNT(DISTINCT pca.challenge_id) AS answered_challenges
+  FROM "user" AS u
+  JOIN challenge AS c
+    ON c.expires_at > u.registered_at
+  LEFT JOIN player_challenge_answer AS pca
+    ON pca.user_id = u.id
+   AND pca.challenge_id = c.id
+   AND pca.answered_at IS NOT NULL
+  WHERE u.id = :userId
+)
+SELECT
+  CAST(
+    ROUND(
+      COALESCE(
+        (ca.answered_challenges::numeric / NULLIF(cc.total_challenges, 0)) * 100,
+        0
+      ),
+      1
+    ) AS numeric(6,1)
+  ) AS discipline_percent_current,
+  CASE
+    WHEN pwc.total_challenges > 0 THEN
+      CAST(
+        ROUND(
+          COALESCE(
+            (pwa.answered_challenges::numeric / NULLIF(pwc.total_challenges, 0)) * 100,
+            0
+          ),
+          1
+        ) AS numeric(6,1)
+      )
+    ELSE NULL
+  END AS discipline_percent_previous
+FROM current_challenges cc
+CROSS JOIN current_answers ca
+CROSS JOIN previous_week_challenges pwc
+CROSS JOIN previous_week_answers pwa
+SQL;
+
+        /** @var array{discipline_percent_current: numeric-string, discipline_percent_previous: numeric-string|null}|false $result */
+        $result = $this->connection->executeQuery($sql, [
+            'userId' => $playerId,
+            'cutoff' => $cutoff->format('Y-m-d H:i:s'),
+        ])->fetchAssociative();
+
+        if ($result === false) {
+            throw new UserNotFound();
+        }
+
+        return [
+            'current' => (float) $result['discipline_percent_current'],
+            'previous' => $result['discipline_percent_previous'] !== null ? (float) $result['discipline_percent_previous'] : null,
+        ];
     }
 }

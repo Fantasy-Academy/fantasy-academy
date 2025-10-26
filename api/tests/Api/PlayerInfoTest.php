@@ -81,47 +81,47 @@ final class PlayerInfoTest extends ApiTestCase
                     [
                         'name' => 'Analytical',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Strategic Planning',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Adaptability',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Premier League Knowledge',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Risk Management',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Decision Making Under Pressure',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Financial Management',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Long Term Vision',
                         'percentage' => 50,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -50,
                     ],
                     [
                         'name' => 'Discipline',
                         'percentage' => 67,
-                        'percentageChange' => NULL,
+                        'percentageChange' => -33,
                     ],
                 ],
             ],
@@ -152,5 +152,28 @@ final class PlayerInfoTest extends ApiTestCase
 
         $this->assertEquals(-5, $statistics->rankChange);
         $this->assertEquals(-300, $statistics->pointsChange);
+    }
+
+    public function testPlayerSkillSupportsPercentageChanges(): void
+    {
+        // This test verifies that PlayerSkill can handle percentage changes
+        // including negative changes (skill percentile decreased)
+        $skill = new \FantasyAcademy\API\Value\PlayerSkill(
+            name: 'Analytical',
+            percentage: 75,
+            percentageChange: 10,  // improved from 65% to 75%
+        );
+
+        $this->assertEquals('Analytical', $skill->name);
+        $this->assertEquals(75, $skill->percentage);
+        $this->assertEquals(10, $skill->percentageChange);
+
+        $decreasingSkill = new \FantasyAcademy\API\Value\PlayerSkill(
+            name: 'Strategic Planning',
+            percentage: 40,
+            percentageChange: -20,  // decreased from 60% to 40%
+        );
+
+        $this->assertEquals(-20, $decreasingSkill->percentageChange);
     }
 }

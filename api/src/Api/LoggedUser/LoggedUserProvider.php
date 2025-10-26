@@ -9,9 +9,12 @@ use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
+use FantasyAcademy\API\Query\UserDisciplineQuery;
 use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
+use FantasyAcademy\API\Services\GameWeekService;
 use FantasyAcademy\API\Services\SkillsTransformer;
 use FantasyAcademy\API\Value\PlayerSkill;
+use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -26,7 +29,9 @@ readonly final class LoggedUserProvider implements ProviderInterface
         private Security $security,
         private Connection $database,
         private UserSkillsPercentilesQuery $userSkillsPercentilesQuery,
+        private UserDisciplineQuery $userDisciplineQuery,
         private SkillsTransformer $skillsTransformer,
+        private ClockInterface $clock,
     ) {}
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
@@ -112,9 +117,13 @@ SQL;
     private function getPlayerSkills(Uuid $userId): array
     {
         try {
-            $skillsRow = $this->userSkillsPercentilesQuery->forPlayer($userId->toString());
+            $now = $this->clock->now();
+            $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
 
-            return $this->skillsTransformer->transformToPlayerSkills($skillsRow, $userId->toString());
+            $skillsRow = $this->userSkillsPercentilesQuery->forPlayerWithPreviousWeek($userId->toString(), $lastMondayCutoff);
+            $disciplineData = $this->userDisciplineQuery->forPlayerWithPreviousWeek($userId->toString(), $lastMondayCutoff);
+
+            return $this->skillsTransformer->transformToPlayerSkillsWithChange($skillsRow, $userId->toString(), $disciplineData);
         } catch (UserNotFound) {
             return [];
         }
