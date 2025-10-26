@@ -20,6 +20,8 @@ use Symfony\Component\Uid\Uuid;
  *     points: int,
  *     challenges_answered: int,
  *     rank: null|int,
+ *     rank_change: int,
+ *     points_change: int
  * }
  */
 #[ApiResource(
@@ -60,6 +62,8 @@ readonly final class PlayerInfoResponse
                 challengesAnswered: $data['challenges_answered'],
                 points: $data['points'],
                 skills: $skills,
+                rankChange: $data['rank_change'],
+                pointsChange: $data['points_change'],
             ),
             seasonsStatistics: [
                 new PlayerSeasonStatistics(

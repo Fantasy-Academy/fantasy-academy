@@ -8,6 +8,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Entity\User;
+use FantasyAcademy\API\Services\GameWeekService;
+use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -21,6 +23,7 @@ readonly final class LeaderboardsProvider implements ProviderInterface
     public function __construct(
         private Security $security,
         private Connection $database,
+        private ClockInterface $clock,
     ) {}
 
     /**
@@ -39,25 +42,53 @@ readonly final class LeaderboardsProvider implements ProviderInterface
      */
     private function getLeaderboards(null|Uuid $userId): array
     {
+        $now = $this->clock->now();
+        $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
+
         $query = <<<SQL
+WITH previous_week_stats AS (
+  SELECT
+    u.id AS user_id,
+    COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN pca.points ELSE 0 END), 0) AS points,
+    ROW_NUMBER() OVER (
+      ORDER BY COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN pca.points ELSE 0 END), 0) DESC, u.name ASC
+    ) AS rank
+  FROM "user" u
+  LEFT JOIN player_challenge_answer pca ON pca.user_id = u.id
+  LEFT JOIN challenge c ON c.id = pca.challenge_id
+  GROUP BY u.id, u.name
+),
+current_stats AS (
+  SELECT
+    u.id AS user_id,
+    u.name AS user_name,
+    COALESCE(SUM(pca.points), 0) AS points,
+    COUNT(pca.id) AS challenges_answered,
+    ROW_NUMBER() OVER (
+      ORDER BY COALESCE(SUM(pca.points), 0) DESC, u.name ASC
+    ) AS rank
+  FROM "user" u
+  LEFT JOIN player_challenge_answer pca ON pca.user_id = u.id
+  GROUP BY u.id, u.name
+)
 SELECT
-  u.id   AS player_id,
-  u.name AS player_name,
-  COALESCE(SUM(pca.points), 0) AS points,
-  COUNT(pca.id) AS challenges_answered,
-  ROW_NUMBER() OVER (
-    ORDER BY COALESCE(SUM(pca.points), 0) DESC, u.name ASC
-  ) AS rank
-FROM "user" u
-LEFT JOIN player_challenge_answer pca
-  ON pca.user_id = u.id
-GROUP BY u.id, u.name
-ORDER BY points DESC, player_name ASC;
+  cs.user_id AS player_id,
+  cs.user_name AS player_name,
+  cs.rank::int AS rank,
+  cs.points::int AS points,
+  cs.challenges_answered::int AS challenges_answered,
+  (COALESCE(pws.rank, cs.rank) - cs.rank)::int AS rank_change,
+  (cs.points - COALESCE(pws.points, 0))::int AS points_change
+FROM current_stats cs
+LEFT JOIN previous_week_stats pws ON pws.user_id = cs.user_id
+ORDER BY cs.rank ASC;
 SQL;
 
         /** @var array<LeaderboardResponseRow> $rows */
         $rows = $this->database
-            ->executeQuery($query)
+            ->executeQuery($query, [
+                'lastMondayCutoff' => $lastMondayCutoff->format('Y-m-d H:i:s'),
+            ])
             ->fetchAllAssociative();
 
         return array_map(
