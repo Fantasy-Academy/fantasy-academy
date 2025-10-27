@@ -28,7 +28,8 @@ SELECT
   c.name,
   c.starts_at,
   c.expires_at,
-  c.evaluated_at
+  c.evaluated_at,
+  c.gameweek
 FROM challenge AS c
 ORDER BY c.starts_at DESC
 SQL;

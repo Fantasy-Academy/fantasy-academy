@@ -13,6 +13,7 @@ use DateTimeImmutable;
  *     starts_at: string,
  *     expires_at: string,
  *     evaluated_at: null|string,
+ *     gameweek: null|int,
  * }
  */
 readonly final class ChallengeRow
@@ -23,6 +24,7 @@ readonly final class ChallengeRow
         public DateTimeImmutable $startsAt,
         public DateTimeImmutable $expiresAt,
         public null|DateTimeImmutable $evaluatedAt,
+        public null|int $gameweek,
     ) {
     }
 
@@ -37,6 +39,7 @@ readonly final class ChallengeRow
             startsAt: new DateTimeImmutable($data['starts_at']),
             expiresAt: new DateTimeImmutable($data['expires_at']),
             evaluatedAt: $data['evaluated_at'] !== null ? new DateTimeImmutable($data['evaluated_at']) : null,
+            gameweek: $data['gameweek'],
         );
     }
 }
