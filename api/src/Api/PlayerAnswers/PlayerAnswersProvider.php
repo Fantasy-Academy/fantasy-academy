@@ -39,6 +39,7 @@ SELECT
     c.id AS challenge_id,
     c.name AS challenge_name,
     c.evaluated_at AS challenge_evaluated_at,
+    c.gameweek,
     pca.points,
     paq.question_id,
     q.text AS question_text,

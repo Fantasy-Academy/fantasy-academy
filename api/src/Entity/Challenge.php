@@ -20,6 +20,10 @@ class Challenge
     #[Column(nullable: true)]
     public null|DateTimeImmutable $evaluatedAt = null;
 
+    #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
+    #[Column(nullable: true)]
+    public null|int $gameweek = null;
+
     public function __construct(
         #[Id]
         #[Immutable]
@@ -100,7 +104,10 @@ class Challenge
         #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(options: ['default' => true])]
         public bool $showStatisticsContinuously = true,
+
+        null|int $gameweek = null,
     ) {
+        $this->gameweek = $gameweek;
     }
 
     public function evaluate(DateTimeImmutable $evaluatedAt): void
@@ -127,6 +134,7 @@ class Challenge
         float $skillFinancialManagement,
         float $skillLongTermVision,
         bool $showStatisticsContinuously,
+        null|int $gameweek,
     ): void {
         $this->name = $name;
         $this->shortDescription = $shortDescription;
@@ -146,5 +154,6 @@ class Challenge
         $this->skillFinancialManagement = $skillFinancialManagement;
         $this->skillLongTermVision = $skillLongTermVision;
         $this->showStatisticsContinuously = $showStatisticsContinuously;
+        $this->gameweek = $gameweek;
     }
 }

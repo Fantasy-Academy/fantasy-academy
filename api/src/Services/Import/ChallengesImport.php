@@ -34,6 +34,7 @@ use Symfony\Component\Uid\Uuid;
  *      hint_text: null|string,
  *      hint_image: null|string,
  *      show_statistics_continuously: null|string,
+ *      gameweek: null|string,
  *      skill_analytical: string,
  *      skill_strategicplanning: string,
  *      skill_adaptability: string,
@@ -243,6 +244,7 @@ readonly final class ChallengesImport
                     skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
                     skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
                     showStatisticsContinuously: $this->makeBoolean($row['show_statistics_continuously'] ?? null),
+                    gameweek: !empty($row['gameweek']) ? (int) $row['gameweek'] : null,
                 );
 
                 return $existingChallenge;
@@ -280,6 +282,7 @@ readonly final class ChallengesImport
             skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
             skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
             showStatisticsContinuously: $this->makeBoolean($row['show_statistics_continuously'] ?? null),
+            gameweek: !empty($row['gameweek']) ? (int) $row['gameweek'] : null,
         );
 
         $this->entityManager->persist($challenge);

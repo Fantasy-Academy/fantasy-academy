@@ -56,6 +56,7 @@ final class ExpiredChallenge2Fixture extends Fixture
             skillDecisionMakingUnderPressure: 10,
             skillFinancialManagement: 10,
             skillLongTermVision: 10,
+            gameweek: 2,
         );
 
         $manager->persist($expiredChallenge2);

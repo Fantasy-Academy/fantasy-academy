@@ -23,6 +23,7 @@ use Symfony\Component\Uid\Uuid;
  *     evaluated_at: null|string,
  *     answered_at: null|string,
  *     my_points: null|int,
+ *     gameweek: null|int,
  * }
  */
 #[ApiResource(
@@ -50,6 +51,7 @@ readonly final class ChallengeResponse
         public bool $isAnswered,
         public bool $isEvaluated,
         public null|int $myPoints,
+        public null|int $gameweek,
     ) {
     }
 
@@ -78,6 +80,7 @@ readonly final class ChallengeResponse
             isAnswered: $answeredAt !== null,
             isEvaluated: $row['evaluated_at'] !== null,
             myPoints: $row['my_points'],
+            gameweek: $row['gameweek'],
         );
     }
 }

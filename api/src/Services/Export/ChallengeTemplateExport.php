@@ -27,6 +27,7 @@ readonly final class ChallengeTemplateExport
             'hint_text',
             'hint_image',
             'show_statistics_continuously',
+            'gameweek',
             'skill_analytical',
             'skill_strategicplanning',
             'skill_adaptability',

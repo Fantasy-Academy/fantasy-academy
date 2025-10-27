@@ -50,14 +50,15 @@ final class ChallengesExportTest extends ApiTestCase
         $this->assertSame('hint_text', $challengesSheet->getCell('I1')->getValue());
         $this->assertSame('hint_image', $challengesSheet->getCell('J1')->getValue());
         $this->assertSame('show_statistics_continuously', $challengesSheet->getCell('K1')->getValue());
-        $this->assertSame('skill_analytical', $challengesSheet->getCell('L1')->getValue());
-        $this->assertSame('skill_strategicplanning', $challengesSheet->getCell('M1')->getValue());
-        $this->assertSame('skill_adaptability', $challengesSheet->getCell('N1')->getValue());
-        $this->assertSame('skill_premierleagueknowledge', $challengesSheet->getCell('O1')->getValue());
-        $this->assertSame('skill_riskmanagement', $challengesSheet->getCell('P1')->getValue());
-        $this->assertSame('skill_decisionmakingunderpressure', $challengesSheet->getCell('Q1')->getValue());
-        $this->assertSame('skill_financialmanagement', $challengesSheet->getCell('R1')->getValue());
-        $this->assertSame('skill_longtermvision', $challengesSheet->getCell('S1')->getValue());
+        $this->assertSame('gameweek', $challengesSheet->getCell('L1')->getValue());
+        $this->assertSame('skill_analytical', $challengesSheet->getCell('M1')->getValue());
+        $this->assertSame('skill_strategicplanning', $challengesSheet->getCell('N1')->getValue());
+        $this->assertSame('skill_adaptability', $challengesSheet->getCell('O1')->getValue());
+        $this->assertSame('skill_premierleagueknowledge', $challengesSheet->getCell('P1')->getValue());
+        $this->assertSame('skill_riskmanagement', $challengesSheet->getCell('Q1')->getValue());
+        $this->assertSame('skill_decisionmakingunderpressure', $challengesSheet->getCell('R1')->getValue());
+        $this->assertSame('skill_financialmanagement', $challengesSheet->getCell('S1')->getValue());
+        $this->assertSame('skill_longtermvision', $challengesSheet->getCell('T1')->getValue());
     }
 
     public function testQuestionsSheetHasCorrectHeaders(): void
@@ -102,14 +103,24 @@ final class ChallengesExportTest extends ApiTestCase
         $challengesSheet = $spreadsheet->getSheet(0);
 
         // Verify skill values are floats
-        $this->assertIsFloat($challengesSheet->getCell('L2')->getValue()); // skill_analytical
-        $this->assertIsFloat($challengesSheet->getCell('M2')->getValue()); // skill_strategicplanning
-        $this->assertIsFloat($challengesSheet->getCell('N2')->getValue()); // skill_adaptability
-        $this->assertIsFloat($challengesSheet->getCell('O2')->getValue()); // skill_premierleagueknowledge
-        $this->assertIsFloat($challengesSheet->getCell('P2')->getValue()); // skill_riskmanagement
-        $this->assertIsFloat($challengesSheet->getCell('Q2')->getValue()); // skill_decisionmakingunderpressure
-        $this->assertIsFloat($challengesSheet->getCell('R2')->getValue()); // skill_financialmanagement
-        $this->assertIsFloat($challengesSheet->getCell('S2')->getValue()); // skill_longtermvision
+        $this->assertIsFloat($challengesSheet->getCell('M2')->getValue()); // skill_analytical
+        $this->assertIsFloat($challengesSheet->getCell('N2')->getValue()); // skill_strategicplanning
+        $this->assertIsFloat($challengesSheet->getCell('O2')->getValue()); // skill_adaptability
+        $this->assertIsFloat($challengesSheet->getCell('P2')->getValue()); // skill_premierleagueknowledge
+        $this->assertIsFloat($challengesSheet->getCell('Q2')->getValue()); // skill_riskmanagement
+        $this->assertIsFloat($challengesSheet->getCell('R2')->getValue()); // skill_decisionmakingunderpressure
+        $this->assertIsFloat($challengesSheet->getCell('S2')->getValue()); // skill_financialmanagement
+        $this->assertIsFloat($challengesSheet->getCell('T2')->getValue()); // skill_longtermvision
+    }
+
+    public function testChallengesSheetContainsGameweek(): void
+    {
+        $spreadsheet = $this->exporter->exportChallenges([ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]);
+        $challengesSheet = $spreadsheet->getSheet(0);
+
+        $value = $challengesSheet->getCell('L2')->getValue();
+        // Gameweek can be null or an integer
+        $this->assertTrue($value === null || is_int($value), 'gameweek must be null or int');
     }
 
     public function testChallengesSheetContainsStatisticsContinuouslyFlag(): void
@@ -332,7 +343,7 @@ final class ChallengesExportTest extends ApiTestCase
 
         // Extract all headers from Challenges sheet
         $challengeHeaders = [];
-        for ($col = 'A'; $col <= 'S'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col++) {
             $header = $challengesSheet->getCell($col . '1')->getValue();
             if ($header !== null) {
                 $challengeHeaders[] = $header;
@@ -351,7 +362,7 @@ final class ChallengesExportTest extends ApiTestCase
         // Verify challenge headers match template export format
         $expectedChallengeHeaders = [
             'id', 'name', 'short_description', 'description', 'image', 'max_points',
-            'starts_at', 'expires_at', 'hint_text', 'hint_image', 'show_statistics_continuously',
+            'starts_at', 'expires_at', 'hint_text', 'hint_image', 'show_statistics_continuously', 'gameweek',
             'skill_analytical', 'skill_strategicplanning', 'skill_adaptability',
             'skill_premierleagueknowledge', 'skill_riskmanagement',
             'skill_decisionmakingunderpressure', 'skill_financialmanagement', 'skill_longtermvision',
@@ -375,7 +386,7 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // All headers should be lowercase with underscores (snake_case)
-        for ($col = 'A'; $col <= 'S'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col++) {
             $header = $challengesSheet->getCell($col . '1')->getValue();
             if (is_string($header)) {
                 $this->assertMatchesRegularExpression(
