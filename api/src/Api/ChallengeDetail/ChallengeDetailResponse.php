@@ -26,6 +26,7 @@ use Symfony\Component\Uid\Uuid;
  *     hint_image: null|string,
  *     my_points: null|int,
  *     show_statistics_continuously: bool,
+ *     gameweek: null|int,
  * }
  */
 #[ApiResource(
@@ -59,6 +60,7 @@ readonly final class ChallengeDetailResponse
         public null|string $hintText,
         public null|string $hintImage,
         public null|int $myPoints,
+        public null|int $gameweek,
     ) {
     }
 
@@ -91,6 +93,7 @@ readonly final class ChallengeDetailResponse
             hintText: $row['hint_text'],
             hintImage: $row['hint_image'],
             myPoints: $row['my_points'],
+            gameweek: $row['gameweek'],
         );
     }
 }

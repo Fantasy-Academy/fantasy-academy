@@ -47,14 +47,15 @@ final class ChallengeTemplateExportTest extends ApiTestCase
         $this->assertSame('hint_text', $challengesSheet->getCell('I1')->getValue());
         $this->assertSame('hint_image', $challengesSheet->getCell('J1')->getValue());
         $this->assertSame('show_statistics_continuously', $challengesSheet->getCell('K1')->getValue());
-        $this->assertSame('skill_analytical', $challengesSheet->getCell('L1')->getValue());
-        $this->assertSame('skill_strategicplanning', $challengesSheet->getCell('M1')->getValue());
-        $this->assertSame('skill_adaptability', $challengesSheet->getCell('N1')->getValue());
-        $this->assertSame('skill_premierleagueknowledge', $challengesSheet->getCell('O1')->getValue());
-        $this->assertSame('skill_riskmanagement', $challengesSheet->getCell('P1')->getValue());
-        $this->assertSame('skill_decisionmakingunderpressure', $challengesSheet->getCell('Q1')->getValue());
-        $this->assertSame('skill_financialmanagement', $challengesSheet->getCell('R1')->getValue());
-        $this->assertSame('skill_longtermvision', $challengesSheet->getCell('S1')->getValue());
+        $this->assertSame('gameweek', $challengesSheet->getCell('L1')->getValue());
+        $this->assertSame('skill_analytical', $challengesSheet->getCell('M1')->getValue());
+        $this->assertSame('skill_strategicplanning', $challengesSheet->getCell('N1')->getValue());
+        $this->assertSame('skill_adaptability', $challengesSheet->getCell('O1')->getValue());
+        $this->assertSame('skill_premierleagueknowledge', $challengesSheet->getCell('P1')->getValue());
+        $this->assertSame('skill_riskmanagement', $challengesSheet->getCell('Q1')->getValue());
+        $this->assertSame('skill_decisionmakingunderpressure', $challengesSheet->getCell('R1')->getValue());
+        $this->assertSame('skill_financialmanagement', $challengesSheet->getCell('S1')->getValue());
+        $this->assertSame('skill_longtermvision', $challengesSheet->getCell('T1')->getValue());
     }
 
     public function testQuestionsSheetHasCorrectHeaders(): void
@@ -101,7 +102,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
 
         // Extract all headers from row 1
         $headers = [];
-        for ($col = 'A'; $col <= 'S'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col++) {
             $headers[] = $challengesSheet->getCell($col . '1')->getValue();
         }
 
@@ -156,7 +157,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
 
         // All headers should be lowercase with underscores (snake_case)
         // This matches the normalizeHeader method in ChallengesImport
-        for ($col = 'A'; $col <= 'R'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col++) {
             $header = $challengesSheet->getCell($col . '1')->getValue();
             if ($header !== null && is_string($header)) {
                 $this->assertMatchesRegularExpression(

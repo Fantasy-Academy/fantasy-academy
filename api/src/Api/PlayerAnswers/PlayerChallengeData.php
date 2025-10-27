@@ -19,6 +19,7 @@ readonly final class PlayerChallengeData
         public string $challengeName,
         public int $points,
         public array $questions,
+        public null|int $gameweek,
     ) {
     }
 
@@ -40,6 +41,7 @@ readonly final class PlayerChallengeData
             challengeName: $firstRow['challenge_name'],
             points: $firstRow['points'],
             questions: $questions,
+            gameweek: $firstRow['gameweek'],
         );
     }
 }

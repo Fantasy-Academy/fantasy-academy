@@ -100,6 +100,10 @@ class Challenge
         #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(options: ['default' => true])]
         public bool $showStatisticsContinuously = true,
+
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
+        #[Column(nullable: true)]
+        public null|int $gameweek = null,
     ) {
     }
 
@@ -127,6 +131,7 @@ class Challenge
         float $skillFinancialManagement,
         float $skillLongTermVision,
         bool $showStatisticsContinuously,
+        null|int $gameweek,
     ): void {
         $this->name = $name;
         $this->shortDescription = $shortDescription;
@@ -146,5 +151,6 @@ class Challenge
         $this->skillFinancialManagement = $skillFinancialManagement;
         $this->skillLongTermVision = $skillLongTermVision;
         $this->showStatisticsContinuously = $showStatisticsContinuously;
+        $this->gameweek = $gameweek;
     }
 }

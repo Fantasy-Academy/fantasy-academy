@@ -21,6 +21,7 @@ use Symfony\Component\Uid\Uuid;
  *     selected_choice_id: null|string,
  *     selected_choice_ids: null|string,
  *     ordered_choice_ids: null|string,
+ *     gameweek: null|int,
  * }
  */
 #[ApiResource(
