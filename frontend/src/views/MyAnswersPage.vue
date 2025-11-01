@@ -34,8 +34,8 @@
                         {{ formatDate(a.answeredAt) }}
                     </span>
                     <span
-                        class="ml-auto inline-flex items-center rounded-full bg-golden-yellow/20 px-2 py-0.5 font-semibold text-golden-yellow">
-                        {{ a.type }}
+                        class="ml-auto inline-flex items-center rounded-full  font-semibold text-blue-black ">
+                        {{ a.myPoints ?? '0' }} FAPs
                     </span>
                 </div>
 

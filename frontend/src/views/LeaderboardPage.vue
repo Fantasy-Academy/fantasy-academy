@@ -27,7 +27,7 @@
         <div class="hidden grid-cols-12 gap-6 bg-dark-white px-8 py-4 text-left text-base text-cool-gray lg:grid">
           <div class="col-span-2">Rank</div>
           <div class="col-span-6">Player</div>
-          <div class="col-span-2">Points</div>
+          <div class="col-span-2">FAPs</div>
           <div class="col-span-2">Answered</div>
         </div>
 
@@ -70,7 +70,7 @@
             <!-- Points -->
             <div class="col-span-6 sm:col-span-2">
               <p class="text-lg font-bold text-blue-black">{{ p.points }}</p>
-              <p class="text-xs text-cool-gray sm:hidden">Points</p>
+              <p class="text-xs text-cool-gray sm:hidden">FAPs</p>
             </div>
 
             <!-- Answered -->

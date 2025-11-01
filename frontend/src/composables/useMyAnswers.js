@@ -40,6 +40,7 @@ export function useMyAnswers() {
                     challengeId: ch?.id ?? null,
                     challengeName: ch?.name ?? '',
                     challengeAnsweredAt: ch?.answeredAt ?? null,
+                    myPoints: ch?.myPoints ?? null,
                 };
                 const normalized = normalizeAnswersFromQuestions(ch?.questions || [], ctx);
                 if (normalized.length) all.push(...normalized);
