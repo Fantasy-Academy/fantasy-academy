@@ -46,7 +46,7 @@
       <!-- KPI Cards -->
       <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
-          <p class="text-sm text-cool-gray font-alexandria">Total Points</p>
+          <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
           <p class="mt-1 text-3xl font-extrabold text-blue-black">{{ overall.points ?? 0 }}</p>
         </div>
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
@@ -114,7 +114,7 @@
                     {{ c.shortDescription || '—' }}
                   </p>
                   <div class="mt-1 flex items-center gap-2 text-xs text-cool-gray">
-                    <span v-if="c.maxPoints != null">{{ c.maxPoints }} pts</span>
+                    <span v-if="c.maxPoints != null">{{ c.maxPoints }} FAPs</span>
                     <span v-if="c.isAnswered" class="rounded bg-pistachio/20 px-2 py-0.5 text-pistachio">Answered</span>
                     <span v-else-if="c.isExpired" class="rounded bg-vibrant-coral/10 px-2 py-0.5 text-vibrant-coral"
                       >Expired</span
@@ -152,7 +152,7 @@
                 <p class="truncate text-sm font-medium text-blue-black">
                   {{ p.playerName }} <span v-if="p.isMyself" class="text-xs text-vibrant-coral">(you)</span>
                 </p>
-                <p class="text-xs text-cool-gray">{{ p.points }} pts · {{ p.challengesAnswered }} challenges</p>
+                <p class="text-xs text-cool-gray">{{ p.points }} FAPs · {{ p.challengesAnswered }} challenges</p>
               </div>
             </li>
             <li v-if="top5.length === 0" class="p-3 text-sm text-cool-gray">No leaderboard data.</li>

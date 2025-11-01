@@ -21,7 +21,7 @@
 
       <div class="mt-auto flex flex-wrap items-center gap-3 text-xs text-cool-gray">
         <span v-if="challenge.maxPoints != null" class="font-semibold text-blue-black">
-          {{ challenge.maxPoints }} pts
+          {{ challenge.maxPoints }} FAPs
         </span>
 
         <span v-if="challenge.isAnswered" class="rounded-full bg-pistachio/20 px-3 py-1 text-pistachio font-semibold">

@@ -36,7 +36,7 @@
       <!-- KPIs -->
       <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
-          <p class="text-sm text-cool-gray font-alexandria">Total points</p>
+          <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
           <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
         </div>
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
@@ -99,7 +99,7 @@
                 <p class="font-alexandria text-blue-black">{{ s.challengesAnswered }}</p>
               </div>
               <div class="rounded-lg bg-dark-white/60 p-2">
-                <p class="text-cool-gray">Points</p>
+                <p class="text-cool-gray">FAPs</p>
                 <p class="font-alexandria text-blue-black">{{ s.points }}</p>
               </div>
               <div class="rounded-lg bg-dark-white/60 p-2">
@@ -133,7 +133,7 @@
                 <th class="px-4 py-2 font-semibold">Season</th>
                 <th class="px-4 py-2 font-semibold">Rank</th>
                 <th class="px-4 py-2 font-semibold">Challenges</th>
-                <th class="px-4 py-2 font-semibold">Points</th>
+                <th class="px-4 py-2 font-semibold">FAPs</th>
                 <th class="px-4 py-2 font-semibold">Top skills</th>
               </tr>
             </thead>
