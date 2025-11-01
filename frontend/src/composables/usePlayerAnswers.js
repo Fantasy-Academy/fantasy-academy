@@ -50,10 +50,10 @@ export function usePlayerAnswers() {
 
       // API dokumentace uvádí Player.answers → očekáváme např. data.challenges
       answers.value = data?.challenges || [];
-      console.log('✅ Ukládám answers:', answers.value);
+      console.log('Ukládám answers:', answers.value);
 
     } catch (e) {
-      console.error('❌ API ERROR:', e);
+      console.error('API ERROR:', e);
       error.value = e.message;
     } finally {
       loading.value = false;
