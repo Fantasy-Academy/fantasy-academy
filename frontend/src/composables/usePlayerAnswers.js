@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/http';
 import { ref } from 'vue';
 import { useAuth } from './useAuth';
 
@@ -27,7 +28,7 @@ export function usePlayerAnswers() {
     console.log('➡ Headers:', headers);
 
     try {
-      const response = await fetch(url, { headers });
+      const response = await apiFetch(url, { headers });
 
       console.log('⬅ Response status:', response.status);
       
