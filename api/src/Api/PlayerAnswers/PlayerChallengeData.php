@@ -39,7 +39,7 @@ readonly final class PlayerChallengeData
         return new self(
             challengeId: Uuid::fromString($firstRow['challenge_id']),
             challengeName: $firstRow['challenge_name'],
-            points: $firstRow['points'],
+            points: $firstRow['points'] ?? 0,
             questions: $questions,
             gameweek: $firstRow['gameweek'],
         );

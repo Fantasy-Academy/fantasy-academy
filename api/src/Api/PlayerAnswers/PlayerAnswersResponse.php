@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
  *     challenge_id: string,
  *     challenge_name: string,
  *     challenge_evaluated_at: string,
- *     points: int,
+ *     points: null|int,
  *     question_id: string,
  *     question_text: string,
  *     text_answer: null|string,
