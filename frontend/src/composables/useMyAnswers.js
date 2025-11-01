@@ -24,7 +24,7 @@ export function useMyAnswers() {
                 myAnswers.value = [];
                 return;
             }
-
+            
             // get detail of challenges where are questions
             const settled = await Promise.allSettled(ids.map(id => apiGetChallengeDetail(id)));
 

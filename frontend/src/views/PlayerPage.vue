@@ -168,6 +168,7 @@
         </div>
 
         <div v-else class="space-y-4">
+          <!-- Každá challenge -->
           <div v-for="challenge in answers" :key="challenge.challengeId"
             class="rounded-xl bg-white p-4 shadow-sm border border-charcoal/10">
             <h3 class="font-semibold text-blue-black">
@@ -175,11 +176,20 @@
               <span class="text-sm text-cool-gray">({{ challenge.points }} FAPs)</span>
             </h3>
 
+            <!-- Otázky a odpovědi -->
             <ul class="mt-2 space-y-2">
-              <li v-for="q in challenge.questions" :key="q.questionId">
+              <li v-for="q in challenge.questions" :key="q.questionId" class="text-sm">
                 <p class="font-medium">{{ q.questionText }}</p>
-                <p class="text-sm text-cool-gray">
-                  Answer: <strong>{{ q.answer?.textAnswer || q.answer?.numericAnswer || '—' }}</strong>
+                <p class="text-cool-gray">
+                  Answer:
+                  <strong>
+                    {{
+                      q.answer?.textAnswer
+                      || q.answer?.numericAnswer
+                      || q.answer?.selectedChoiceId
+                      || '—'
+                    }}
+                  </strong>
                 </p>
               </li>
             </ul>

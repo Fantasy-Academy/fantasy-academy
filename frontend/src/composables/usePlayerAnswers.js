@@ -1,63 +1,39 @@
+// src/composables/usePlayerAnswers.js
 import { apiFetch } from '../api/http';
 import { ref } from 'vue';
 import { useAuth } from './useAuth';
 
 export function usePlayerAnswers() {
   const { token } = useAuth() || {};
-  const answers = ref([]);
+  const answers = ref([]);           // rovnou pole -> lepší pro v-for
   const loading = ref(false);
   const error = ref(null);
 
   async function loadPlayerAnswers(playerId) {
-    if (!playerId) {
-      console.warn('[usePlayerAnswers] ❌ playerId není definováno');
-      return;
-    }
+    if (!playerId) return;
 
     loading.value = true;
     error.value = null;
 
-    const url = `/api/players/${playerId}/answers`;
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(token?.value ? { Authorization: `Bearer ${token.value}` } : {})
-    };
-
-    console.group(`[usePlayerAnswers] 🔍 Odesílám request`);
-    console.log('➡ URL:', url);
-    console.log('➡ Headers:', headers);
-
     try {
-      const response = await apiFetch(url, { headers });
+      const data = await apiFetch(`/api/players/${playerId}/answers`, {
+        method: 'GET',
+        auth: true, // pokud používáš token přes apiFetch automaticky
+        headers: token?.value ? { Authorization: `Bearer ${token.value}` } : {},
+      });
 
-      console.log('⬅ Response status:', response.status);
-      
-      // Čteme jako text (kvůli 204/500 odpovědím bez těla)
-      const rawText = await response.text();
-      console.log('⬅ Response raw text:', rawText);
+      // Tady už je data JS objekt (např. {challenges: [...]})
+      console.log('✅ Data z API:', data);
 
-      let data = null;
-      try {
-        data = rawText ? JSON.parse(rawText) : null;
-        console.log('⬅ Response JSON parsed:', data);
-      } catch (err) {
-        console.warn('⚠ JSON parsing failed:', err);
-      }
-
-      if (!response.ok) {
-        throw new Error(data?.detail || `Error ${response.status}: Unable to fetch answers`);
-      }
-
-      // API dokumentace uvádí Player.answers → očekáváme např. data.challenges
       answers.value = data?.challenges || [];
-      console.log('Ukládám answers:', answers.value);
+
+      console.log('📌 Uložené answers:', answers.value);
 
     } catch (e) {
-      console.error('API ERROR:', e);
+      console.error('❌ API ERROR:', e);
       error.value = e.message;
     } finally {
       loading.value = false;
-      console.groupEnd();
     }
   }
 
