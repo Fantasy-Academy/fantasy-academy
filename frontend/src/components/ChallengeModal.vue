@@ -99,10 +99,15 @@
                   <span class="text-cool-gray">Unknown question type: {{ q.type }}</span>
                 </template>
               </div>
-
-              <p v-if="q.answeredAt" class="mt-2 text-xs text-cool-gray">
-                Answered at: {{ new Date(q.answeredAt).toLocaleString() }}
-              </p>
+              <div class="mt-5">
+                <p v-if="q.answeredAt" class="mt-2 text-xs text-cool-gray">
+                  Answered at: {{ new Date(q.answeredAt).toLocaleString() }}
+                </p>
+                <p v-if="challenge.isExpired">
+                  Correct answer:
+                  <strong>{{ formatCorrectAnswer(q) }}</strong>
+                </p>
+              </div>
             </template>
 
             <!-- EDITABLE block (always editable while NOT expired) -->
@@ -537,6 +542,41 @@ async function handleSubmit() {
   } finally {
     submitting.value = false;
   }
+}
+
+function formatCorrectAnswer(question) {
+  const answer = question.correctAnswer;
+  if (!answer) return null;
+
+  // 1) Numeric
+  if (answer.numericAnswer !== null) {
+    return answer.numericAnswer;
+  }
+
+  // 2) Text
+  if (answer.textAnswer) {
+    return answer.textAnswer;
+  }
+
+  // 3) Single select
+  if (answer.selectedChoiceId) {
+    const choice = question.choiceConstraint?.choices.find(
+      c => c.id === answer.selectedChoiceId
+    );
+    return choice ? choice.text : answer.selectedChoiceId;
+  }
+
+  // 4) Multi select
+  if (Array.isArray(answer.selectedChoiceIds) && answer.selectedChoiceIds.length > 0) {
+    return answer.selectedChoiceIds
+      .map(id => {
+        const choice = question.choiceConstraint?.choices.find(c => c.id === id);
+        return choice ? choice.text : id;
+      })
+      .join(', ');
+  }
+
+  return null;
 }
 
 // mount & watchers
