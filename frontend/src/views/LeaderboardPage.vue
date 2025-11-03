@@ -45,7 +45,7 @@
               </span>
             </div>
 
-            <!-- Player (no inner link; the whole row is clickable) -->
+            <!-- Player -->
             <div class="col-span-12 sm:col-span-6">
               <div
                 class="inline-flex max-w-full items-center gap-4 rounded-lg px-2 py-1 font-alexandria text-blue-black">
@@ -201,9 +201,9 @@ function formatChange(value) {
 }
 
 function changeClass(value) {
-  if (value > 0) return 'text-pistachio'; // zelená
-  if (value < 0) return 'text-vibrant-coral'; // červená
-  return 'text-cool-gray'; // neutrální
+  if (value > 0) return 'text-pistachio';
+  if (value < 0) return 'text-vibrant-coral';
+  return 'text-cool-gray';
 }
 
 onMounted(loadInitial);
