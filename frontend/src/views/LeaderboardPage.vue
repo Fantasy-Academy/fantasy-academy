@@ -201,8 +201,8 @@ function formatChange(value) {
 }
 
 function changeClass(value) {
-  if (value > 0) return 'text-pistachio'; // zelená (lepší)
-  if (value < 0) return 'text-vibrant-coral'; // červená (horší)
+  if (value > 0) return 'text-pistachio'; // zelená
+  if (value < 0) return 'text-vibrant-coral'; // červená
   return 'text-cool-gray'; // neutrální
 }
 
