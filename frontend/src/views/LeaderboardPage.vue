@@ -2,8 +2,7 @@
   <section class="mx-auto max-w-full px-8 py-10">
     <!-- Header -->
     <div
-      class="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-6 text-white shadow-main"
-    >
+      class="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-6 text-white shadow-main">
       <div>
         <h1 class="font-bebas-neue text-4xl tracking-wide">Leaderboard</h1>
         <p class="font-alexandria text-dark-white/80 text-lg">
@@ -14,10 +13,8 @@
 
     <!-- States -->
     <div v-if="initialLoading" class="text-cool-gray">Loading leaderboard…</div>
-    <div
-      v-else-if="error"
-      class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-4 text-vibrant-coral"
-    >
+    <div v-else-if="error"
+      class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-4 text-vibrant-coral">
       {{ error }}
     </div>
 
@@ -32,32 +29,28 @@
         </div>
 
         <ul class="divide-y">
-          <li
-            v-for="(p, i) in items"
-            :key="p.playerId || i"
+          <li v-for="(p, i) in items" :key="p.playerId || i"
             class="grid grid-cols-12 gap-6 px-8 py-6 hover:bg-dark-white/50 sm:items-center cursor-pointer focus:outline-none focus:bg-dark-white/60"
-            role="button"
-            tabindex="0"
-            :aria-label="`Open player ${p.playerName}`"
-            @click="onRowClick(p.playerId)"
-            @keydown.enter.prevent="onRowClick(p.playerId)"
-            @keydown.space.prevent="onRowClick(p.playerId)"
-          >
-            <!-- Rank badge -->
+            role="button" tabindex="0" :aria-label="`Open player ${p.playerName}`" @click="onRowClick(p.playerId)"
+            @keydown.enter.prevent="onRowClick(p.playerId)" @keydown.space.prevent="onRowClick(p.playerId)">
+            <!-- Rank -->
             <div class="col-span-12 mb-3 flex items-center gap-4 sm:col-span-2 sm:mb-0">
-              <div class="grid h-12 w-12 place-items-center rounded-full text-blue-black text-lg" :class="badgeBg(p.rank, i)">
+              <div class="grid h-12 w-12 place-items-center rounded-full text-blue-black text-lg"
+                :class="badgeBg(p.rank, i)">
                 {{ (p.rank ?? i + 1) }}
               </div>
-              <span class="text-sm text-cool-gray sm:hidden">Rank</span>
+              <!-- Rank change -->
+              <span v-if="p.rankChange !== null" :class="changeClass(p.rankChange)" class="text-sm ml-2">
+                {{ formatChange(p.rankChange) }}
+              </span>
             </div>
 
             <!-- Player (no inner link; the whole row is clickable) -->
             <div class="col-span-12 sm:col-span-6">
-              <div class="inline-flex max-w-full items-center gap-4 rounded-lg px-2 py-1 font-alexandria text-blue-black">
-                <div
-                  class="grid h-12 w-12 shrink-0 place-items-center rounded-full"
-                  :class="p.isMyself ? 'bg-golden-yellow text-blue-black' : 'bg-dark-white text-blue-black'"
-                >
+              <div
+                class="inline-flex max-w-full items-center gap-4 rounded-lg px-2 py-1 font-alexandria text-blue-black">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-full"
+                  :class="p.isMyself ? 'bg-golden-yellow text-blue-black' : 'bg-dark-white text-blue-black'">
                   {{ monogram(p.playerName) }}
                 </div>
                 <span class="truncate text-lg font-medium">
@@ -70,6 +63,9 @@
             <!-- Points -->
             <div class="col-span-6 sm:col-span-2">
               <p class="text-lg font-bold text-blue-black">{{ p.points }}</p>
+              <p v-if="p.pointsChange !== null" :class="changeClass(p.pointsChange)" class="text-sm">
+                {{ formatChange(p.pointsChange) }}
+              </p>
               <p class="text-xs text-cool-gray sm:hidden">FAPs</p>
             </div>
 
@@ -86,12 +82,9 @@
 
       <!-- See more -->
       <div class="mt-8 flex items-center justify-center">
-        <button
-          v-if="hasMore"
+        <button v-if="hasMore"
           class="rounded-lg border border-charcoal/20 bg-white px-8 py-3 font-semibold text-blue-black hover:bg-dark-white disabled:opacity-50"
-          :disabled="loadingMore"
-          @click="loadMore"
-        >
+          :disabled="loadingMore" @click="loadMore">
           <span v-if="loadingMore">Loading…</span>
           <span v-else>See more</span>
         </button>
@@ -200,6 +193,17 @@ async function loadMore() {
   } finally {
     loadingMore.value = false;
   }
+}
+
+function formatChange(value) {
+  if (value === 0 || value === null || value === undefined) return '';
+  return value > 0 ? `↑${value}` : `↓${Math.abs(value)}`;
+}
+
+function changeClass(value) {
+  if (value > 0) return 'text-pistachio'; // zelená (lepší)
+  if (value < 0) return 'text-vibrant-coral'; // červená (horší)
+  return 'text-cool-gray'; // neutrální
 }
 
 onMounted(loadInitial);
