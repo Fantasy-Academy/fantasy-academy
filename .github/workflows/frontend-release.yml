@@ -58,6 +58,7 @@ jobs:
                     build-args: |
                         APP_VERSION=${{ github.sha }}
                         VITE_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
+                        SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
     deploy:
         runs-on: ubuntu-latest

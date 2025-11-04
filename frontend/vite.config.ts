@@ -1,12 +1,26 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    // Upload source maps to Sentry on production builds
+    // Only runs if SENTRY_AUTH_TOKEN is provided
+    process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
+      org: 'fantasy-academy',
+      project: 'frontend',
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': '/app/src',
     },
+  },
+  build: {
+    // Generate source maps for production builds
+    sourcemap: true,
   },
   server: {
     proxy: {
