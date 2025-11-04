@@ -6,6 +6,7 @@ namespace FantasyAcademy\API\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\CurrentChallenge1Fixture;
+use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallenge2Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallengeFixture;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
 use FantasyAcademy\API\Tests\TestingLogin;
@@ -158,5 +159,106 @@ final class ChallengeAnswersTest extends ApiTestCase
         }
 
         $this->assertTrue($user2Found, 'User 2 should be in the results');
+    }
+
+    public function testChallengeAnswersIncludesChoiceTexts(): void
+    {
+        $client = self::createClient();
+        $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
+
+        $response = $client->request('GET', '/api/challenges/' . ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID . '/answers', [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertIsArray($responseData);
+        $this->assertEquals(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID, $responseData['id']);
+        $this->assertArrayHasKey('players', $responseData);
+        $this->assertIsArray($responseData['players']);
+        $this->assertCount(3, $responseData['players']); // 3 users answered this challenge
+
+        // Find User 1's answers (should be last with 600 points)
+        $user1Data = null;
+        foreach ($responseData['players'] as $player) {
+            if ($player['userId'] === UserFixture::USER_1_ID) {
+                $user1Data = $player;
+                break;
+            }
+        }
+
+        $this->assertNotNull($user1Data, 'User 1 should be in results');
+        $this->assertEquals(600, $user1Data['points']);
+        $this->assertIsArray($user1Data['questions']);
+        $this->assertCount(3, $user1Data['questions']); // 3 questions in ExpiredChallenge2
+
+        // Find specific questions
+        $question8 = null;
+        $question9 = null;
+        foreach ($user1Data['questions'] as $question) {
+            if ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_8_ID) {
+                $question8 = $question;
+            } elseif ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_9_ID) {
+                $question9 = $question;
+            }
+        }
+
+        $this->assertNotNull($question8, 'Question 8 should be present');
+        $this->assertNotNull($question9, 'Question 9 should be present');
+
+        // Question 8 (SingleSelect) - User 1 selected Red (CHOICE_9_ID)
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_9_ID, $question8['answer']['selectedChoiceId']);
+        $this->assertEquals('Red', $question8['answer']['selectedChoiceText']);
+
+        // Question 9 (MultiSelect) - User 1 selected 7 and 13 (CHOICE_12_ID, CHOICE_13_ID)
+        $this->assertIsArray($question9['answer']['selectedChoiceIds']);
+        $this->assertCount(2, $question9['answer']['selectedChoiceIds']);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_12_ID, $question9['answer']['selectedChoiceIds'][0]);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_13_ID, $question9['answer']['selectedChoiceIds'][1]);
+        $this->assertIsArray($question9['answer']['selectedChoiceTexts']);
+        $this->assertCount(2, $question9['answer']['selectedChoiceTexts']);
+        $this->assertEquals('7', $question9['answer']['selectedChoiceTexts'][0]);
+        $this->assertEquals('13', $question9['answer']['selectedChoiceTexts'][1]);
+
+        // Find User 2's answers to verify different selections
+        /** @var null|array{userId: string, questions: array<mixed>} $user2Data */
+        $user2Data = null;
+        foreach ($responseData['players'] as $player) {
+            if ($player['userId'] === UserFixture::USER_2_ID) {
+                $user2Data = $player;
+                break;
+            }
+        }
+
+        $this->assertNotNull($user2Data, 'User 2 should be in results');
+        $this->assertIsArray($user2Data['questions']);
+
+        // Find User 2's question 8 answer
+        $user2Question8 = null;
+        $user2Question9 = null;
+        foreach ($user2Data['questions'] as $question) {
+            if ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_8_ID) {
+                $user2Question8 = $question;
+            } elseif ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_9_ID) {
+                $user2Question9 = $question;
+            }
+        }
+
+        // User 2 selected Blue (CHOICE_10_ID) for question 8
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_10_ID, $user2Question8['answer']['selectedChoiceId']);
+        $this->assertEquals('Blue', $user2Question8['answer']['selectedChoiceText']);
+
+        // User 2 selected only 7 (CHOICE_12_ID) for question 9
+        $this->assertIsArray($user2Question9['answer']['selectedChoiceIds']);
+        $this->assertCount(1, $user2Question9['answer']['selectedChoiceIds']);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_12_ID, $user2Question9['answer']['selectedChoiceIds'][0]);
+        $this->assertIsArray($user2Question9['answer']['selectedChoiceTexts']);
+        $this->assertCount(1, $user2Question9['answer']['selectedChoiceTexts']);
+        $this->assertEquals('7', $user2Question9['answer']['selectedChoiceTexts'][0]);
     }
 }

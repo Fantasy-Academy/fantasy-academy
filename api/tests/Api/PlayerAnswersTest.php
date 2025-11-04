@@ -113,6 +113,34 @@ final class PlayerAnswersTest extends ApiTestCase
             $this->assertArrayHasKey('answer', $question);
             $this->assertIsArray($question['answer']);
         }
+
+        // Verify choice texts are included for choice-based questions
+        $question8 = null;
+        $question9 = null;
+        foreach ($expiredChallenge2Data['questions'] as $question) {
+            if ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_8_ID) {
+                $question8 = $question;
+            } elseif ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_9_ID) {
+                $question9 = $question;
+            }
+        }
+
+        $this->assertNotNull($question8, 'Question 8 should be present');
+        $this->assertNotNull($question9, 'Question 9 should be present');
+
+        // Question 8 (SingleSelect) - User 1 selected Red (CHOICE_9_ID)
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_9_ID, $question8['answer']['selectedChoiceId']);
+        $this->assertEquals('Red', $question8['answer']['selectedChoiceText']);
+
+        // Question 9 (MultiSelect) - User 1 selected 7 and 13 (CHOICE_12_ID, CHOICE_13_ID)
+        $this->assertIsArray($question9['answer']['selectedChoiceIds']);
+        $this->assertCount(2, $question9['answer']['selectedChoiceIds']);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_12_ID, $question9['answer']['selectedChoiceIds'][0]);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_13_ID, $question9['answer']['selectedChoiceIds'][1]);
+        $this->assertIsArray($question9['answer']['selectedChoiceTexts']);
+        $this->assertCount(2, $question9['answer']['selectedChoiceTexts']);
+        $this->assertEquals('7', $question9['answer']['selectedChoiceTexts'][0]);
+        $this->assertEquals('13', $question9['answer']['selectedChoiceTexts'][1]);
     }
 
     public function testPlayerAnswersDoesNotIncludeUnevaluatedChallenges(): void

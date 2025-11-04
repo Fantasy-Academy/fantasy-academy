@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Api\ChallengeDetail;
 
 use DateTimeImmutable;
+use FantasyAcademy\API\Api\Shared\AnswerWithTexts;
 use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
-use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
 use FantasyAcademy\API\Value\QuestionStatistics;
@@ -45,8 +45,8 @@ readonly final class QuestionResponse
         public null|NumericQuestionConstraint $numericConstraint,
         public null|ChoiceQuestionConstraint $choiceConstraint,
         public null|DateTimeImmutable $answeredAt,
-        public null|Answer $myAnswer,
-        public null|Answer $correctAnswer,
+        public null|AnswerWithTexts $myAnswer,
+        public null|AnswerWithTexts $correctAnswer,
         public null|QuestionStatistics $statistics = null,
     ) {}
 
@@ -70,6 +70,9 @@ readonly final class QuestionResponse
             $choiceConstraint = ChoiceQuestionConstraintDoctrineType::createChoiceQuestionConstraintFromArray($choiceConstraintData);
         }
 
+        // Build choice text mapping for answer population
+        $choiceTextMap = self::buildChoiceTextMap($row['choice_constraint']);
+
         $myAnswer = null;
         if ($row['answered_at'] !== null) {
             // Transform QuestionRow data to AnswerRow format
@@ -88,21 +91,33 @@ readonly final class QuestionResponse
                 $orderedChoiceIds = $decoded;
             }
 
-            $answerData = [
-                'text_answer' => $row['text_answer'],
-                'numeric_answer' => $row['numeric_answer'],
-                'selected_choice_id' => $row['selected_choice_id'],
-                'selected_choice_ids' => $selectedChoiceIds,
-                'ordered_choice_ids' => $orderedChoiceIds,
-            ];
-            $myAnswer = AnswerDoctrineType::createAnswerFromArray($answerData);
+            $myAnswer = self::createAnswerWithTexts(
+                textAnswer: $row['text_answer'],
+                numericAnswer: $row['numeric_answer'],
+                selectedChoiceId: $row['selected_choice_id'],
+                selectedChoiceIds: $selectedChoiceIds,
+                orderedChoiceIds: $orderedChoiceIds,
+                choiceTextMap: $choiceTextMap,
+            );
         }
 
         $correctAnswer = null;
         if (is_string($row['correct_answer']) && json_validate($row['correct_answer'])) {
             /** @var array{text_answer: null|string, numeric_answer: null|string, selected_choice_id: null|string, selected_choice_ids: null|array<string>, ordered_choice_ids: null|array<string>} $correctAnswerData */
             $correctAnswerData = json_decode($row['correct_answer'], associative: true);
-            $correctAnswer = AnswerDoctrineType::createAnswerFromArray($correctAnswerData);
+
+            // Parse choice arrays if they exist
+            $correctSelectedChoiceIds = $correctAnswerData['selected_choice_ids'] ?? null;
+            $correctOrderedChoiceIds = $correctAnswerData['ordered_choice_ids'] ?? null;
+
+            $correctAnswer = self::createAnswerWithTexts(
+                textAnswer: $correctAnswerData['text_answer'],
+                numericAnswer: $correctAnswerData['numeric_answer'],
+                selectedChoiceId: $correctAnswerData['selected_choice_id'],
+                selectedChoiceIds: $correctSelectedChoiceIds,
+                orderedChoiceIds: $correctOrderedChoiceIds,
+                choiceTextMap: $choiceTextMap,
+            );
         }
 
         return new self(
@@ -115,6 +130,100 @@ readonly final class QuestionResponse
             answeredAt: $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null,
             myAnswer: $myAnswer,
             correctAnswer: $correctAnswer,
+        );
+    }
+
+    /**
+     * Build a mapping of choice ID (string) to choice text from choice_constraint JSONB.
+     *
+     * @return array<string, string>
+     */
+    private static function buildChoiceTextMap(null|string $choiceConstraintJson): array
+    {
+        if ($choiceConstraintJson === null || !json_validate($choiceConstraintJson)) {
+            return [];
+        }
+
+        /** @var null|array{choices?: array<array{id?: string, text?: string}>} $choiceConstraint */
+        $choiceConstraint = json_decode($choiceConstraintJson, associative: true);
+
+        if ($choiceConstraint === null || !isset($choiceConstraint['choices'])) {
+            return [];
+        }
+
+        $map = [];
+        foreach ($choiceConstraint['choices'] as $choice) {
+            if (isset($choice['id'], $choice['text'])) {
+                $map[$choice['id']] = $choice['text'];
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Create AnswerWithTexts from answer data and choice text mapping.
+     *
+     * @param null|array<string> $selectedChoiceIds
+     * @param null|array<string> $orderedChoiceIds
+     * @param array<string, string> $choiceTextMap
+     */
+    private static function createAnswerWithTexts(
+        null|string $textAnswer,
+        null|string $numericAnswer,
+        null|string $selectedChoiceId,
+        null|array $selectedChoiceIds,
+        null|array $orderedChoiceIds,
+        array $choiceTextMap,
+    ): AnswerWithTexts {
+        // Convert string IDs to UUIDs and build text arrays
+        $selectedChoiceIdUuids = null;
+        $selectedChoiceTexts = null;
+        if ($selectedChoiceIds !== null) {
+            $selectedChoiceIdUuids = array_map(
+                static fn (string $id): Uuid => Uuid::fromString($id),
+                $selectedChoiceIds,
+            );
+            $selectedChoiceTexts = array_map(
+                static fn (string $id): string => $choiceTextMap[$id] ?? '',
+                $selectedChoiceIds,
+            );
+        }
+
+        $orderedChoiceIdUuids = null;
+        $orderedChoiceTexts = null;
+        if ($orderedChoiceIds !== null) {
+            $orderedChoiceIdUuids = array_map(
+                static fn (string $id): Uuid => Uuid::fromString($id),
+                $orderedChoiceIds,
+            );
+            $orderedChoiceTexts = array_map(
+                static fn (string $id): string => $choiceTextMap[$id] ?? '',
+                $orderedChoiceIds,
+            );
+        }
+
+        $selectedChoiceIdUuid = null;
+        $selectedChoiceText = null;
+        if ($selectedChoiceId !== null) {
+            $selectedChoiceIdUuid = Uuid::fromString($selectedChoiceId);
+            $selectedChoiceText = $choiceTextMap[$selectedChoiceId] ?? null;
+        }
+
+        $numericAnswerFloat = null;
+        if ($numericAnswer !== null) {
+            $numericAnswerFloat = (float) $numericAnswer;
+        }
+
+        return new AnswerWithTexts(
+            textAnswer: $textAnswer,
+            numericAnswer: $numericAnswerFloat,
+            selectedChoiceId: $selectedChoiceIdUuid,
+            selectedChoiceText: $selectedChoiceText,
+            selectedChoiceIds: $selectedChoiceIdUuids,
+            selectedChoiceTexts: $selectedChoiceTexts,
+            orderedChoiceIds: $orderedChoiceIdUuids,
+            orderedChoiceTexts: $orderedChoiceTexts,
         );
     }
 }

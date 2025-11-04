@@ -256,11 +256,27 @@ final class ChallengeDetailTest extends ApiTestCase
         $this->assertIsNumeric($blueStats['percentage']);
         $this->assertEquals(33.33, round((float) $blueStats['percentage'], 2));
 
-        // Verify correct answer is present for choice question
+        // Verify choice texts are included in statistics
+        $this->assertArrayHasKey('selectedChoiceText', $redStats['answer']);
+        $this->assertEquals('Red', $redStats['answer']['selectedChoiceText']);
+        $this->assertArrayHasKey('selectedChoiceText', $blueStats['answer']);
+        $this->assertEquals('Blue', $blueStats['answer']['selectedChoiceText']);
+
+        // Verify myAnswer includes choice text (User 1 answered Red)
+        $this->assertArrayHasKey('myAnswer', $question);
+        $this->assertIsArray($question['myAnswer']);
+        $this->assertArrayHasKey('selectedChoiceId', $question['myAnswer']);
+        $this->assertEquals(CurrentChallenge2Fixture::CHOICE_20_ID, $question['myAnswer']['selectedChoiceId']);
+        $this->assertArrayHasKey('selectedChoiceText', $question['myAnswer']);
+        $this->assertEquals('Red', $question['myAnswer']['selectedChoiceText']);
+
+        // Verify correct answer includes choice text
         $this->assertArrayHasKey('correctAnswer', $question);
         $this->assertIsArray($question['correctAnswer']);
         $this->assertArrayHasKey('selectedChoiceId', $question['correctAnswer']);
         $this->assertEquals(CurrentChallenge2Fixture::CHOICE_20_ID, $question['correctAnswer']['selectedChoiceId']);
+        $this->assertArrayHasKey('selectedChoiceText', $question['correctAnswer']);
+        $this->assertEquals('Red', $question['correctAnswer']['selectedChoiceText']);
     }
 
     public function testNoStatisticsWhenShowStatisticsContinuouslyIsFalse(): void

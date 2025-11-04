@@ -98,10 +98,13 @@ SQL;
             ])
             ->fetchAllAssociative();
 
+        // Fetch all statistics at once if needed
+        $statisticsMap = $shouldShowStatistics ? $this->getAllQuestionStatistics($challengeId) : [];
+
         $questions = [];
         foreach ($rows as $row) {
             $questionId = Uuid::fromString($row['id']);
-            $statistics = $shouldShowStatistics ? $this->getQuestionStatistics($questionId) : null;
+            $statistics = $statisticsMap[$questionId->toString()] ?? null;
 
             $question = QuestionResponse::fromArray($row);
 
@@ -123,11 +126,41 @@ SQL;
         return $questions;
     }
 
-    private function getQuestionStatistics(Uuid $questionId): QuestionStatistics
+    /**
+     * Fetch statistics for all questions in a challenge at once.
+     *
+     * @return array<string, QuestionStatistics> Map of questionId => QuestionStatistics
+     */
+    private function getAllQuestionStatistics(Uuid $challengeId): array
     {
-        // Query to get all answers for a specific question with counts
+        // Get all questions with their choice_constraints
+        $questionsQuery = <<<SQL
+SELECT id, choice_constraint
+FROM question
+WHERE challenge_id = :challengeId
+SQL;
+
+        /** @var array<array{id: string, choice_constraint: null|string}> $questionRows */
+        $questionRows = $this->database
+            ->executeQuery($questionsQuery, [
+                'challengeId' => $challengeId->toString(),
+            ])
+            ->fetchAllAssociative();
+
+        // Build choice text maps for each question
+        $choiceTextMaps = [];
+        foreach ($questionRows as $questionRow) {
+            $questionId = $questionRow['id'];
+            $choiceTextMaps[$questionId] = [];
+            if ($questionRow['choice_constraint'] !== null) {
+                $choiceTextMaps[$questionId] = $this->buildChoiceTextMap($questionRow['choice_constraint']);
+            }
+        }
+
+        // Get all answer statistics for all questions in this challenge
         $query = <<<SQL
 SELECT
+    paq.question_id,
     COALESCE(paq.text_answer, '') as text_answer,
     COALESCE(CAST(paq.numeric_answer AS TEXT), '') as numeric_answer,
     COALESCE(CAST(paq.selected_choice_id AS TEXT), '') as selected_choice_id,
@@ -135,8 +168,10 @@ SELECT
     COALESCE(CAST(paq.ordered_choice_ids AS TEXT), '') as ordered_choice_ids,
     COUNT(*) as answer_count
 FROM player_answered_question paq
-WHERE paq.question_id = :questionId
+JOIN player_challenge_answer pca ON paq.challenge_answer_id = pca.id
+WHERE pca.challenge_id = :challengeId
 GROUP BY
+    paq.question_id,
     paq.text_answer,
     paq.numeric_answer,
     paq.selected_choice_id,
@@ -144,63 +179,178 @@ GROUP BY
     paq.ordered_choice_ids
 SQL;
 
-        /** @var array<array{text_answer: string, numeric_answer: string, selected_choice_id: string, selected_choice_ids: string, ordered_choice_ids: string, answer_count: int}> $results */
+        /** @var array<array{question_id: string, text_answer: string, numeric_answer: string, selected_choice_id: string, selected_choice_ids: string, ordered_choice_ids: string, answer_count: int}> $results */
         $results = $this->database
             ->executeQuery($query, [
-                'questionId' => $questionId->toString(),
+                'challengeId' => $challengeId->toString(),
             ])
             ->fetchAllAssociative();
 
-        // Calculate total answers
-        $totalAnswers = array_sum(array_column($results, 'answer_count'));
-
-        if ($totalAnswers === 0) {
-            return new QuestionStatistics(totalAnswers: 0, answers: []);
+        // Group results by question_id
+        $resultsByQuestion = [];
+        foreach ($results as $result) {
+            $questionId = $result['question_id'];
+            if (!isset($resultsByQuestion[$questionId])) {
+                $resultsByQuestion[$questionId] = [];
+            }
+            $resultsByQuestion[$questionId][] = $result;
         }
 
-        // Build answer statistics
-        $answerStats = [];
-        foreach ($results as $result) {
-            // Parse JSON arrays for choice fields
-            $selectedChoiceIds = null;
-            $orderedChoiceIds = null;
+        // Build QuestionStatistics for each question
+        $statisticsMap = [];
+        foreach ($questionRows as $questionRow) {
+            $questionId = $questionRow['id'];
+            $questionResults = $resultsByQuestion[$questionId] ?? [];
 
-            if ($result['selected_choice_ids'] !== '' && json_validate($result['selected_choice_ids'])) {
-                /** @var null|array<string> $decoded */
-                $decoded = json_decode($result['selected_choice_ids'], associative: true);
-                $selectedChoiceIds = $decoded;
+            // Calculate total answers for this question
+            $totalAnswers = array_sum(array_column($questionResults, 'answer_count'));
+
+            if ($totalAnswers === 0) {
+                $statisticsMap[$questionId] = new QuestionStatistics(totalAnswers: 0, answers: []);
+                continue;
             }
 
-            if ($result['ordered_choice_ids'] !== '' && json_validate($result['ordered_choice_ids'])) {
-                /** @var null|array<string> $decoded */
-                $decoded = json_decode($result['ordered_choice_ids'], associative: true);
-                $orderedChoiceIds = $decoded;
+            // Build answer statistics
+            $answerStats = [];
+            $choiceTextMap = $choiceTextMaps[$questionId];
+
+            foreach ($questionResults as $result) {
+                // Parse JSON arrays for choice fields
+                $selectedChoiceIds = null;
+                $orderedChoiceIds = null;
+
+                if ($result['selected_choice_ids'] !== '' && json_validate($result['selected_choice_ids'])) {
+                    /** @var null|array<string> $decoded */
+                    $decoded = json_decode($result['selected_choice_ids'], associative: true);
+                    $selectedChoiceIds = $decoded;
+                }
+
+                if ($result['ordered_choice_ids'] !== '' && json_validate($result['ordered_choice_ids'])) {
+                    /** @var null|array<string> $decoded */
+                    $decoded = json_decode($result['ordered_choice_ids'], associative: true);
+                    $orderedChoiceIds = $decoded;
+                }
+
+                // Construct AnswerWithTexts object
+                $answer = $this->createAnswerWithTextsFromStatistics(
+                    textAnswer: $result['text_answer'] !== '' ? $result['text_answer'] : null,
+                    numericAnswer: $result['numeric_answer'] !== '' ? $result['numeric_answer'] : null,
+                    selectedChoiceId: $result['selected_choice_id'] !== '' ? $result['selected_choice_id'] : null,
+                    selectedChoiceIds: $selectedChoiceIds,
+                    orderedChoiceIds: $orderedChoiceIds,
+                    choiceTextMap: $choiceTextMap,
+                );
+
+                $count = (int) $result['answer_count'];
+                $percentage = ($count / $totalAnswers) * 100;
+
+                $answerStats[] = new AnswerStatistic(
+                    answer: $answer,
+                    count: $count,
+                    percentage: $percentage,
+                );
             }
 
-            // Construct Answer object using the helper
-            $answerData = [
-                'text_answer' => $result['text_answer'] !== '' ? $result['text_answer'] : null,
-                'numeric_answer' => $result['numeric_answer'] !== '' ? $result['numeric_answer'] : null,
-                'selected_choice_id' => $result['selected_choice_id'] !== '' ? $result['selected_choice_id'] : null,
-                'selected_choice_ids' => $selectedChoiceIds,
-                'ordered_choice_ids' => $orderedChoiceIds,
-            ];
-
-            $answer = AnswerDoctrineType::createAnswerFromArray($answerData);
-
-            $count = (int) $result['answer_count'];
-            $percentage = ($count / $totalAnswers) * 100;
-
-            $answerStats[] = new AnswerStatistic(
-                answer: $answer,
-                count: $count,
-                percentage: $percentage,
+            $statisticsMap[$questionId] = new QuestionStatistics(
+                totalAnswers: $totalAnswers,
+                answers: $answerStats,
             );
         }
 
-        return new QuestionStatistics(
-            totalAnswers: $totalAnswers,
-            answers: $answerStats,
+        return $statisticsMap;
+    }
+
+    /**
+     * Build a mapping of choice ID (string) to choice text from choice_constraint JSONB.
+     *
+     * @return array<string, string>
+     */
+    private function buildChoiceTextMap(string $choiceConstraintJson): array
+    {
+        if (!json_validate($choiceConstraintJson)) {
+            return [];
+        }
+
+        /** @var null|array{choices?: array<array{id?: string, text?: string}>} $choiceConstraint */
+        $choiceConstraint = json_decode($choiceConstraintJson, associative: true);
+
+        if ($choiceConstraint === null || !isset($choiceConstraint['choices'])) {
+            return [];
+        }
+
+        $map = [];
+        foreach ($choiceConstraint['choices'] as $choice) {
+            if (isset($choice['id'], $choice['text'])) {
+                $map[$choice['id']] = $choice['text'];
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Create AnswerWithTexts from answer data and choice text mapping.
+     *
+     * @param null|array<string> $selectedChoiceIds
+     * @param null|array<string> $orderedChoiceIds
+     * @param array<string, string> $choiceTextMap
+     */
+    private function createAnswerWithTextsFromStatistics(
+        null|string $textAnswer,
+        null|string $numericAnswer,
+        null|string $selectedChoiceId,
+        null|array $selectedChoiceIds,
+        null|array $orderedChoiceIds,
+        array $choiceTextMap,
+    ): \FantasyAcademy\API\Api\Shared\AnswerWithTexts {
+        // Convert string IDs to UUIDs and build text arrays
+        $selectedChoiceIdUuids = null;
+        $selectedChoiceTexts = null;
+        if ($selectedChoiceIds !== null) {
+            $selectedChoiceIdUuids = array_map(
+                static fn (string $id): Uuid => Uuid::fromString($id),
+                $selectedChoiceIds,
+            );
+            $selectedChoiceTexts = array_map(
+                static fn (string $id): string => $choiceTextMap[$id] ?? '',
+                $selectedChoiceIds,
+            );
+        }
+
+        $orderedChoiceIdUuids = null;
+        $orderedChoiceTexts = null;
+        if ($orderedChoiceIds !== null) {
+            $orderedChoiceIdUuids = array_map(
+                static fn (string $id): Uuid => Uuid::fromString($id),
+                $orderedChoiceIds,
+            );
+            $orderedChoiceTexts = array_map(
+                static fn (string $id): string => $choiceTextMap[$id] ?? '',
+                $orderedChoiceIds,
+            );
+        }
+
+        $selectedChoiceIdUuid = null;
+        $selectedChoiceText = null;
+        if ($selectedChoiceId !== null) {
+            $selectedChoiceIdUuid = Uuid::fromString($selectedChoiceId);
+            $selectedChoiceText = $choiceTextMap[$selectedChoiceId] ?? null;
+        }
+
+        $numericAnswerFloat = null;
+        if ($numericAnswer !== null) {
+            $numericAnswerFloat = (float) $numericAnswer;
+        }
+
+        return new \FantasyAcademy\API\Api\Shared\AnswerWithTexts(
+            textAnswer: $textAnswer,
+            numericAnswer: $numericAnswerFloat,
+            selectedChoiceId: $selectedChoiceIdUuid,
+            selectedChoiceText: $selectedChoiceText,
+            selectedChoiceIds: $selectedChoiceIdUuids,
+            selectedChoiceTexts: $selectedChoiceTexts,
+            orderedChoiceIds: $orderedChoiceIdUuids,
+            orderedChoiceTexts: $orderedChoiceTexts,
         );
     }
 }
