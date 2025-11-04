@@ -39,6 +39,7 @@
         <span class="ml-auto text-xs italic text-cool-gray">
           {{ expirationText }}
         </span>
+        <img v-if='challenge.isExpired' :src="ExpiredIcon" alt="Clock Icon" class="h-4" />
       </div>
     </div>
   </article>
@@ -47,6 +48,7 @@
 <script setup>
 import { computed } from 'vue';
 import { resolvedImage, onImgError } from '../utils/imageHelpers.js';
+import ExpiredIcon from '../assets/expiredTime.svg';
 
 const props = defineProps({
   challenge: {
