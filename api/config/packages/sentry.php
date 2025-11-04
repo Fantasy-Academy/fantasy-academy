@@ -21,7 +21,7 @@ return static function (SentryConfig $sentryConfig) {
 
     $sentryConfig->options()
         ->environment(param('kernel.environment'))
-        ->release(env('SENTRY_RELEASE')->default(null))
+        ->release(env('SENTRY_RELEASE')->default(''))
         ->sendDefaultPii(true)
         ->ignoreExceptions([
             AccessDeniedException::class,
