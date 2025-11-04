@@ -15,6 +15,11 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     integrations: [
       Sentry.browserTracingIntegration({ router }),
       Sentry.replayIntegration(),
+      Sentry.vueIntegration({
+        tracingOptions: {
+            trackComponents: true,
+        },
+      }),
     ],
     tracesSampleRate: 0.0,
     replaysSessionSampleRate: 0.0,
