@@ -10,6 +10,9 @@ ENV NODE_ENV=production
 ENV VITE_API_BASE_URL="https://backend.fantasy-academy.com"
 ENV VITE_API_DEBUG=false
 
+ARG VITE_SENTRY_DSN
+ENV VITE_SENTRY_DSN="${VITE_SENTRY_DSN}"
+
 COPY --link pnpm-lock.yaml package.json ./
 RUN pnpm fetch
 
