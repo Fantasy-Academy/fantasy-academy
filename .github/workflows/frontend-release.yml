@@ -57,6 +57,7 @@ jobs:
                     cache-to: type=gha, scope=${{ github.workflow }}
                     build-args: |
                         APP_VERSION=${{ github.sha }}
+                        VITE_APP_VERSION=${{ github.sha }}
                         VITE_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
                         SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
@@ -69,9 +70,25 @@ jobs:
             name: production
             url: https://fantasy-academy.com
         steps:
-            -   uses: appleboy/ssh-action@master
+            -   name: Checkout
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+
+            -   name: Deploy to production
+                uses: appleboy/ssh-action@master
                 with:
                     host: fantasy-academy.com
                     username: ${{ secrets.DEPLOY_USERNAME }}
                     key: ${{ secrets.DEPLOY_PRIVATE_KEY }}
                     script: cd /deployment/fantasy-academy && ./deploy-frontend.sh
+
+            -   name: Create Sentry release
+                uses: getsentry/action-release@v1
+                env:
+                    SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+                    SENTRY_ORG: fantasy-academy
+                    SENTRY_PROJECT: frontend
+                with:
+                    environment: production
+                    version: ${{ github.sha }}

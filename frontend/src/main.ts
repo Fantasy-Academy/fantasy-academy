@@ -12,6 +12,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     app,
     dsn: import.meta.env.VITE_SENTRY_DSN,
+    release: import.meta.env.VITE_APP_VERSION,
     integrations: [
       Sentry.browserTracingIntegration({ router }),
       Sentry.replayIntegration(),

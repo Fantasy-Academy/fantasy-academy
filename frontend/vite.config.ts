@@ -11,6 +11,9 @@ export default defineConfig({
       org: 'fantasy-academy',
       project: 'frontend',
       authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: {
+        name: process.env.VITE_APP_VERSION,
+      },
     }),
   ].filter(Boolean),
   resolve: {
