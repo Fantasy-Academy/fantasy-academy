@@ -309,18 +309,14 @@ final class ChallengesImportTest extends ApiTestCase
         $this->importer->importFile($file);
     }
 
-    public function testInvalidJsonChoicesIgnored(): void
+    public function testInvalidJsonChoicesThrowsException(): void
     {
         $file = $this->createUploadedFile('challenge_import_invalid_json_choices.xlsx');
 
-        $this->importer->importFile($file);
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Invalid JSON format in choices column');
 
-        // Should still create the question, but with null choiceConstraint (UUID 2 for question)
-        $question = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000002'));
-        $this->assertInstanceOf(Question::class, $question);
-        $this->assertSame('Test question', $question->text);
-        $this->assertSame(QuestionType::SingleSelect, $question->type);
-        $this->assertNull($question->choiceConstraint, 'Invalid JSON should result in null choiceConstraint');
+        $this->importer->importFile($file);
     }
 
     public function testEntitiesArePersistedInDatabase(): void
@@ -418,6 +414,46 @@ final class ChallengesImportTest extends ApiTestCase
         }
         $this->assertNotNull($salahChoice);
         $this->assertEquals($salahChoice->id, $updatedQuestion->correctAnswer->selectedChoiceId);
+    }
+
+    public function testChoicesMissingTextFieldThrowsException(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_choices_missing_text.xlsx');
+
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Choice at index 0 is missing required field "text"');
+
+        $this->importer->importFile($file);
+    }
+
+    public function testChoicesMissingDescriptionFieldThrowsException(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_choices_missing_description.xlsx');
+
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Choice at index 1 is missing required field "description"');
+
+        $this->importer->importFile($file);
+    }
+
+    public function testChoicesNotArrayThrowsException(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_choices_not_array.xlsx');
+
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Choices must be a JSON array');
+
+        $this->importer->importFile($file);
+    }
+
+    public function testChoiceElementNotObjectThrowsException(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_choice_element_not_object.xlsx');
+
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Choice at index 0 must be an object with "text" and "description" fields');
+
+        $this->importer->importFile($file);
     }
 
     private function createUploadedFile(string $filename): UploadedFile
