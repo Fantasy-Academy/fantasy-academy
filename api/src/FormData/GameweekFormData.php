@@ -13,7 +13,7 @@ final class GameweekFormData
 {
     #[NotBlank]
     #[Positive]
-    public null|int $season = null;
+    public int $season = 1;
 
     #[NotBlank]
     #[Positive]
