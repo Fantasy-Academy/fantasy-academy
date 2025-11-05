@@ -35,10 +35,10 @@ final class AddGameweekController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                assert($data->season !== null);
                 assert($data->number !== null);
                 assert($data->startsAt !== null);
                 assert($data->endsAt !== null);
+
                 $this->messageBus->dispatch(new AddGameweek(
                     season: $data->season,
                     number: $data->number,
