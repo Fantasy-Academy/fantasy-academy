@@ -42,6 +42,9 @@
                     {% set current_route = app.request.attributes.get('_route') %}
                     <ul class="navbar-nav">
                         <li class="nav-item">
+                            <a class="nav-link {{ current_route == 'manage_gameweeks' or current_route == 'add_gameweek' or current_route == 'edit_gameweek' ? 'active' }}" href="{{ path('manage_gameweeks') }}">Gameweeks</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ current_route == 'import_challenges' ? 'active' }}" href="{{ path('import_challenges') }}">Import challenges</a>
                         </li>
                         <li class="nav-item">
