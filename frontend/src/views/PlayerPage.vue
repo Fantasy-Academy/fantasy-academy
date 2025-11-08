@@ -343,4 +343,30 @@ function changeRankClass(value) {
   if (value > 0) return 'text-pistachio';
   return 'text-cool-gray';
 }
+
+const answersToShow = ref(5);
+
+const limitedAnswers = computed(() =>
+  answers.value.slice(0, answersToShow.value)
+);
+
+function showMoreAnswers() {
+  answersToShow.value += 5;
+}
+
+function formatDate(dt) {
+  if (!dt) return '—';
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(dt));
+  } catch {
+    return new Date(dt).toLocaleString();
+  }
+}
+
 </script>
