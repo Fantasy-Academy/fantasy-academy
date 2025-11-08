@@ -17,6 +17,8 @@ export function useProfile() {
 
     try {
       me.value = await apiGetMe();
+      console.log('[useProfile] Loaded profile:', me.value);
+      
     } catch (e) {
       const fe = toFriendlyError(e);
       console.warn('[useProfile] load FAIL', {

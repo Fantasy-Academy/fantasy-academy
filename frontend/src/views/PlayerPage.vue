@@ -33,7 +33,7 @@
 
     <template v-else-if="player">
       <!--stat cards-->
-      <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total FAPs -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
@@ -59,6 +59,7 @@
           <p class="text-sm text-cool-gray font-alexandria">Answered challenges</p>
           <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.challengesAnswered ?? 0 }}</p>
         </div>
+        <GameweekStatus />
       </div>
 
       <!-- Skills -->
@@ -218,6 +219,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { apiGetPlayer } from '@/api/players';
 import { usePlayerAnswers } from '@/composables/usePlayerAnswers';
+import GameweekStatus from '../components/GameweekStatus.vue';
 
 
 document.title = 'Fantasy Academy | Player';
