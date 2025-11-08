@@ -258,9 +258,6 @@ import { useAuth } from '@/composables/useAuth';
 import { useChallenges } from '@/composables/useChallenges';
 import { useMyAnswers } from '@/composables/useMyAnswers';
 import GameweekStatus from '../components/GameweekStatus.vue';
-
-
-
 const { user } = useAuth();
 const { me, loading, error, load } = useProfile();
 

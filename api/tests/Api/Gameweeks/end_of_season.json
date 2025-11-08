@@ -1,0 +1,27 @@
+{
+    "current": {
+        "id": "00000000-0000-0000-0003-000000000005",
+        "season": 2025,
+        "number": 5,
+        "title": "Final Push",
+        "description": "Last gameweek before break",
+        "startsAt": "2025-06-27T12:00:00+00:00",
+        "endsAt": "2025-07-04T12:00:00+00:00",
+        "isStarted": true,
+        "isEnded": false,
+        "isCurrent": true
+    },
+    "next": null,
+    "previous": {
+        "id": "00000000-0000-0000-0003-000000000004",
+        "season": 2025,
+        "number": 4,
+        "title": null,
+        "description": null,
+        "startsAt": "2025-06-13T12:00:00+00:00",
+        "endsAt": "2025-06-20T12:00:00+00:00",
+        "isStarted": true,
+        "isEnded": true,
+        "isCurrent": false
+    }
+}

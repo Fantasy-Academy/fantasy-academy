@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Api\ChallengeAnswers;
 
+use FantasyAcademy\API\Api\Shared\QuestionAnswer;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -12,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 readonly final class PlayerAnswerData
 {
     /**
-     * @param array<PlayerQuestionAnswer> $questions
+     * @param array<QuestionAnswer> $questions
      */
     public function __construct(
         public Uuid $userId,
@@ -33,7 +34,7 @@ readonly final class PlayerAnswerData
 
         $questions = [];
         foreach ($playerAnswers as $row) {
-            $questions[] = PlayerQuestionAnswer::fromArray($row);
+            $questions[] = QuestionAnswer::fromArray($row);
         }
 
         return new self(
