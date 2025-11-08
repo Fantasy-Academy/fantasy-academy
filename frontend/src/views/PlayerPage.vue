@@ -36,7 +36,16 @@
       <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total FAPs -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
+      <!--stat cards-->
+      <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total FAPs -->
+        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
+          <p v-if="overall.pointsChange != null && overall.pointsChange !== 0"
+            :class="changePointsClass(overall.pointsChange)" class="text-s">
+            {{ formatChange(overall.pointsChange) }} this week
+          </p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
           <p v-if="overall.pointsChange != null && overall.pointsChange !== 0"
             :class="changePointsClass(overall.pointsChange)" class="text-s">
@@ -46,7 +55,15 @@
 
         <!-- Rank -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
+
+        <!-- Rank -->
+        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Rank</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
+          <p v-if="overall.rankChange != null && overall.rankChange !== 0" :class="changeRankClass(overall.rankChange)"
+            class="text-s">
+            {{ formatChange(overall.rankChange) }} this week
+          </p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
           <p v-if="overall.rankChange != null && overall.rankChange !== 0" :class="changeRankClass(overall.rankChange)"
             class="text-s">
@@ -56,9 +73,13 @@
 
         <!-- Answered challenges -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
+
+        <!-- Answered challenges -->
+        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Answered challenges</p>
           <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.challengesAnswered ?? 0 }}</p>
         </div>
+        <GameweekStatus />
         <GameweekStatus />
       </div>
 
@@ -216,6 +237,7 @@ import { useRoute } from 'vue-router';
 import { apiGetPlayer } from '@/api/players';
 import { usePlayerAnswers } from '@/composables/usePlayerAnswers';
 import GameweekStatus from '../components/GameweekStatus.vue';
+import GameweekStatus from '../components/GameweekStatus.vue';
 
 
 document.title = 'Fantasy Academy | Player';
@@ -266,6 +288,15 @@ const overall = computed(() => {
     weeklyPoints: 0,
     weeklyRankChange: 0,
   }
+const overall = computed(() => {
+  return player.value?.overallStatistics ?? {
+    rank: null,
+    points: 0,
+    challengesAnswered: 0,
+    skills: [],
+    weeklyPoints: 0,
+    weeklyRankChange: 0,
+  }
 });
 
 const initials = computed(() => {
@@ -274,20 +305,6 @@ const initials = computed(() => {
   const parts = name.split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
 });
-
-function extractAnswerText(answer) {
-  if (!answer) return "—";
-
-  if (answer.textAnswer) return answer.textAnswer;
-  if (answer.numericAnswer !== null) return answer.numericAnswer;
-
-  if (answer.selectedChoiceText) return answer.selectedChoiceText;
-  if (answer.selectedChoiceTexts?.length) return answer.selectedChoiceTexts.join(", ");
-
-  if (answer.orderedChoiceTexts?.length) return answer.orderedChoiceTexts.join(" → ");
-
-  return "—";
-}
 
 function formatChange(value) {
   if (value === 0 || value === null || value === undefined) return '';
@@ -305,30 +322,4 @@ function changeRankClass(value) {
   if (value > 0) return 'text-pistachio';
   return 'text-cool-gray';
 }
-
-const answersToShow = ref(5);
-
-const limitedAnswers = computed(() =>
-  (answers.value || []).slice(0, answersToShow.value)
-);
-
-function showMoreAnswers() {
-  answersToShow.value += 5;
-}
-
-function formatDate(dt) {
-  if (!dt) return '—';
-  try {
-    return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dt));
-  } catch {
-    return new Date(dt).toLocaleString();
-  }
-}
-
 </script>

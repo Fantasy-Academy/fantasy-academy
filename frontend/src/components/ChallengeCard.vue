@@ -41,6 +41,8 @@
         </span>
         <img v-if='challenge.isExpired' :src="ExpiredIcon" alt="expired clock Icon" class="h-4" />
         <img v-if='!challenge.isExpired' :src="ActiveIcon" alt="active clock Icon" class="h-4" />
+        <img v-if='challenge.isExpired' :src="ExpiredIcon" alt="expired clock Icon" class="h-4" />
+        <img v-if='!challenge.isExpired' :src="ActiveIcon" alt="active clock Icon" class="h-4" />
       </div>
     </div>
   </article>
@@ -49,7 +51,6 @@
 <script setup>
 import { computed } from 'vue';
 import { resolvedImage, onImgError } from '../utils/imageHelpers.js';
-import ExpiredIcon from '../assets/expiredTime.svg';
 import ActiveIcon from '../assets/activeTime.svg';
 
 
