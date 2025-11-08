@@ -52,14 +52,25 @@
 
       <!-- Stat cards -->
       <div class="mb-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Total FAPs -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
+          <p v-if="overall.weeklyPoints" :class="changePointsClass(overall.weeklyPoints)" class="text-xs">
+            {{ formatChange(overall.weeklyPoints) }} this week
+          </p>
         </div>
+
+        <!-- Rank -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Rank</p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
+          <p v-if="overall.weeklyRankChange" :class="changeRankClass(overall.weeklyRankChange)" class="text-xs">
+            {{ formatChange(overall.weeklyRankChange) }} this week
+          </p>
         </div>
+
+        <!-- Answered Challenges -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Answered challenges</p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.challengesAnswered ?? 0 }}</p>
@@ -330,6 +341,8 @@ const overall = computed(() => profile.value.overallStatistics ?? {
   rank: null,
   challengesAnswered: 0,
   points: 0,
+  weeklyPoints: 0,
+  weeklyRankChange: 0,
   skills: [],
 });
 
@@ -344,4 +357,15 @@ const initials = computed(() => {
   const email = profile.value.email ?? '';
   return (email[0] || '?').toUpperCase();
 });
+
+function formatRankChange(value) {
+  if (value === null || value === 0 || value === undefined) return '';
+  return value > 0 ? `↑${value}` : `↓${Math.abs(value)}`;
+}
+
+function changeRankClass(value) {
+  if (value > 0) return 'text-pistachio';      
+  if (value < 0) return 'text-vibrant-coral'; 
+  return 'text-cool-gray';
+}
 </script>

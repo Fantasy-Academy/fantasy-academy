@@ -2,21 +2,17 @@
   <section class="mx-auto max-w-6xl px-4 py-8">
     <!-- States -->
     <div v-if="loadingProfile" class="text-cool-gray">Loading profile…</div>
-    <div
-      v-else-if="errorProfile"
-      class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-4 text-vibrant-coral shadow-sharp"
-    >
+    <div v-else-if="errorProfile"
+      class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-4 text-vibrant-coral shadow-sharp">
       {{ errorProfile }}
     </div>
 
     <template v-else>
       <!-- Header -->
       <div
-        class="mb-8 flex flex-wrap items-center gap-4 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main"
-      >
+        class="mb-8 flex flex-wrap items-center gap-4 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main">
         <div
-          class="grid h-14 w-14 place-items-center rounded-full bg-golden-yellow text-blue-black text-lg font-extrabold"
-        >
+          class="grid h-14 w-14 place-items-center rounded-full bg-golden-yellow text-blue-black text-lg font-extrabold">
           {{ initials }}
         </div>
         <div class="min-w-0">
@@ -28,23 +24,19 @@
           </p>
         </div>
         <div class="ml-auto flex flex-wrap gap-2">
-          <router-link
-            to="/challenges"
-            class="inline-flex items-center justify-center rounded-lg bg-golden-yellow px-4 py-2 font-semibold text-blue-black hover:opacity-90 shadow-sm"
-          >
+          <router-link to="/challenges"
+            class="inline-flex items-center justify-center rounded-lg bg-golden-yellow px-4 py-2 font-semibold text-blue-black hover:opacity-90 shadow-sm">
             Browse Challenges
           </router-link>
-          <router-link
-            to="/profile"
-            class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 bg-white px-4 py-2 font-semibold text-blue-black hover:bg-dark-white shadow-sm"
-          >
+          <router-link to="/profile"
+            class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 bg-white px-4 py-2 font-semibold text-blue-black hover:bg-dark-white shadow-sm">
             My Profile
           </router-link>
         </div>
       </div>
 
       <!-- KPI Cards -->
-      <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
           <p class="mt-1 text-3xl font-extrabold text-blue-black">{{ overall.points ?? 0 }}</p>
@@ -61,6 +53,7 @@
           <p class="text-sm text-cool-gray font-alexandria">Available Challenges</p>
           <p class="mt-1 text-3xl font-extrabold text-blue-black">{{ availableChallenges.length }}</p>
         </div>
+        <GameweekStatus />
       </div>
 
       <div class="grid gap-6 lg:grid-cols-3">
@@ -81,31 +74,18 @@
             {{ errorChallenges }}
           </div>
           <div v-else>
-            <div
-              v-if="topChallenges.length === 0"
-              class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray"
-            >
+            <div v-if="topChallenges.length === 0"
+              class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray">
               No available challenges at the moment.
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
-              <article
-                v-for="c in topChallenges"
-                :key="c.id"
+              <article v-for="c in topChallenges" :key="c.id"
                 class="flex cursor-pointer gap-4 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm transition hover:shadow-main"
-                @click="openChallenge(c.id)"
-              >
-                <div
-                  class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded bg-dark-white"
-                >
-                  <img
-                    v-if="resolvedImage(c)"
-                    :src="resolvedImage(c)"
-                    :alt="c.name"
-                    class="h-full w-full object-cover"
-                    loading="lazy"
-                    @error="onImgError"
-                  />
+                @click="openChallenge(c.id)">
+                <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded bg-dark-white">
+                  <img v-if="resolvedImage(c)" :src="resolvedImage(c)" :alt="c.name" class="h-full w-full object-cover"
+                    loading="lazy" @error="onImgError" />
                   <span v-else class="text-xs text-cool-gray">No image</span>
                 </div>
                 <div class="min-w-0 flex-1">
@@ -116,9 +96,8 @@
                   <div class="mt-1 flex items-center gap-2 text-xs text-cool-gray">
                     <span v-if="c.maxPoints != null">{{ c.maxPoints }} FAPs</span>
                     <span v-if="c.isAnswered" class="rounded bg-pistachio/20 px-2 py-0.5 text-pistachio">Answered</span>
-                    <span v-else-if="c.isExpired" class="rounded bg-vibrant-coral/10 px-2 py-0.5 text-vibrant-coral"
-                      >Expired</span
-                    >
+                    <span v-else-if="c.isExpired"
+                      class="rounded bg-vibrant-coral/10 px-2 py-0.5 text-vibrant-coral">Expired</span>
                   </div>
                 </div>
               </article>
@@ -141,11 +120,8 @@
           </div>
           <ul v-else class="divide-y rounded-xl border border-charcoal/10 bg-white shadow-sm">
             <li v-for="(p, i) in top5" :key="p.playerId || i" class="flex items-center gap-3 p-3">
-              <div
-                class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-blue-black"
-                :class="badgeBg(i)"
-                :title="p.isMyself ? 'This is you' : undefined"
-              >
+              <div class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-blue-black" :class="badgeBg(i)"
+                :title="p.isMyself ? 'This is you' : undefined">
                 <span class="text-sm font-semibold">{{ p.rank ?? i + 1 }}</span>
               </div>
               <div class="min-w-0 flex-1">
@@ -163,10 +139,8 @@
       <!-- Skills -->
       <div class="mt-8">
         <h2 class="mb-3 font-bebas-neue text-2xl text-blue-black">Skills</h2>
-        <div
-          v-if="(overall.skills?.length || 0) === 0"
-          class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray"
-        >
+        <div v-if="(overall.skills?.length || 0) === 0"
+          class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray">
           No skills evaluated yet.
         </div>
         <ul v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -175,7 +149,8 @@
               <p class="font-alexandria font-semibold text-blue-black">{{ s.name }}</p>
               <div class="flex items-center gap-2 text-sm">
                 <span class="font-extrabold text-blue-black">{{ s.percentage }}%</span>
-                <span :class="s.percentageChange != null && s.percentageChange >= 0 ? 'text-pistachio' : 'text-vibrant-coral'">
+                <span
+                  :class="s.percentageChange != null && s.percentageChange >= 0 ? 'text-pistachio' : 'text-vibrant-coral'">
                   <template v-if="s.percentageChange != null">
                     {{ s.percentageChange >= 0 ? '+' : '' }}{{ s.percentageChange }}%
                   </template>
@@ -191,13 +166,8 @@
     </template>
 
     <!-- Modal with questions -->
-    <ChallengeModal
-      v-if="showModal"
-      :show="showModal"
-      :challenge-id="selectedId"
-      @close="showModal = false"
-      @submitted="afterSubmit"
-    />
+    <ChallengeModal v-if="showModal" :show="showModal" :challenge-id="selectedId" @close="showModal = false"
+      @submitted="afterSubmit" />
   </section>
 </template>
 
@@ -210,6 +180,7 @@ import { resolvedImage, onImgError } from '@/utils/imageHelpers';
 import ChallengeModal from '@/components/ChallengeModal.vue';
 import { apiFetch } from '@/api/http';
 import { toFriendlyError } from '@/utils/errorHandler';
+import GameweekStatus from '@/components/GameweekStatus.vue';
 
 document.title = 'Fantasy Academy | Dashboard';
 

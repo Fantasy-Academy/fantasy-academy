@@ -32,17 +32,28 @@
     </div>
 
     <template v-else-if="player">
-      <!-- KPIs -->
+      <!--stat cards-->
       <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
+        <!-- Total FAPs -->
+        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
-          <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
+          <p v-if="overall.weeklyPoints" :class="changePointsClass(overall.weeklyPoints)" class="text-xs">
+            {{ formatChange(overall.weeklyPoints) }} this week
+          </p>
         </div>
-        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+        <!-- Rank -->
+        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Rank</p>
-          <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
+          <p v-if="overall.weeklyRankChange" :class="changeRankClass(overall.weeklyRankChange)" class="text-xs">
+            {{ formatChange(overall.weeklyRankChange) }} this week
+          </p>
         </div>
-        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+        <!-- Answered challenges -->
+        <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Answered challenges</p>
           <p class="mt-1 text-3xl font-bold text-blue-black">{{ overall.challengesAnswered ?? 0 }}</p>
         </div>
@@ -243,8 +254,15 @@ const registered = computed(() => {
   } catch { return d.toLocaleString(); }
 });
 
-const overall = computed(() => player.value?.overallStatistics ?? {
-  rank: null, challengesAnswered: 0, points: 0, skills: []
+const overall = computed(() => {
+  return player.value?.overallStatistics ?? {
+    rank: null,
+    points: 0,
+    challengesAnswered: 0,
+    skills: [],
+    weeklyPoints: 0,
+    weeklyRankChange: 0,
+  }
 });
 
 const initials = computed(() => {
@@ -253,4 +271,15 @@ const initials = computed(() => {
   const parts = name.split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
 });
+
+function formatRankChange(value) {
+  if (value === null || value === 0 || value === undefined) return '';
+  return value > 0 ? `↑${value}` : `↓${Math.abs(value)}`;
+}
+
+function changeRankClass(value) {
+  if (value > 0) return 'text-pistachio';
+  if (value < 0) return 'text-vibrant-coral';
+  return 'text-cool-gray';
+}
 </script>
