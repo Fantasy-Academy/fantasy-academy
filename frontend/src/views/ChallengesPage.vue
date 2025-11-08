@@ -17,13 +17,12 @@
         </button>
       </nav>
     </header>
-
+    <GameweekStatus class="mb-6"/>
     <!-- States -->
     <p v-if="error" class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
       {{ error }}
     </p>
     <p v-else-if="loading" class="text-cool-gray">Loading…</p>
-
     <!-- Empty state per filter -->
     <div v-else-if="filteredChallenges.length === 0"
       class="rounded-xl border border-charcoal/10 bg-dark-white p-6 text-cool-gray">
@@ -32,7 +31,6 @@
       <span v-else-if="activeFilter === 'completed'">You haven’t completed any challenges yet.</span>
       <span v-else-if="activeFilter === 'expired'">No expired challenges.</span>
     </div>
-
     <!-- List -->
     <div v-else class="flex flex-col gap-2">
       <ChallengeCard v-for="c in filteredChallenges" :key="c.id" :challenge="c" @select="openChallenge(c.id)" />
@@ -49,6 +47,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useChallenges } from '@/composables/useChallenges';
 import ChallengeCard from '@/components/ChallengeCard.vue';
 import ChallengeModal from '@/components/ChallengeModal.vue';
+import GameweekStatus from '../components/GameweekStatus.vue';
 
 const { challenges, loading, error, loadChallenges } = useChallenges();
 

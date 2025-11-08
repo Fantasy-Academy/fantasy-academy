@@ -49,12 +49,6 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/myanswers" class="hover:text-vibrant-coral transition"
-              active-class="text-vibrant-coral font-semibold">
-              My Answers
-            </router-link>
-          </li>
-          <li>
             <router-link to="/profile" class="hover:text-vibrant-coral transition"
               active-class="text-vibrant-coral font-semibold">
               Profile
@@ -130,12 +124,6 @@
               <router-link to="/leaderboard" class="block rounded-lg px-3 py-2 hover:bg-dark-white/10 transition"
                 active-class="bg-dark-white/10 text-vibrant-coral font-semibold" @click="closeMobile">
                 Leaderboard
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/myanswers" class="block rounded-lg px-3 py-2 hover:bg-dark-white/10 transition"
-                active-class="bg-dark-white/10 text-vibrant-coral font-semibold" @click="closeMobile">
-                My Answers
               </router-link>
             </li>
             <li>

@@ -16,7 +16,6 @@ const router = createRouter({
     //secured
     { path: '/profile', component: () => import('../views/ProfilePage.vue'), meta: { requiresAuth: true } },
     { path: '/dashboard', component: () => import('../views/DashboardPage.vue'), meta: { requiresAuth: true } },
-    { path: '/myanswers', component: () => import('../views/MyAnswersPage.vue'), meta: { requiresAuth: true } },
     { path: '/profile/edit', component: () => import('@/views/EditProfilePage.vue'), meta: { requiresAuth: true } }
   ],
 });

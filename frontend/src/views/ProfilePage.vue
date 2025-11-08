@@ -51,19 +51,33 @@
       </div>
 
       <!-- Stat cards -->
-      <div class="mb-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mb-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Total FAPs -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
+          <p v-if="overall.pointsChange != null && overall.pointsChange !== 0"
+            :class="changePointsClass(overall.pointsChange)" class="text-s">
+            {{ formatChange(overall.pointsChange) }} this week
+          </p>
         </div>
+
+        <!-- Rank -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Rank</p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
+          <p v-if="overall.rankChange != null && overall.rankChange !== 0" :class="changeRankClass(overall.rankChange)"
+            class="text-s">
+            {{ formatChange(overall.rankChange) }} this week
+          </p>
         </div>
+
+        <!-- Answered Challenges -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Answered challenges</p>
           <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.challengesAnswered ?? 0 }}</p>
         </div>
+        <GameweekStatus />
       </div>
 
       <!-- Skills -->
@@ -200,7 +214,8 @@
               <span class="text-cool-gray">
                 {{ formatDate(a.answeredAt) }}
               </span>
-              <span class="ml-auto font-semibold text-blue-black">{{ a.myPoints }} FAPs</span>
+              <span class="ml-auto font-semibold text-blue-black">{{ a.points ?? a.myPoints ?? 0 }} FAPs</span>
+
             </div>
 
             <p class="font-alexandria text-blue-black font-semibold">
@@ -243,6 +258,8 @@ import { useProfile } from '@/composables/useProfile';
 import { useAuth } from '@/composables/useAuth';
 import { useChallenges } from '@/composables/useChallenges';
 import { useMyAnswers } from '@/composables/useMyAnswers';
+import GameweekStatus from '../components/GameweekStatus.vue';
+
 
 
 
@@ -330,6 +347,8 @@ const overall = computed(() => profile.value.overallStatistics ?? {
   rank: null,
   challengesAnswered: 0,
   points: 0,
+  weeklyPoints: 0,
+  weeklyRankChange: 0,
   skills: [],
 });
 
@@ -344,4 +363,21 @@ const initials = computed(() => {
   const email = profile.value.email ?? '';
   return (email[0] || '?').toUpperCase();
 });
+
+function formatChange(value) {
+  if (value === 0 || value === null || value === undefined) return '';
+  return value > 0 ? `↑${value}` : `↓${Math.abs(value)}`;
+}
+
+function changePointsClass(value) {
+  if (value > 0) return 'text-pistachio';
+  if (value < 0) return 'text-vibrant-coral';
+  return 'text-cool-gray';
+}
+
+function changeRankClass(value) {
+  if (value < 0) return 'text-vibrant-coral';
+  if (value > 0) return 'text-pistachio';
+  return 'text-cool-gray';
+}
 </script>
