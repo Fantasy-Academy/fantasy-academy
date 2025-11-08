@@ -181,33 +181,48 @@
           This player hasn't answered any challenges yet.
         </div>
 
-        <div v-else class="space-y-4">
-          <!-- Každá challenge -->
-          <div v-for="challenge in answers" :key="challenge.challengeId"
-            class="rounded-xl bg-white p-4 shadow-sm border border-charcoal/10">
-            <h3 class="font-semibold text-blue-black">
-              {{ challenge.challengeName }}
-              <span class="text-sm text-cool-gray">({{ challenge.points }} FAPs)</span>
-            </h3>
+        <!-- Scrollovací seznam odpovědí -->
+        <div v-else class="max-h-96 overflow-y-auto space-y-4 pr-2">
+          <div v-for="(a, i) in limitedAnswers" :key="i"
+            class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
+            <div class="mb-2 flex flex-wrap items-center gap-2 text-xs">
+              <!-- Název challenge -->
+              <span
+                class="inline-flex items-center bg-dark-white px-2 py-0.5 rounded-full font-semibold text-blue-black">
+                {{ a.challengeName }}
+              </span>
+              <span class="text-cool-gray">·</span>
 
-            <!-- Otázky a odpovědi -->
-            <ul class="mt-2 space-y-2">
-              <li v-for="q in challenge.questions" :key="q.questionId" class="text-sm">
-                <p class="font-medium">{{ q.questionText }}</p>
-                <p class="text-cool-gray">
-                  Answer:
-                  <strong>
-                    {{
-                      q.answer?.textAnswer
-                      || q.answer?.numericAnswer
-                      || q.answer?.selectedChoiceId
-                      || '—'
-                    }}
-                  </strong>
-                </p>
-              </li>
-            </ul>
+              <!-- Datum -->
+              <span class="text-cool-gray">
+                {{ formatDate(a.answeredAt) }}
+              </span>
+
+              <!-- Body -->
+              <span class="ml-auto font-semibold text-blue-black">
+                {{ a.points ?? a.myPoints ?? 0 }} FAPs
+              </span>
+            </div>
+
+            <!-- Otázka + odpověď -->
+            <p class="font-alexandria text-blue-black font-semibold">
+              {{ a.questionText }}
+            </p>
+            <p class="text-sm text-cool-gray mt-1">
+              Answer:
+              <span class="font-semibold text-blue-black">
+                {{ a.answerText }}
+              </span>
+            </p>
           </div>
+        </div>
+
+        <!-- Show more -->
+        <div v-if="answersToShow < answers.length" class="mt-4 text-center">
+          <button @click="showMoreAnswers"
+            class="px-4 py-2 rounded-lg bg-white border border-charcoal/20 font-semibold text-blue-black hover:bg-dark-white shadow-sm">
+            Show more
+          </button>
         </div>
       </div>
     </template>
@@ -244,7 +259,9 @@ async function load() {
   }
 
   if (player.value?.id) {
-    loadPlayerAnswers(player.value.id);
+    loadPlayerAnswers(player.value.id).then(() => {
+      console.log('[PlayerProfilePage] Loaded answers:', answers.value);
+    });
   }
 }
 
@@ -293,4 +310,30 @@ function changeRankClass(value) {
   if (value > 0) return 'text-pistachio';
   return 'text-cool-gray';
 }
+
+const answersToShow = ref(5);
+
+const limitedAnswers = computed(() =>
+  answers.value.slice(0, answersToShow.value)
+);
+
+function showMoreAnswers() {
+  answersToShow.value += 5;
+}
+
+function formatDate(dt) {
+  if (!dt) return '—';
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(dt));
+  } catch {
+    return new Date(dt).toLocaleString();
+  }
+}
+
 </script>

@@ -215,7 +215,6 @@
                 {{ formatDate(a.answeredAt) }}
               </span>
               <span class="ml-auto font-semibold text-blue-black">{{ a.points ?? a.myPoints ?? 0 }} FAPs</span>
-
             </div>
 
             <p class="font-alexandria text-blue-black font-semibold">
@@ -259,10 +258,6 @@ import { useAuth } from '@/composables/useAuth';
 import { useChallenges } from '@/composables/useChallenges';
 import { useMyAnswers } from '@/composables/useMyAnswers';
 import GameweekStatus from '../components/GameweekStatus.vue';
-
-
-
-
 const { user } = useAuth();
 const { me, loading, error, load } = useProfile();
 

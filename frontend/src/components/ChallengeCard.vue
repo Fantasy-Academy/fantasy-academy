@@ -49,6 +49,7 @@
 <script setup>
 import { computed } from 'vue';
 import { resolvedImage, onImgError } from '../utils/imageHelpers.js';
+import ExpiredIcon from '../assets/expiredTime.svg';
 import ActiveIcon from '../assets/activeTime.svg';
 
 
