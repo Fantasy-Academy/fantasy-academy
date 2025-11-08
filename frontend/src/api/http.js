@@ -1,4 +1,5 @@
 import { getToken } from '@/services/tokenService';
+import * as Sentry from '@sentry/vue';
 
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ??
@@ -102,6 +103,32 @@ export async function apiFetch(path, opts = {}) {
     err.status = res.status;
     err.data = data ?? text;
     err.allow = allow;
+
+    // Report API errors to Sentry (if initialized)
+    if (import.meta.env.VITE_SENTRY_DSN) {
+      Sentry.captureException(err, {
+        contexts: {
+          api_request: {
+            url,
+            method,
+            status: res.status,
+            statusText: res.statusText,
+            request_id: reqId,
+          },
+        },
+        tags: {
+          api_endpoint: path,
+          http_status: res.status,
+        },
+        extra: {
+          responseData: data,
+          responseText: text,
+          sentBody: body,
+          allow,
+        },
+      });
+    }
+
     throw err;
   }
 

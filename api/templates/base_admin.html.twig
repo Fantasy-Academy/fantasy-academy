@@ -53,6 +53,9 @@
                         <li class="nav-item">
                             <a class="nav-link {{ current_route == 'export_challenges' ? 'active' }}" href="{{ path('export_challenges') }}">Export challenges</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ current_route == 'manage_gameweeks' or current_route == 'add_gameweek' or current_route == 'edit_gameweek' ? 'active' }}" href="{{ path('manage_gameweeks') }}">Gameweeks</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-lg-auto">
                         <li class="nav-item">
