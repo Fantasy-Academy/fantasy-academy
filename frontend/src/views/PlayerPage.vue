@@ -33,7 +33,7 @@
 
     <template v-else-if="player">
       <!--stat cards-->
-      <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="mb-8 grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total FAPs -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
       <!--stat cards-->
