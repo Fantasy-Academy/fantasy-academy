@@ -200,7 +200,7 @@
               <span class="text-cool-gray">
                 {{ formatDate(a.answeredAt) }}
               </span>
-              <span class="ml-auto font-semibold text-blue-black">{{ a.myPoints }} FAPs</span>
+              <span class="ml-auto font-semibold text-blue-black">{{ a.points ?? a.myPoints ?? 0 }} FAPs</span>
             </div>
 
             <p class="font-alexandria text-blue-black font-semibold">
