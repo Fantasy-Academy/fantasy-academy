@@ -170,7 +170,7 @@ readonly final class QuestionResponse
      */
     private static function createAnswerWithTexts(
         null|string $textAnswer,
-        null|string $numericAnswer,
+        null|string|float $numericAnswer,
         null|string $selectedChoiceId,
         null|array $selectedChoiceIds,
         null|array $orderedChoiceIds,

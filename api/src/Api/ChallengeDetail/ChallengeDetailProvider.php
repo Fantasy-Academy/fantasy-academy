@@ -297,7 +297,7 @@ SQL;
      */
     private function createAnswerWithTextsFromStatistics(
         null|string $textAnswer,
-        null|string $numericAnswer,
+        null|string|float $numericAnswer,
         null|string $selectedChoiceId,
         null|array $selectedChoiceIds,
         null|array $orderedChoiceIds,
