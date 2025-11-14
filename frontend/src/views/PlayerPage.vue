@@ -171,54 +171,35 @@
       <!-- ========== Player's Answers ========== -->
       <div class="mt-10">
         <h2 class="font-bebas-neue text-2xl text-blue-black mb-4">
-          Answer History
+          Answered Challenges
         </h2>
 
         <div v-if="answersLoading" class="text-cool-gray">Loading answers…</div>
         <div v-else-if="answersError" class="text-vibrant-coral">{{ answersError }}</div>
-
         <div v-else-if="answers.length === 0" class="text-cool-gray">
           This player hasn't answered any challenges yet.
         </div>
 
-        <!-- Scrollovací seznam odpovědí -->
-        <div v-else class="max-h-96 overflow-y-auto space-y-4 pr-2">
-          <div v-for="(a, i) in limitedAnswers" :key="i"
+        <div v-else class="grid gap-4">
+          <div v-for="(c, i) in limitedAnswers" :key="i"
             class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
-            <div class="mb-2 flex flex-wrap items-center gap-2 text-xs">
-              <!-- Název challenge -->
-              <span
-                class="inline-flex items-center bg-dark-white px-2 py-0.5 rounded-full font-semibold text-blue-black">
-                {{ a.challengeName }}
-              </span>
-              <span class="text-cool-gray">·</span>
-
-              <!-- Datum -->
-              <span class="text-cool-gray">
-                {{ formatDate(a.answeredAt) }}
-              </span>
-
-              <!-- Body -->
-              <span class="ml-auto font-semibold text-blue-black">
-                {{ a.points ?? a.myPoints ?? 0 }} FAPs
-              </span>
+            <div class="flex justify-between items-center">
+              <h3 class="font-alexandria font-semibold text-blue-black text-lg truncate">
+                {{ c.challengeName }}
+              </h3>
+              <span class="font-bold text-blue-black">{{ c.points }} FAPs</span>
             </div>
 
-            <!-- Otázka + odpověď -->
-            <p class="font-alexandria text-blue-black font-semibold">
-              {{ a.questionText }}
-            </p>
-            <p class="text-sm text-cool-gray mt-1">
-              Answer:
-              <span class="font-semibold text-blue-black">
-                {{ a.answerText }}
-              </span>
-            </p>
+            <div class="mt-4 space-y-2">
+              <span class="font-bold">Gameweek {{ c.gameweek ?? '—' }} Answers:</span>
+              <div v-for="q in c.questions" :key="q.questionId" class="text-sm text-blue-black mt-2">
+                <span class="font-semibold">{{ q.questionText }}:</span>
+                <span class="text-cool-gray">{{ extractAnswerText(q.answer) }}</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- Show more -->
-        <div v-if="answersToShow < answers.length" class="mt-4 text-center">
+        <div v-if="answersToShow < answers.length" class="mt-2 text-center">
           <button @click="showMoreAnswers"
             class="px-4 py-2 rounded-lg bg-white border border-charcoal/20 font-semibold text-blue-black hover:bg-dark-white shadow-sm">
             Show more
@@ -294,6 +275,20 @@ const initials = computed(() => {
   return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
 });
 
+function extractAnswerText(answer) {
+  if (!answer) return "—";
+
+  if (answer.textAnswer) return answer.textAnswer;
+  if (answer.numericAnswer !== null) return answer.numericAnswer;
+
+  if (answer.selectedChoiceText) return answer.selectedChoiceText;
+  if (answer.selectedChoiceTexts?.length) return answer.selectedChoiceTexts.join(", ");
+
+  if (answer.orderedChoiceTexts?.length) return answer.orderedChoiceTexts.join(" → ");
+
+  return "—";
+}
+
 function formatChange(value) {
   if (value === 0 || value === null || value === undefined) return '';
   return value > 0 ? `↑${value}` : `↓${Math.abs(value)}`;
@@ -314,7 +309,7 @@ function changeRankClass(value) {
 const answersToShow = ref(5);
 
 const limitedAnswers = computed(() =>
-  answers.value.slice(0, answersToShow.value)
+  (answers.value || []).slice(0, answersToShow.value)
 );
 
 function showMoreAnswers() {

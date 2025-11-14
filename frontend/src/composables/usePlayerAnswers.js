@@ -5,7 +5,7 @@ import { useAuth } from './useAuth';
 
 export function usePlayerAnswers() {
   const { token } = useAuth() || {};
-  const answers = ref([]);           // rovnou pole -> lepší pro v-for
+  const answers = ref([]);    
   const loading = ref(false);
   const error = ref(null);
 
@@ -18,16 +18,16 @@ export function usePlayerAnswers() {
     try {
       const data = await apiFetch(`/api/players/${playerId}/answers`, {
         method: 'GET',
-        auth: true, // pokud používáš token přes apiFetch automaticky
+        auth: true,
         headers: token?.value ? { Authorization: `Bearer ${token.value}` } : {},
       });
 
-      // Tady už je data JS objekt (např. {challenges: [...]})
-      console.log('✅ Data z API:', data);
+      console.log('[PlayerProfilePage] Loaded answers:', data);
 
+      // API vrací { id, challenges: [...] }
       answers.value = data?.challenges || [];
 
-      console.log('📌 Uložené answers:', answers.value);
+      console.log('[PlayerProfilePage] Stored answers array:', answers.value);
 
     } catch (e) {
       console.error('❌ API ERROR:', e);
