@@ -73,7 +73,8 @@ SELECT
     paq.numeric_answer,
     paq.selected_choice_id,
     paq.selected_choice_ids,
-    paq.ordered_choice_ids
+    paq.ordered_choice_ids,
+    q.choice_constraint
 FROM player_challenge_answer pca
 JOIN "user" u ON u.id = pca.user_id
 JOIN player_answered_question paq ON paq.challenge_answer_id = pca.id

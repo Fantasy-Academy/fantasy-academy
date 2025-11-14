@@ -586,5 +586,33 @@ readonly final class ChallengesImport
                 throw new ImportFailed(sprintf('Missing required question column "%s".', $key));
             }
         }
+
+        // Validate choices format if provided
+        if ($row['choices'] !== null && is_string($row['choices']) && trim($row['choices']) !== '') {
+            $choicesJson = $row['choices'];
+            if (!json_validate($choicesJson)) {
+                throw new ImportFailed('Invalid JSON format in choices column.');
+            }
+
+            $choicesData = json_decode($choicesJson, associative: true);
+
+            if (!is_array($choicesData) || !array_is_list($choicesData)) {
+                throw new ImportFailed('Choices must be a JSON array.');
+            }
+
+            foreach ($choicesData as $index => $choice) {
+                if (!is_array($choice)) {
+                    throw new ImportFailed(sprintf('Choice at index %d must be an object with "text" and "description" fields.', $index));
+                }
+
+                if (!array_key_exists('text', $choice)) {
+                    throw new ImportFailed(sprintf('Choice at index %d is missing required field "text".', $index));
+                }
+
+                if (!array_key_exists('description', $choice)) {
+                    throw new ImportFailed(sprintf('Choice at index %d is missing required field "description".', $index));
+                }
+            }
+        }
     }
 }

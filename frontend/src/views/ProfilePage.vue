@@ -222,6 +222,7 @@
               <span class="ml-auto font-semibold text-blue-black">
                 {{ c.points }} FAPs
               </span>
+              <span class="ml-auto font-semibold text-blue-black">{{ a.points ?? a.myPoints ?? 0 }} FAPs</span>
             </div>
 
             <!-- Questions + answers -->

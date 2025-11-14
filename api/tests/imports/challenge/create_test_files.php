@@ -685,6 +685,155 @@ function createUpdateWithCorrectAnswersFile(): void
     $writer->save(__DIR__ . '/challenge_import_update_with_correct_answers.xlsx');
 }
 
+// Choices missing text field
+function createChoicesMissingTextField(): void
+{
+    $spreadsheet = createBaseSpreadsheet();
+    $challengesSheet = $spreadsheet->getSheet(0);
+    $challengesSheet->fromArray([
+        'C001',
+        'Test Challenge',
+        'Short desc',
+        'Full description',
+        null,
+        '100',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        null,
+        null,
+        '10', '10', '10', '10', '10', '10', '10', '10',
+    ], null, 'A2');
+
+    $questionsSheet = $spreadsheet->getSheet(1);
+    $questionsSheet->fromArray([
+        'C001',
+        'Test question',
+        'single_select',
+        null,
+        null,
+        null,
+        json_encode([
+            ['description' => 'Option without text'], // Missing 'text' field!
+        ]),
+        '1',
+        '1',
+    ], null, 'A2');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_choices_missing_text.xlsx');
+}
+
+// Choices missing description field
+function createChoicesMissingDescriptionField(): void
+{
+    $spreadsheet = createBaseSpreadsheet();
+    $challengesSheet = $spreadsheet->getSheet(0);
+    $challengesSheet->fromArray([
+        'C001',
+        'Test Challenge',
+        'Short desc',
+        'Full description',
+        null,
+        '100',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        null,
+        null,
+        '10', '10', '10', '10', '10', '10', '10', '10',
+    ], null, 'A2');
+
+    $questionsSheet = $spreadsheet->getSheet(1);
+    $questionsSheet->fromArray([
+        'C001',
+        'Test question',
+        'single_select',
+        null,
+        null,
+        null,
+        json_encode([
+            ['text' => 'First option', 'description' => 'Valid option'],
+            ['text' => 'Second option'], // Missing 'description' field at index 1!
+        ]),
+        '1',
+        '1',
+    ], null, 'A2');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_choices_missing_description.xlsx');
+}
+
+// Choices not a JSON array
+function createChoicesNotArrayFile(): void
+{
+    $spreadsheet = createBaseSpreadsheet();
+    $challengesSheet = $spreadsheet->getSheet(0);
+    $challengesSheet->fromArray([
+        'C001',
+        'Test Challenge',
+        'Short desc',
+        'Full description',
+        null,
+        '100',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        null,
+        null,
+        '10', '10', '10', '10', '10', '10', '10', '10',
+    ], null, 'A2');
+
+    $questionsSheet = $spreadsheet->getSheet(1);
+    $questionsSheet->fromArray([
+        'C001',
+        'Test question',
+        'single_select',
+        null,
+        null,
+        null,
+        json_encode(['text' => 'Not an array, but an object']), // Not an array!
+        '1',
+        '1',
+    ], null, 'A2');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_choices_not_array.xlsx');
+}
+
+// Choice element not an object
+function createChoiceElementNotObjectFile(): void
+{
+    $spreadsheet = createBaseSpreadsheet();
+    $challengesSheet = $spreadsheet->getSheet(0);
+    $challengesSheet->fromArray([
+        'C001',
+        'Test Challenge',
+        'Short desc',
+        'Full description',
+        null,
+        '100',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        null,
+        null,
+        '10', '10', '10', '10', '10', '10', '10', '10',
+    ], null, 'A2');
+
+    $questionsSheet = $spreadsheet->getSheet(1);
+    $questionsSheet->fromArray([
+        'C001',
+        'Test question',
+        'single_select',
+        null,
+        null,
+        null,
+        json_encode(['string value instead of object']), // Array element is not an object!
+        '1',
+        '1',
+    ], null, 'A2');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_choice_element_not_object.xlsx');
+}
+
 // Create all test files
 echo "Generating Excel test files...\n";
 
@@ -723,6 +872,18 @@ createImportWithCorrectAnswersFile();
 
 echo "Creating challenge_import_update_with_correct_answers.xlsx...\n";
 createUpdateWithCorrectAnswersFile();
+
+echo "Creating challenge_import_choices_missing_text.xlsx...\n";
+createChoicesMissingTextField();
+
+echo "Creating challenge_import_choices_missing_description.xlsx...\n";
+createChoicesMissingDescriptionField();
+
+echo "Creating challenge_import_choices_not_array.xlsx...\n";
+createChoicesNotArrayFile();
+
+echo "Creating challenge_import_choice_element_not_object.xlsx...\n";
+createChoiceElementNotObjectFile();
 
 echo "\n✅ All test files generated successfully!\n";
 echo "Files created in: " . __DIR__ . "\n";

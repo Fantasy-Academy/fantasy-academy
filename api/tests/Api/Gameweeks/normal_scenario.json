@@ -1,0 +1,38 @@
+{
+    "current": {
+        "id": "00000000-0000-0000-0003-000000000003",
+        "season": 2025,
+        "number": 3,
+        "title": "Derby Week",
+        "description": "Big matches this week",
+        "startsAt": "2025-06-05T12:00:00+00:00",
+        "endsAt": "2025-06-12T12:00:00+00:00",
+        "isStarted": true,
+        "isEnded": false,
+        "isCurrent": true
+    },
+    "next": {
+        "id": "00000000-0000-0000-0003-000000000004",
+        "season": 2025,
+        "number": 4,
+        "title": null,
+        "description": null,
+        "startsAt": "2025-06-13T12:00:00+00:00",
+        "endsAt": "2025-06-20T12:00:00+00:00",
+        "isStarted": false,
+        "isEnded": false,
+        "isCurrent": false
+    },
+    "previous": {
+        "id": "00000000-0000-0000-0003-000000000002",
+        "season": 2025,
+        "number": 2,
+        "title": "Midweek Madness",
+        "description": "A challenging midweek gameweek",
+        "startsAt": "2025-05-23T12:00:00+00:00",
+        "endsAt": "2025-05-30T12:00:00+00:00",
+        "isStarted": true,
+        "isEnded": true,
+        "isCurrent": false
+    }
+}
