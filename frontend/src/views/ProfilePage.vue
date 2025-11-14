@@ -203,26 +203,40 @@
 
         <!-- Scroll Container -->
         <div v-else class="max-h-96 overflow-y-auto space-y-4 pr-2">
-          <div v-for="(a, i) in limitedAnswers" :key="i"
+          <div v-for="(c, i) in limitedAnswers" :key="i"
             class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+            <!-- Challenge header -->
             <div class="mb-2 flex flex-wrap items-center gap-2 text-xs">
               <span
                 class="inline-flex items-center bg-dark-white px-2 py-0.5 rounded-full font-semibold text-blue-black">
-                {{ a.challengeName }}
+                {{ c.challengeName }}
               </span>
+
               <span class="text-cool-gray">·</span>
+
               <span class="text-cool-gray">
-                {{ formatDate(a.answeredAt) }}
+                Gameweek {{ c.gameweek ?? '—' }}
               </span>
-              <span class="ml-auto font-semibold text-blue-black">{{ a.points ?? a.myPoints ?? 0 }} FAPs</span>
+
+              <span class="ml-auto font-semibold text-blue-black">
+                {{ c.points }} FAPs
+              </span>
             </div>
 
-            <p class="font-alexandria text-blue-black font-semibold">
-              {{ a.questionText }}
-            </p>
-            <p class="text-sm text-cool-gray mt-1">
-              You answered: <span class="font-semibold text-blue-black">{{ a.answerText }}</span>
-            </p>
+            <!-- Questions + answers -->
+            <div v-for="(q, qi) in c.questions" :key="qi" class="mt-2">
+              <p class="font-alexandria text-blue-black font-semibold">
+                {{ q.questionText }}
+              </p>
+
+              <p class="text-sm text-cool-gray mt-1">
+                You answered:
+                <span class="font-semibold text-blue-black">
+                  {{ formatAnswer(q.answer) }}
+                </span>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -349,6 +363,16 @@ const overall = computed(() => profile.value.overallStatistics ?? {
   weeklyRankChange: 0,
   skills: [],
 });
+
+function formatAnswer(a) {
+  if (!a) return '—';
+  if (a.textAnswer != null) return a.textAnswer;
+  if (a.numericAnswer != null) return a.numericAnswer;
+  if (a.selectedChoiceId) return a.selectedChoiceId;
+  if (Array.isArray(a.selectedChoiceIds)) return a.selectedChoiceIds.join(', ');
+  if (Array.isArray(a.orderedChoiceIds)) return a.orderedChoiceIds.join(' → ');
+  return '—';
+}
 
 const initials = computed(() => {
   const name = profile.value.name?.trim();
