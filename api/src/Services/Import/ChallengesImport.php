@@ -34,7 +34,7 @@ use Symfony\Component\Uid\Uuid;
  *      hint_text: null|string,
  *      hint_image: null|string,
  *      show_statistics_continuously: null|string,
- *      gameweek: null|string,
+ *      gameweek: string,
  *      skill_analytical: string,
  *      skill_strategicplanning: string,
  *      skill_adaptability: string,
@@ -244,7 +244,7 @@ readonly final class ChallengesImport
                     skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
                     skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
                     showStatisticsContinuously: $this->makeBoolean($row['show_statistics_continuously'] ?? null),
-                    gameweek: !empty($row['gameweek']) ? (int) $row['gameweek'] : null,
+                    gameweek: (int) $row['gameweek'],
                 );
 
                 return $existingChallenge;
@@ -282,7 +282,7 @@ readonly final class ChallengesImport
             skillFinancialManagement: $this->makePercentage($row['skill_financialmanagement']),
             skillLongTermVision: $this->makePercentage($row['skill_longtermvision']),
             showStatisticsContinuously: $this->makeBoolean($row['show_statistics_continuously'] ?? null),
-            gameweek: !empty($row['gameweek']) ? (int) $row['gameweek'] : null,
+            gameweek: (int) $row['gameweek'],
         );
 
         $this->entityManager->persist($challenge);
@@ -563,6 +563,7 @@ readonly final class ChallengesImport
         // Minimal runtime presence checks for required keys; extend as needed
         foreach ([
             'id','name','short_description','description','max_points','starts_at','expires_at',
+            'gameweek',
             'skill_analytical','skill_strategicplanning','skill_adaptability','skill_premierleagueknowledge',
             'skill_riskmanagement','skill_decisionmakingunderpressure','skill_financialmanagement',
             'skill_longtermvision',

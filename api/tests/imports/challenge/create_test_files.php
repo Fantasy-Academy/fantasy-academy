@@ -39,6 +39,8 @@ function createBaseSpreadsheet(): Spreadsheet
         'Skill DecisionMakingUnderPressure',
         'Skill FinancialManagement',
         'Skill LongTermVision',
+        'Show Statistics Continuously',
+        'Gameweek',
     ], null, 'A1');
 
     // Questions sheet (second sheet)
@@ -86,6 +88,8 @@ function createBaseSpreadsheetWithCorrectAnswers(): Spreadsheet
         'Skill DecisionMakingUnderPressure',
         'Skill FinancialManagement',
         'Skill LongTermVision',
+        'Show Statistics Continuously',
+        'Gameweek',
     ], null, 'A1');
 
     // Questions sheet (second sheet)
@@ -136,6 +140,8 @@ function createValidFile(): void
         '25',
         '35',
         '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $challengesSheet->fromArray([
@@ -157,6 +163,8 @@ function createValidFile(): void
         '0.35',
         '0.1',
         '0.15',
+        'true',
+        '2',
     ], null, 'A3');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -256,6 +264,8 @@ function createMissingChallengeColumnFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
@@ -279,6 +289,8 @@ function createMissingQuestionColumnFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -314,6 +326,8 @@ function createDuplicateChallengeIdFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $challengesSheet->fromArray([
@@ -328,6 +342,8 @@ function createDuplicateChallengeIdFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A3');
 
     $writer = new Xlsx($spreadsheet);
@@ -351,6 +367,8 @@ function createInvalidChallengeReferenceFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -383,6 +401,8 @@ function createEmptyChallengeIdFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $writer = new Xlsx($spreadsheet);
@@ -406,6 +426,8 @@ function createEmptyQuestionChallengeIdFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -457,6 +479,8 @@ function createInvalidQuestionTypeFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -489,6 +513,8 @@ function createInvalidJsonChoicesFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -526,6 +552,8 @@ function createImportWithCorrectAnswersFile(): void
         null,
         null,
         '20', '20', '20', '20', '20', '20', '20', '20',
+        'true',
+        '3',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -596,6 +624,8 @@ function createUpdateWithCorrectAnswersFile(): void
         '25',
         '35',
         '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -702,6 +732,8 @@ function createChoicesMissingTextField(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -740,6 +772,8 @@ function createChoicesMissingDescriptionField(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -779,6 +813,8 @@ function createChoicesNotArrayFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -815,6 +851,8 @@ function createChoiceElementNotObjectFile(): void
         null,
         null,
         '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        '1',
     ], null, 'A2');
 
     $questionsSheet = $spreadsheet->getSheet(1);
@@ -832,6 +870,34 @@ function createChoiceElementNotObjectFile(): void
 
     $writer = new Xlsx($spreadsheet);
     $writer->save(__DIR__ . '/challenge_import_choice_element_not_object.xlsx');
+}
+
+// Missing gameweek column
+function createMissingGameweekFile(): void
+{
+    $spreadsheet = createBaseSpreadsheet();
+    $challengesSheet = $spreadsheet->getSheet(0);
+    // Remove the "Gameweek" column (column T - the 20th column)
+    $challengesSheet->removeColumn('T');
+    // Add a data row to trigger validation
+    $challengesSheet->fromArray([
+        'C001',
+        'Test Challenge',
+        'Short desc',
+        'Full description',
+        null,
+        '100',
+        '2024-01-01 00:00:00',
+        '2024-12-31 23:59:59',
+        null,
+        null,
+        '10', '10', '10', '10', '10', '10', '10', '10',
+        'true',
+        // Gameweek column missing
+    ], null, 'A2');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save(__DIR__ . '/challenge_import_missing_gameweek.xlsx');
 }
 
 // Create all test files
@@ -884,6 +950,9 @@ createChoicesNotArrayFile();
 
 echo "Creating challenge_import_choice_element_not_object.xlsx...\n";
 createChoiceElementNotObjectFile();
+
+echo "Creating challenge_import_missing_gameweek.xlsx...\n";
+createMissingGameweekFile();
 
 echo "\n✅ All test files generated successfully!\n";
 echo "Files created in: " . __DIR__ . "\n";
