@@ -1,10 +1,13 @@
-FROM node:24 AS build
+FROM node:24 AS dev
 
 WORKDIR /app
 
 RUN corepack enable pnpm && \
 	corepack prepare --activate pnpm@latest && \
 	pnpm config -g set store-dir /.pnpm-store
+
+
+FROM dev AS build
 
 ENV NODE_ENV=production
 ENV VITE_API_BASE_URL="https://backend.fantasy-academy.com"
