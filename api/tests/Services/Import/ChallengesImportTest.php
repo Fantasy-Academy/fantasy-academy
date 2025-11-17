@@ -456,6 +456,32 @@ final class ChallengesImportTest extends ApiTestCase
         $this->importer->importFile($file);
     }
 
+    public function testMissingGameweekColumnThrowsException(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_missing_gameweek.xlsx');
+
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Missing required challenge column "gameweek"');
+
+        $this->importer->importFile($file);
+    }
+
+    public function testGameweekIsImportedCorrectly(): void
+    {
+        $file = $this->createUploadedFile('challenge_import_valid.xlsx');
+
+        $this->importer->importFile($file);
+        $this->entityManager->clear();
+
+        $challenge1 = $this->entityManager->find(Challenge::class, Uuid::fromString('01933333-0000-7000-8000-000000000001'));
+        $this->assertInstanceOf(Challenge::class, $challenge1);
+        $this->assertSame(1, $challenge1->gameweek);
+
+        $challenge2 = $this->entityManager->find(Challenge::class, Uuid::fromString('01933333-0000-7000-8000-000000000002'));
+        $this->assertInstanceOf(Challenge::class, $challenge2);
+        $this->assertSame(2, $challenge2->gameweek);
+    }
+
     private function createUploadedFile(string $filename): UploadedFile
     {
         $path = __DIR__ . '/../../imports/challenge/' . $filename;
