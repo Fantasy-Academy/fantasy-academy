@@ -266,6 +266,15 @@ const overall = computed(() => {
     weeklyPoints: 0,
     weeklyRankChange: 0,
   }
+const overall = computed(() => {
+  return player.value?.overallStatistics ?? {
+    rank: null,
+    points: 0,
+    challengesAnswered: 0,
+    skills: [],
+    weeklyPoints: 0,
+    weeklyRankChange: 0,
+  }
 });
 
 const initials = computed(() => {
