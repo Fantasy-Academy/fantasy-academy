@@ -11,10 +11,8 @@ use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Query\UserDisciplineQuery;
 use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
-use FantasyAcademy\API\Services\GameWeekService;
 use FantasyAcademy\API\Services\SkillsTransformer;
 use FantasyAcademy\API\Value\PlayerSkill;
-use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -31,7 +29,6 @@ readonly final class LoggedUserProvider implements ProviderInterface
         private UserSkillsPercentilesQuery $userSkillsPercentilesQuery,
         private UserDisciplineQuery $userDisciplineQuery,
         private SkillsTransformer $skillsTransformer,
-        private ClockInterface $clock,
     ) {}
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
@@ -48,9 +45,10 @@ readonly final class LoggedUserProvider implements ProviderInterface
 WITH agg AS (
   SELECT
     user_id,
-    SUM(COALESCE(points, 0)) AS points,
-    COUNT(challenge_id) AS challenges_answered
-  FROM player_challenge_answer
+    SUM(CASE WHEN c.evaluated_at IS NOT NULL THEN COALESCE(pca.points, 0) ELSE 0 END) AS points,
+    COUNT(CASE WHEN c.evaluated_at IS NOT NULL THEN pca.challenge_id ELSE NULL END) AS challenges_answered
+  FROM player_challenge_answer pca
+  LEFT JOIN challenge c ON c.id = pca.challenge_id
   GROUP BY user_id
 ),
 ranked AS (
@@ -117,11 +115,8 @@ SQL;
     private function getPlayerSkills(Uuid $userId): array
     {
         try {
-            $now = $this->clock->now();
-            $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
-
-            $skillsRow = $this->userSkillsPercentilesQuery->forPlayerWithPreviousWeek($userId->toString(), $lastMondayCutoff);
-            $disciplineData = $this->userDisciplineQuery->forPlayerWithPreviousWeek($userId->toString(), $lastMondayCutoff);
+            $skillsRow = $this->userSkillsPercentilesQuery->forPlayerWithPreviousWeek($userId->toString());
+            $disciplineData = $this->userDisciplineQuery->forPlayerWithPreviousWeek($userId->toString());
 
             return $this->skillsTransformer->transformToPlayerSkillsWithChange($skillsRow, $userId->toString(), $disciplineData);
         } catch (UserNotFound) {

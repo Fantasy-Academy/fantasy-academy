@@ -11,10 +11,8 @@ use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Query\UserDisciplineQuery;
 use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
-use FantasyAcademy\API\Services\GameWeekService;
 use FantasyAcademy\API\Services\SkillsTransformer;
 use FantasyAcademy\API\Value\PlayerSkill;
-use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -31,7 +29,6 @@ readonly final class PlayerInfoProvider implements ProviderInterface
         private UserSkillsPercentilesQuery $userSkillsPercentilesQuery,
         private UserDisciplineQuery $userDisciplineQuery,
         private SkillsTransformer $skillsTransformer,
-        private ClockInterface $clock,
     ) {}
 
     /**
@@ -50,14 +47,22 @@ readonly final class PlayerInfoProvider implements ProviderInterface
 
     private function getPlayerInfo(Uuid $playerId, null|Uuid $userId): PlayerInfoResponse
     {
-        $now = $this->clock->now();
-        $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
-
         $query = <<<SQL
-WITH previous_week_agg AS (
+WITH latest_gameweek AS (
+  SELECT MAX(gameweek) AS latest_gw
+  FROM challenge
+  WHERE evaluated_at IS NOT NULL
+    AND gameweek IS NOT NULL
+),
+previous_week_agg AS (
   SELECT
     user_id,
-    SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN COALESCE(points, 0) ELSE 0 END) AS points
+    SUM(CASE
+      WHEN c.evaluated_at IS NOT NULL
+        AND (c.gameweek IS NULL OR c.gameweek < (SELECT latest_gw FROM latest_gameweek))
+      THEN COALESCE(points, 0)
+      ELSE 0
+    END) AS points
   FROM player_challenge_answer pca
   LEFT JOIN challenge c ON c.id = pca.challenge_id
   GROUP BY user_id
@@ -71,9 +76,10 @@ previous_week_ranked AS (
 current_agg AS (
   SELECT
     user_id,
-    SUM(COALESCE(points, 0)) AS points,
-    COUNT(challenge_id) AS challenges_answered
-  FROM player_challenge_answer
+    SUM(CASE WHEN c.evaluated_at IS NOT NULL THEN COALESCE(points, 0) ELSE 0 END) AS points,
+    COUNT(CASE WHEN c.evaluated_at IS NOT NULL THEN challenge_id ELSE NULL END) AS challenges_answered
+  FROM player_challenge_answer pca
+  LEFT JOIN challenge c ON c.id = pca.challenge_id
   GROUP BY user_id
 ),
 current_ranked AS (
@@ -99,7 +105,6 @@ SQL;
         $row = $this->database
             ->executeQuery($query, [
                 'playerId' => $playerId->toString(),
-                'lastMondayCutoff' => $lastMondayCutoff->format('Y-m-d H:i:s'),
             ])
             ->fetchAssociative();
 
@@ -107,7 +112,7 @@ SQL;
             throw new UserNotFound();
         }
 
-        $skills = $this->getPlayerSkills($playerId, $lastMondayCutoff);
+        $skills = $this->getPlayerSkills($playerId);
 
         return PlayerInfoResponse::fromArray($row, $userId, $skills);
     }
@@ -115,11 +120,11 @@ SQL;
     /**
      * @return array<PlayerSkill>
      */
-    private function getPlayerSkills(Uuid $userId, \DateTimeImmutable $cutoff): array
+    private function getPlayerSkills(Uuid $userId): array
     {
         try {
-            $skillsRow = $this->userSkillsPercentilesQuery->forPlayerWithPreviousWeek($userId->toString(), $cutoff);
-            $disciplineData = $this->userDisciplineQuery->forPlayerWithPreviousWeek($userId->toString(), $cutoff);
+            $skillsRow = $this->userSkillsPercentilesQuery->forPlayerWithPreviousWeek($userId->toString());
+            $disciplineData = $this->userDisciplineQuery->forPlayerWithPreviousWeek($userId->toString());
 
             return $this->skillsTransformer->transformToPlayerSkillsWithChange($skillsRow, $userId->toString(), $disciplineData);
         } catch (UserNotFound) {

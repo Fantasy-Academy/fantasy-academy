@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FantasyAcademy\API\Query;
 
-use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Exceptions\UserNotFound;
 
@@ -59,16 +58,22 @@ SQL;
      * @throws UserNotFound
      * @return array{current: float, previous: null|float}
      */
-    public function forPlayerWithPreviousWeek(string $playerId, DateTimeImmutable $cutoff): array
+    public function forPlayerWithPreviousWeek(string $playerId): array
     {
         $sql = <<<SQL
-WITH previous_week_challenges AS (
+WITH latest_gameweek AS (
+  SELECT MAX(gameweek) AS latest_gw
+  FROM challenge
+  WHERE evaluated_at IS NOT NULL
+    AND gameweek IS NOT NULL
+),
+previous_week_challenges AS (
   SELECT COUNT(DISTINCT c.id) AS total_challenges
   FROM "user" AS u
   JOIN challenge AS c
     ON c.expires_at > u.registered_at
    AND c.evaluated_at IS NOT NULL
-   AND c.evaluated_at <= :cutoff
+   AND (c.gameweek IS NULL OR c.gameweek < (SELECT latest_gw FROM latest_gameweek))
   WHERE u.id = :userId
 ),
 previous_week_answers AS (
@@ -77,7 +82,7 @@ previous_week_answers AS (
   JOIN challenge AS c
     ON c.expires_at > u.registered_at
    AND c.evaluated_at IS NOT NULL
-   AND c.evaluated_at <= :cutoff
+   AND (c.gameweek IS NULL OR c.gameweek < (SELECT latest_gw FROM latest_gameweek))
   LEFT JOIN player_challenge_answer AS pca
     ON pca.user_id = u.id
    AND pca.challenge_id = c.id
@@ -89,6 +94,7 @@ current_challenges AS (
   FROM "user" AS u
   JOIN challenge AS c
     ON c.expires_at > u.registered_at
+   AND c.evaluated_at IS NOT NULL
   WHERE u.id = :userId
 ),
 current_answers AS (
@@ -96,6 +102,7 @@ current_answers AS (
   FROM "user" AS u
   JOIN challenge AS c
     ON c.expires_at > u.registered_at
+   AND c.evaluated_at IS NOT NULL
   LEFT JOIN player_challenge_answer AS pca
     ON pca.user_id = u.id
    AND pca.challenge_id = c.id
@@ -134,7 +141,6 @@ SQL;
         /** @var array{discipline_percent_current: numeric-string, discipline_percent_previous: numeric-string|null}|false $result */
         $result = $this->connection->executeQuery($sql, [
             'userId' => $playerId,
-            'cutoff' => $cutoff->format('Y-m-d H:i:s'),
         ])->fetchAssociative();
 
         if ($result === false) {
