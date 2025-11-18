@@ -27,8 +27,37 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     replaysOnErrorSampleRate: 1.0,
     sendDefaultPii: true,
     environment: import.meta.env.MODE,
+    // Filter out chunk load errors from Sentry since we handle them with reload
+    beforeSend(event, hint) {
+      const error = hint.originalException;
+      if (error && typeof error === 'object' && 'message' in error) {
+        const message = String(error.message);
+        if (
+          message.includes('Failed to fetch dynamically imported module') ||
+          message.includes('Importing a module script failed') ||
+          message.includes('error loading dynamically imported module')
+        ) {
+          // Don't send chunk load errors to Sentry
+          return null;
+        }
+      }
+      return event;
+    },
   });
 }
+
+// Global error handler for uncaught chunk load errors
+window.addEventListener('error', (event) => {
+  if (
+    event.message.includes('Failed to fetch dynamically imported module') ||
+    event.message.includes('Importing a module script failed') ||
+    event.message.includes('error loading dynamically imported module')
+  ) {
+    console.warn('Global chunk load error detected, reloading...', event.error);
+    event.preventDefault();
+    window.location.reload();
+  }
+});
 
 router.afterEach((to) => {
   if (import.meta.env.PROD && window.gtag) {

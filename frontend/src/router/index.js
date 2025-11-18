@@ -28,4 +28,18 @@ router.beforeEach((to) => {
   }
 });
 
+// Handle chunk load errors (stale assets after deployment)
+router.onError((error, to) => {
+  if (
+    error.message.includes('Failed to fetch dynamically imported module') ||
+    error.message.includes('Importing a module script failed') ||
+    error.message.includes('error loading dynamically imported module')
+  ) {
+    console.warn('Detected stale chunk error, reloading page...', error);
+    // Reload the page to fetch fresh assets
+    // Use location.href instead of router to ensure full page reload
+    window.location.href = to.fullPath;
+  }
+});
+
 export default router;
