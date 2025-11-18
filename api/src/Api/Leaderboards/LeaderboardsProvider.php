@@ -8,8 +8,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Connection;
 use FantasyAcademy\API\Entity\User;
-use FantasyAcademy\API\Services\GameWeekService;
-use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 
@@ -23,7 +21,6 @@ readonly final class LeaderboardsProvider implements ProviderInterface
     public function __construct(
         private Security $security,
         private Connection $database,
-        private ClockInterface $clock,
     ) {}
 
     /**
@@ -42,16 +39,29 @@ readonly final class LeaderboardsProvider implements ProviderInterface
      */
     private function getLeaderboards(null|Uuid $userId): array
     {
-        $now = $this->clock->now();
-        $lastMondayCutoff = GameWeekService::getLastMondayCutoff($now);
-
         $query = <<<SQL
-WITH previous_week_stats AS (
+WITH latest_gameweek AS (
+  SELECT MAX(gameweek) AS latest_gw
+  FROM challenge
+  WHERE evaluated_at IS NOT NULL
+    AND gameweek IS NOT NULL
+),
+previous_week_stats AS (
   SELECT
     u.id AS user_id,
-    COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN pca.points ELSE 0 END), 0) AS points,
+    COALESCE(SUM(CASE
+      WHEN c.evaluated_at IS NOT NULL
+        AND (c.gameweek IS NULL OR c.gameweek < (SELECT latest_gw FROM latest_gameweek))
+      THEN pca.points
+      ELSE 0
+    END), 0) AS points,
     ROW_NUMBER() OVER (
-      ORDER BY COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL AND c.evaluated_at <= :lastMondayCutoff THEN pca.points ELSE 0 END), 0) DESC, u.name ASC
+      ORDER BY COALESCE(SUM(CASE
+        WHEN c.evaluated_at IS NOT NULL
+          AND (c.gameweek IS NULL OR c.gameweek < (SELECT latest_gw FROM latest_gameweek))
+        THEN pca.points
+        ELSE 0
+      END), 0) DESC, u.name ASC
     ) AS rank
   FROM "user" u
   LEFT JOIN player_challenge_answer pca ON pca.user_id = u.id
@@ -62,13 +72,14 @@ current_stats AS (
   SELECT
     u.id AS user_id,
     u.name AS user_name,
-    COALESCE(SUM(pca.points), 0) AS points,
-    COUNT(pca.id) AS challenges_answered,
+    COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL THEN pca.points ELSE 0 END), 0) AS points,
+    COUNT(CASE WHEN c.evaluated_at IS NOT NULL THEN pca.id ELSE NULL END) AS challenges_answered,
     ROW_NUMBER() OVER (
-      ORDER BY COALESCE(SUM(pca.points), 0) DESC, u.name ASC
+      ORDER BY COALESCE(SUM(CASE WHEN c.evaluated_at IS NOT NULL THEN pca.points ELSE 0 END), 0) DESC, u.name ASC
     ) AS rank
   FROM "user" u
   LEFT JOIN player_challenge_answer pca ON pca.user_id = u.id
+  LEFT JOIN challenge c ON c.id = pca.challenge_id
   GROUP BY u.id, u.name
 )
 SELECT
@@ -86,9 +97,7 @@ SQL;
 
         /** @var array<LeaderboardResponseRow> $rows */
         $rows = $this->database
-            ->executeQuery($query, [
-                'lastMondayCutoff' => $lastMondayCutoff->format('Y-m-d H:i:s'),
-            ])
+            ->executeQuery($query)
             ->fetchAllAssociative();
 
         return array_map(
