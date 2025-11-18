@@ -147,10 +147,10 @@ readonly final class ChallengesImport
 
     private function getFirstColumnHeaderKey(Worksheet $ws): string
     {
-        /** @var string $raw */
+        /** @var null|string $raw */
         $raw = $ws->getCell('A1')->getValue();
 
-        return $this->normalizeHeader($raw);
+        return $this->normalizeHeader((string) $raw);
     }
 
     /**
