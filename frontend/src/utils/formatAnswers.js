@@ -24,3 +24,29 @@ export function formatAnswer(answer) {
 
   return '—';
 }
+
+export function formatCorrectAnswer(correct) {
+  if (!correct) return "—";
+
+  const parts = [];
+
+  if (correct.textAnswer) {
+    parts.push(correct.textAnswer);
+  }
+
+  if (correct.numericAnswer !== null && correct.numericAnswer !== undefined) {
+    parts.push(correct.numericAnswer.toString());
+  }
+
+  if (correct.selectedChoiceText) {
+    parts.push(correct.selectedChoiceText);
+  }
+
+  if (Array.isArray(correct.selectedChoiceTexts) && correct.selectedChoiceTexts.length > 0) {
+    correct.selectedChoiceTexts.forEach((t, i) => {
+      parts.push(`${i + 1}) ${t}`);
+    });
+  }
+
+  return parts.length > 0 ? parts.join("  ·  ") : "—";
+}
