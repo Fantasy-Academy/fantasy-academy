@@ -48,7 +48,8 @@ SELECT
     paq.selected_choice_id,
     paq.selected_choice_ids,
     paq.ordered_choice_ids,
-    q.choice_constraint
+    q.choice_constraint,
+    q.correct_answer
 FROM player_challenge_answer pca
 JOIN challenge c ON c.id = pca.challenge_id
 JOIN player_answered_question paq ON paq.challenge_answer_id = pca.id

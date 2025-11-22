@@ -23,6 +23,7 @@ use Symfony\Component\Uid\Uuid;
  *     ordered_choice_ids: null|string,
  *     choice_constraint: null|string,
  *     gameweek: null|int,
+ *     correct_answer: null|string,
  * }
  */
 #[ApiResource(
