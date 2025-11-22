@@ -219,9 +219,9 @@
                 Gameweek {{ c.gameweek ?? '—' }}
               </span>
 
-              <span class="ml-auto font-semibold text-blue-black">
-                {{ c.points }} FAPs
-              </span>
+              <p class="font-bold text-blue-black">
+                +{{ c.points }} FAPs
+              </p>
             </div>
 
             <!-- Questions + answers -->
@@ -230,10 +230,10 @@
                 {{ q.questionText }}
               </p>
 
-              <p class="text-sm text-cool-gray mt-1">
-                You answered:
-                <span class="font-semibold text-blue-black">
-                  {{ formatAnswer(q.answer) }}
+              <p class="text-sm mt-1">
+                Correct answer:
+                <span class="font-semibold text-pistachio">
+                  {{ formatAnswer(q.correctAnswer) }}
                 </span>
               </p>
             </div>
@@ -271,6 +271,7 @@ import { useProfile } from '@/composables/useProfile';
 import { useAuth } from '@/composables/useAuth';
 import { useChallenges } from '@/composables/useChallenges';
 import { useMyAnswers } from '@/composables/useMyAnswers';
+import { formatAnswer } from '../utils/formatAnswers';
 import GameweekStatus from '../components/GameweekStatus.vue';
 
 
@@ -363,16 +364,6 @@ const overall = computed(() => profile.value.overallStatistics ?? {
   weeklyRankChange: 0,
   skills: [],
 });
-
-function formatAnswer(a) {
-  if (!a) return '—';
-  if (a.textAnswer != null) return a.textAnswer;
-  if (a.numericAnswer != null) return a.numericAnswer;
-  if (a.selectedChoiceId) return a.selectedChoiceId;
-  if (Array.isArray(a.selectedChoiceIds)) return a.selectedChoiceIds.join(', ');
-  if (Array.isArray(a.orderedChoiceIds)) return a.orderedChoiceIds.join(' → ');
-  return '—';
-}
 
 const initials = computed(() => {
   const name = profile.value.name?.trim();

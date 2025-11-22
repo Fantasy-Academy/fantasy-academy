@@ -265,24 +265,8 @@ const overall = computed(() => {
     skills: [],
     weeklyPoints: 0,
     weeklyRankChange: 0,
-  }
-const overall = computed(() => {
-  return player.value?.overallStatistics ?? {
-    rank: null,
-    points: 0,
-    challengesAnswered: 0,
-    skills: [],
-    weeklyPoints: 0,
-    weeklyRankChange: 0,
-  }
-});
+  }});
 
-const initials = computed(() => {
-  const name = player.value?.name?.trim() || '';
-  if (!name) return '?';
-  const parts = name.split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
-});
 
 function extractAnswerText(answer) {
   if (!answer) return "—";
