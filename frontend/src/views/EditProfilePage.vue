@@ -7,7 +7,7 @@
       <h2 class="font-alexandria text-xl font-semibold text-blue-black">Profile info</h2>
       <p class="mt-1 text-sm text-cool-gray">Update your public name. Your email is not editable here.</p>
 
-      <div class="mt-4 grid gap-4">
+      <div class="mt-4 grid gap-4 grid-cols-1">
         <div>
           <label class="mb-1 block text-sm font-medium text-blue-black">Name</label>
           <input

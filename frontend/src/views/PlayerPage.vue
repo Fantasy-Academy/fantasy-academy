@@ -180,7 +180,7 @@
           This player hasn't answered any challenges yet.
         </div>
 
-        <div v-else class="grid gap-4">
+        <div v-else class="grid gap-4 grid-cols-1">
           <div v-for="(c, i) in limitedAnswers" :key="i"
             class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
             <div class="flex justify-between items-center">
