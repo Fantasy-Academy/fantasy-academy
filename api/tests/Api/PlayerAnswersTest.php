@@ -99,6 +99,12 @@ final class PlayerAnswersTest extends ApiTestCase
         $this->assertArrayHasKey('textAnswer', $question['answer']);
         $this->assertEquals('User 1 answer to question 7', $question['answer']['textAnswer']);
 
+        // Verify correctAnswer for Question 7 (Text question)
+        $this->assertArrayHasKey('correctAnswer', $question);
+        $this->assertIsArray($question['correctAnswer']);
+        $this->assertArrayHasKey('textAnswer', $question['correctAnswer']);
+        $this->assertEquals('This is the correct text answer', $question['correctAnswer']['textAnswer']);
+
         // Verify ExpiredChallenge2 data
         $this->assertEquals('Another expired challenge', $expiredChallenge2Data['challengeName']);
         $this->assertEquals(600, $expiredChallenge2Data['points']); // User 1 got 600 points
@@ -132,6 +138,13 @@ final class PlayerAnswersTest extends ApiTestCase
         $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_9_ID, $question8['answer']['selectedChoiceId']);
         $this->assertEquals('Red', $question8['answer']['selectedChoiceText']);
 
+        // Verify correctAnswer for Question 8 (SingleSelect) - Correct answer is Red (CHOICE_9_ID)
+        assert(is_array($question8));
+        $this->assertArrayHasKey('correctAnswer', $question8);
+        $this->assertIsArray($question8['correctAnswer']);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_9_ID, $question8['correctAnswer']['selectedChoiceId']);
+        $this->assertEquals('Red', $question8['correctAnswer']['selectedChoiceText']);
+
         // Question 9 (MultiSelect) - User 1 selected 7 and 13 (CHOICE_12_ID, CHOICE_13_ID)
         $this->assertIsArray($question9['answer']['selectedChoiceIds']);
         $this->assertCount(2, $question9['answer']['selectedChoiceIds']);
@@ -141,6 +154,32 @@ final class PlayerAnswersTest extends ApiTestCase
         $this->assertCount(2, $question9['answer']['selectedChoiceTexts']);
         $this->assertEquals('7', $question9['answer']['selectedChoiceTexts'][0]);
         $this->assertEquals('13', $question9['answer']['selectedChoiceTexts'][1]);
+
+        // Verify correctAnswer for Question 9 (MultiSelect) - Correct answers are 7 and 13
+        assert(is_array($question9));
+        $this->assertArrayHasKey('correctAnswer', $question9);
+        $this->assertIsArray($question9['correctAnswer']);
+        $this->assertIsArray($question9['correctAnswer']['selectedChoiceIds']);
+        $this->assertCount(2, $question9['correctAnswer']['selectedChoiceIds']);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_12_ID, $question9['correctAnswer']['selectedChoiceIds'][0]);
+        $this->assertEquals(ExpiredChallenge2Fixture::CHOICE_13_ID, $question9['correctAnswer']['selectedChoiceIds'][1]);
+        $this->assertIsArray($question9['correctAnswer']['selectedChoiceTexts']);
+        $this->assertCount(2, $question9['correctAnswer']['selectedChoiceTexts']);
+        $this->assertEquals('7', $question9['correctAnswer']['selectedChoiceTexts'][0]);
+        $this->assertEquals('13', $question9['correctAnswer']['selectedChoiceTexts'][1]);
+
+        // Verify correctAnswer for Question 10 (Numeric) - Correct answer is 42.0
+        $question10 = null;
+        foreach ($expiredChallenge2Data['questions'] as $question) {
+            if ($question['questionId'] === ExpiredChallenge2Fixture::QUESTION_10_ID) {
+                $question10 = $question;
+            }
+        }
+        $this->assertNotNull($question10, 'Question 10 should be present');
+        assert(is_array($question10));
+        $this->assertArrayHasKey('correctAnswer', $question10);
+        $this->assertIsArray($question10['correctAnswer']);
+        $this->assertEquals(42.0, $question10['correctAnswer']['numericAnswer']);
     }
 
     public function testPlayerAnswersDoesNotIncludeUnevaluatedChallenges(): void
