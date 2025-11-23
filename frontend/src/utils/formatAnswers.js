@@ -48,5 +48,5 @@ export function formatCorrectAnswer(correct) {
     });
   }
 
-  return parts.length > 0 ? parts.join("  ·  ") : "—";
+  return parts.length > 0 ? parts.join("  |  ") : "—";
 }
