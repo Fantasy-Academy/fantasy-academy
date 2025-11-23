@@ -246,6 +246,13 @@ async function load() {
   }
 }
 
+const initials = computed(() => {
+  const name = player.value?.name?.trim() || '';
+  if (!name) return  '?';
+  const parts = name.split(/\s+/).filter(Boolean);
+  return((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
+});
+
 const registered = computed(() => {
   const d = player.value?.registeredAt ? new Date(player.value.registeredAt) : null;
   if (!d) return '—';
@@ -266,13 +273,6 @@ const overall = computed(() => {
     weeklyPoints: 0,
     weeklyRankChange: 0,
   }
-});
-
-const initials = computed(() => {
-  const name = player.value?.name?.trim() || '';
-  if (!name) return '?';
-  const parts = name.split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
 });
 
 function extractAnswerText(answer) {

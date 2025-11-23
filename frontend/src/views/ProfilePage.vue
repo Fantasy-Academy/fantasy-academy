@@ -11,7 +11,6 @@
       <!-- Header with avatar/monogram -->
       <div
         class="mb-8 flex flex-col lg:flex-row items-start lg:items-center gap-5 rounded-2xl bg-gradient-to-r from-blue-black to-charcoal p-5 text-white shadow-main">
-
         <!-- Left side: Avatar + user info -->
         <div class="flex flex-row sm:flex-row gap-4 items-center flex-1">
           <div class="relative h-16 w-16 shrink-0">
@@ -24,10 +23,15 @@
             </div>
           </div>
           <div class="min-w-0">
-            <h1 class="font-bebas-neue text-2xl sm:text-3xl tracking-wide">{{ profile.name }}</h1>
-            <p class="text-dark-white/90 text-sm sm:text-base font-alexandria break-all">{{ profile.email }}</p>
+            <h1 class="font-bebas-neue text-2xl sm:text-3xl tracking-wide">
+              {{ profile.name }}
+            </h1>
+            <p class="text-dark-white/90 text-sm sm:text-base font-alexandria break-all">
+              {{ profile.email }}
+            </p>
             <p class="text-xs sm:text-sm text-dark-white/70 font-alexandria">
-              Registered: <span class="font-semibold text-white">{{ formattedRegistered }}</span>
+              Registered:
+              <span class="font-semibold text-white">{{ formattedRegistered }}</span>
             </p>
           </div>
         </div>
@@ -55,7 +59,9 @@
         <!-- Total FAPs -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Total FAPs</p>
-          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.points ?? 0 }}</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">
+            {{ overall.points ?? 0 }}
+          </p>
           <p v-if="overall.pointsChange != null && overall.pointsChange !== 0"
             :class="changePointsClass(overall.pointsChange)" class="text-s">
             {{ formatChange(overall.pointsChange) }} this week
@@ -65,7 +71,9 @@
         <!-- Rank -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Rank</p>
-          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.rank ?? '—' }}</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">
+            {{ overall.rank ?? '—' }}
+          </p>
           <p v-if="overall.rankChange != null && overall.rankChange !== 0" :class="changeRankClass(overall.rankChange)"
             class="text-s">
             {{ formatChange(overall.rankChange) }} this week
@@ -75,8 +83,11 @@
         <!-- Answered Challenges -->
         <div class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm text-center">
           <p class="text-sm text-cool-gray font-alexandria">Answered challenges</p>
-          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">{{ overall.challengesAnswered ?? 0 }}</p>
+          <p class="mt-1 text-2xl sm:text-3xl font-bold text-blue-black">
+            {{ overall.challengesAnswered ?? 0 }}
+          </p>
         </div>
+
         <GameweekStatus />
       </div>
 
@@ -162,10 +173,18 @@
             </thead>
             <tbody>
               <tr v-for="(s, i) in profile.seasonsStatistics" :key="i" class="border-t border-dark-white/60">
-                <td class="px-4 py-2 font-alexandria text-blue-black">{{ s.seasonNumber }}</td>
-                <td class="px-4 py-2 font-alexandria text-blue-black">{{ s.rank ?? '—' }}</td>
-                <td class="px-4 py-2 font-alexandria text-blue-black">{{ s.challengesAnswered }}</td>
-                <td class="px-4 py-2 font-alexandria text-blue-black">{{ s.points }}</td>
+                <td class="px-4 py-2 font-alexandria text-blue-black">
+                  {{ s.seasonNumber }}
+                </td>
+                <td class="px-4 py-2 font-alexandria text-blue-black">
+                  {{ s.rank ?? '—' }}
+                </td>
+                <td class="px-4 py-2 font-alexandria text-blue-black">
+                  {{ s.challengesAnswered }}
+                </td>
+                <td class="px-4 py-2 font-alexandria text-blue-black">
+                  {{ s.points }}
+                </td>
                 <td class="px-4 py-2">
                   <div class="flex flex-wrap gap-2">
                     <span v-for="(sk, j) in (s.skills || []).slice(0, 3)" :key="j"
@@ -189,24 +208,24 @@
         </div>
       </div>
 
-      <!-- My Answers Section -->
+      <!-- PLAYER ANSWERS -->
       <div class="mt-10">
-        <h2 class="font-bebas-neue text-2xl text-blue-black mb-4">My Answers</h2>
+        <h2 class="font-bebas-neue text-2xl text-blue-black mb-4">Player Answers</h2>
 
-        <div v-if="answersLoading" class="text-cool-gray">Loading answers…</div>
-        <div v-else-if="answersError" class="text-vibrant-coral">{{ answersError }}</div>
+        <div v-if="playerAnswersLoading" class="text-cool-gray">Loading answers…</div>
+        <div v-else-if="playerAnswersError" class="text-vibrant-coral">
+          {{ playerAnswersError }}
+        </div>
 
-        <div v-else-if="myAnswers.length === 0"
+        <div v-else-if="playerAnswers.length === 0"
           class="rounded-xl border border-charcoal/10 bg-dark-white p-4 text-cool-gray">
           No answers yet.
         </div>
 
-        <!-- Scroll Container -->
         <div v-else class="max-h-96 overflow-y-auto space-y-4 pr-2">
-          <div v-for="(c, i) in limitedAnswers" :key="i"
+          <div v-for="(c, i) in limitedAnswers" :key="c.challengeId || i"
             class="rounded-2xl border border-charcoal/10 bg-white p-4 shadow-sm">
-
-            <!-- Challenge header -->
+            <!-- Header -->
             <div class="mb-2 flex flex-wrap items-center gap-2 text-xs">
               <span
                 class="inline-flex items-center bg-dark-white px-2 py-0.5 rounded-full font-semibold text-blue-black">
@@ -215,114 +234,96 @@
 
               <span class="text-cool-gray">·</span>
 
-              <span class="text-cool-gray">
-                Gameweek {{ c.gameweek ?? '—' }}
-              </span>
+              <span class="text-cool-gray">Gameweek {{ c.gameweek }}</span>
 
-              <span class="ml-auto font-semibold text-blue-black">
-                {{ c.points }} FAPs
-              </span>
+              <p class="font-bold text-blue-black">
+                +{{ c.points }} FAPs
+              </p>
             </div>
 
-            <!-- Questions + answers -->
-            <div v-for="(q, qi) in c.questions" :key="qi" class="mt-2">
+            <!-- Questions -->
+            <div v-for="(q, qi) in c.questions || []" :key="q.questionId || qi" class="mt-3">
               <p class="font-alexandria text-blue-black font-semibold">
                 {{ q.questionText }}
               </p>
 
-              <p class="text-sm text-cool-gray mt-1">
-                You answered:
+              <p class="text-sm mt-1">
+                Your answer:
                 <span class="font-semibold text-blue-black">
                   {{ formatAnswer(q.answer) }}
+                </span>
+              </p>
+
+              <p class="text-sm mt-1">
+                Correct:
+                <span class="font-semibold text-pistachio">
+                  {{ formatCorrectAnswer(q.correctAnswer) }}
                 </span>
               </p>
             </div>
           </div>
         </div>
 
-        <!-- "Show more" Button -->
-        <div v-if="answersToShow < myAnswers.length" class="mt-4 text-center">
+        <div v-if="answersToShow < playerAnswers.length" class="mt-4 text-center">
           <button @click="showMoreAnswers"
             class="px-4 py-2 rounded-lg bg-white border border-charcoal/20 font-semibold text-blue-black hover:bg-dark-white shadow-sm">
             Show more
           </button>
         </div>
       </div>
-
-      <!-- Actions -->
-      <div class="mt-8 flex flex-wrap justify-center sm:justify-start gap-3">
-        <router-link to="/challenges"
-          class="inline-flex items-center justify-center rounded-lg bg-blue-black px-5 py-2 font-semibold text-white shadow-main hover:opacity-90">
-          View challenges
-        </router-link>
-        <router-link to="/dashboard"
-          class="inline-flex items-center justify-center rounded-lg border border-charcoal/20 bg-white px-5 py-2 font-semibold text-blue-black hover:bg-dark-white shadow-sm">
-          Go to dashboard
-        </router-link>
-      </div>
     </template>
   </section>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { resolvedImage, onImgError } from '../utils/imageHelpers';
 import { useProfile } from '@/composables/useProfile';
 import { useAuth } from '@/composables/useAuth';
 import { useChallenges } from '@/composables/useChallenges';
-import { useMyAnswers } from '@/composables/useMyAnswers';
 import GameweekStatus from '../components/GameweekStatus.vue';
-
-
+import { usePlayerAnswers } from '@/composables/usePlayerAnswers';
+import { formatAnswer, formatCorrectAnswer } from '@/utils/formatAnswers';
+import { watchEffect } from 'vue';
 
 const { user } = useAuth();
 const { me, loading, error, load } = useProfile();
+const { challenges, loadChallenges } = useChallenges();
+
+const {
+  answers: playerAnswers,
+  loading: playerAnswersLoading,
+  error: playerAnswersError,
+  loadPlayerAnswers,
+} = usePlayerAnswers();
 
 document.title = 'Fantasy Academy | Profile';
 
-//challenges
-const { challenges, loadChallenges } = useChallenges();
-
+// Pokud už máme usera a není nastavený me, zkopíruj ho
 if (user.value && !me.value) {
   me.value = user.value;
 }
+
 onMounted(() => {
-  load();            // načti profil
-  loadChallenges();  // načti výzvy
-  loadMyAnswers({ page: 1, auth: true }); // načti moje odpovědi
+  load();           // profil
+  loadChallenges(); // výzvy
+
+  // pro případ, že me je už připravený
+  if (me.value?.id) {
+    loadPlayerAnswers(me.value.id);
+  }
 });
 
-const {
-  myAnswers,
-  loading: answersLoading,
-  error: answersError,
-  loadMyAnswers
-} = useMyAnswers();
-
-const answersToShow = ref(5);
-
-function formatDate(dt) {
-  if (!dt) return '—';
-  try {
-    return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dt));
-  } catch {
-    return new Date(dt).toLocaleString();
+// Když se změní ID hráče → načíst jeho answers
+watch(
+  () => me.value?.id,
+  (id) => {
+    if (id) {
+      console.log('🔵 Loading player answers for profile id:', id);
+      loadPlayerAnswers(id);
+    }
   }
-}
-
-const limitedAnswers = computed(() =>
-  myAnswers.value.slice(0, answersToShow.value)
 );
-
-function showMoreAnswers() {
-  answersToShow.value += 5;
-}
 
 const profile = computed(() => ({
   id: me.value?.id ?? user.value?.id ?? null,
@@ -334,10 +335,10 @@ const profile = computed(() => ({
   seasonsStatistics: me.value?.seasonsStatistics ?? user.value?.seasonsStatistics ?? [],
 }));
 
-//výpočet aktivních výzev z reálných dat
+// Aktivní výzvy
 const activeChallengesCount = computed(() => {
   const list = challenges.value || [];
-  return list.filter(c => c && c.isStarted && !c.isExpired && !c.isAnswered).length;
+  return list.filter((c) => c && c.isStarted && !c.isExpired && !c.isAnswered).length;
 });
 
 const avatarSrc = computed(() => resolvedImage(profile.value));
@@ -347,32 +348,28 @@ const formattedRegistered = computed(() => {
   const d = new Date(profile.value.registeredAt);
   try {
     return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     }).format(d);
   } catch {
     return d.toLocaleString();
   }
 });
 
-const overall = computed(() => profile.value.overallStatistics ?? {
-  rank: null,
-  challengesAnswered: 0,
-  points: 0,
-  weeklyPoints: 0,
-  weeklyRankChange: 0,
-  skills: [],
-});
-
-function formatAnswer(a) {
-  if (!a) return '—';
-  if (a.textAnswer != null) return a.textAnswer;
-  if (a.numericAnswer != null) return a.numericAnswer;
-  if (a.selectedChoiceId) return a.selectedChoiceId;
-  if (Array.isArray(a.selectedChoiceIds)) return a.selectedChoiceIds.join(', ');
-  if (Array.isArray(a.orderedChoiceIds)) return a.orderedChoiceIds.join(' → ');
-  return '—';
-}
+const overall = computed(
+  () =>
+    profile.value.overallStatistics ?? {
+      rank: null,
+      challengesAnswered: 0,
+      points: 0,
+      weeklyPoints: 0,
+      weeklyRankChange: 0,
+      skills: [],
+    }
+);
 
 const initials = computed(() => {
   const name = profile.value.name?.trim();
@@ -402,4 +399,59 @@ function changeRankClass(value) {
   if (value > 0) return 'text-pistachio';
   return 'text-cool-gray';
 }
+
+
+const answersToShow = ref(5);
+const limitedAnswers = computed(() =>
+  playerAnswers.value.slice(0, answersToShow.value)
+);
+
+watchEffect(() => {
+  console.log("🟪 limitedAnswers used for rendering:", limitedAnswers.value);
+});
+
+function showMoreAnswers() {
+  answersToShow.value += 5;
+}
+
+
+watchEffect(() => {
+  console.log("🟦 RAW playerAnswers from composable:", playerAnswers.value);
+
+  if (!playerAnswers.value || playerAnswers.value.length === 0) {
+    console.log("🟨 No player answers yet.");
+    return;
+  }
+
+  playerAnswers.value.forEach((ch, ci) => {
+    console.groupCollapsed(`📘 Challenge #${ci + 1}: ${ch.challengeName || ch.name}`);
+    console.log("Challenge object:", ch);
+
+    console.log("➡️ gameweek:", ch.gameweek);
+    console.log("➡️ points:", ch.points ?? ch.myPoints);
+
+    ch.questions?.forEach((q, qi) => {
+      console.groupCollapsed(`🟩 Question #${qi + 1}`);
+      console.log("Text:", q.questionText || q.text);
+      console.log("My Answer:", q.answer || q.myAnswer);
+      console.log("Correct Answer:", q.correctAnswer);
+      console.groupEnd();
+    });
+
+    console.groupEnd();
+  });
+});
+
+watchEffect(() => {
+  playerAnswers.value?.forEach((c, ci) => {
+    c.questions?.forEach((q, qi) => {
+      console.log(
+        `%c[DEBUG correctAnswer] challenge ${ci} question ${qi}`,
+        "color:#ff00ff;font-weight:bold"
+      );
+      console.log("CorrectAnswer object actually passed:", q.correctAnswer);
+      console.log("After formatter:", formatCorrectAnswer(q.correctAnswer));
+    });
+  });
+});
 </script>

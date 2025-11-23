@@ -1,29 +1,57 @@
-import { ref, computed } from 'vue';
-import { useChallenges } from './useChallenges';
+import { ref, computed, onMounted } from 'vue';
+import { apiFetch } from '@/api/http';
+import { useAuth } from './useAuth';
 
 export function useGameweek() {
-  const { challenges, loadChallenges } = useChallenges();
+  const { token } = useAuth();
 
-  // Pokud ještě nemáme výzvy, načteme
-  if (!challenges.value || challenges.value.length === 0) {
-    loadChallenges();
+  const gameweeks = ref({
+    current: null,
+    next: null,
+    previous: null,
+  });
+
+  const loading = ref(false);
+  const error = ref(null);
+
+  async function loadGameweeks() {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const data = await apiFetch('/api/gameweeks', {
+        method: 'GET',
+        headers: token?.value
+          ? { Authorization: `Bearer ${token.value}` }
+          : {},
+      });
+
+      console.log("🔍 Raw response from /api/gameweeks:", data);
+
+      gameweeks.value = data;
+    } catch (e) {
+      console.error('❌ Error loading gameweeks:', e);
+      error.value = e.message;
+    } finally {
+      loading.value = false;
+    }
   }
 
-  // Aktuální běžící gameweek
-  const currentGameweek = computed(() => {
-    const active = challenges.value?.find(c => c.isStarted && !c.isExpired);
-    return active?.gameweek ?? null;
-  });
+  // 🔥 Auto-load when imported
+  onMounted(loadGameweeks);
 
-  // Nejbližší nadcházející gameweek
-  const nextGameweek = computed(() => {
-    const next = challenges.value?.find(c => !c.isStarted && !c.isExpired);
-    return next?.gameweek ?? null;
-  });
+  // Computed getters
+  const currentGameweek = computed(() => gameweeks.value?.current ?? null);
+  const nextGameweek = computed(() => gameweeks.value?.next ?? null);
+  const previousGameweek = computed(() => gameweeks.value?.previous ?? null);
 
   return {
+    gameweeks,
     currentGameweek,
     nextGameweek,
-    challenges
+    previousGameweek,
+    loading,
+    error,
+    loadGameweeks,
   };
-}
+} 
