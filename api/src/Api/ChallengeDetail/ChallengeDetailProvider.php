@@ -251,6 +251,9 @@ SQL;
                 );
             }
 
+            // Sort by count descending (most answers first)
+            usort($answerStats, static fn (AnswerStatistic $a, AnswerStatistic $b): int => $b->count <=> $a->count);
+
             $statisticsMap[$questionId] = new QuestionStatistics(
                 totalAnswers: $totalAnswers,
                 answers: $answerStats,
