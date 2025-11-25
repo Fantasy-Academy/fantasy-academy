@@ -50,3 +50,24 @@ export function formatCorrectAnswer(correct) {
 
   return parts.length > 0 ? parts.join("  |  ") : "—";
 }
+
+export function formatStatisticAnswer(stat) {
+  if (!stat?.answer) return "—";
+
+  const a = stat.answer;
+
+  if (a.numericAnswer !== null && a.numericAnswer !== undefined) {
+    return a.numericAnswer.toString();
+  }
+  if (a.textAnswer) {
+    return a.textAnswer;
+  }
+  if (a.selectedChoiceText) {
+    return a.selectedChoiceText;
+  }
+  if (Array.isArray(a.selectedChoiceTexts) && a.selectedChoiceTexts.length > 0) {
+    return a.selectedChoiceTexts.join(", ");
+  }
+
+  return "—";
+}
