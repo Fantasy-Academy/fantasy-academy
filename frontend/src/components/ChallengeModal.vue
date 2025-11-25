@@ -99,6 +99,7 @@
                   <span class="text-cool-gray">Unknown question type: {{ q.type }}</span>
                 </template>
               </div>
+
               <div class="mt-5">
                 <p v-if="q.answeredAt" class="mt-2 text-xs text-cool-gray">
                   Answered at: {{ new Date(q.answeredAt).toLocaleString() }}
@@ -133,8 +134,37 @@
               <div v-else class="text-sm text-cool-gray">Unknown question type: {{ q.type }}</div>
 
               <!-- Per-question validation error -->
-              <p v-if="qErrors[q.id]" class="mt-2 text-sm text-vibrant-coral font-medium">{{ qErrors[q.id] }}</p>
+              <p v-if="qErrors[q.id]" class="mt-2 text-sm text-vibrant-coral font-medium">
+                {{ qErrors[q.id] }}
+              </p>
             </template>
+
+            <!-- ALWAYS SHOW STATISTICS (ACTIVE, NON-ANSWERED, ANSWERED, EXPIRED) -->
+            <div v-if="q.statistics" class="mt-4 rounded-lg border border-charcoal/10 bg-dark-white/60 p-3">
+              <p class="text-sm font-semibold text-blue-black mb-2">
+                Player answer distribution ({{ q.statistics.totalAnswers }} answers)
+              </p>
+
+              <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                No answers yet.
+              </div>
+
+              <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+                <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                  <span>{{ formatStatisticAnswer(stat) }}</span>
+                  <span>{{ stat.percentage.toFixed(1) }}%</span>
+                </div>
+
+                <div class="w-full h-2 bg-white rounded-full overflow-hidden border border-charcoal/10">
+                  <div class="h-full bg-vibrant-coral rounded-full transition-all duration-500"
+                    :style="{ width: stat.percentage + '%' }"></div>
+                </div>
+
+                <p class="text-xs text-cool-gray mt-1">
+                  {{ stat.count }} players
+                </p>
+              </div>
+            </div>
           </div>
         </template>
       </section>
@@ -173,34 +203,35 @@
 </style>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed } from 'vue';
-import { apiGetChallengeDetail, apiAnswerChallenge } from '@/api/challenges';
-import { resolvedImage, onImgError } from '@/utils/imageHelpers';
+import { ref, reactive, onMounted, watch, computed } from "vue";
+import { apiGetChallengeDetail, apiAnswerChallenge } from "@/api/challenges";
+import { resolvedImage, onImgError } from "@/utils/imageHelpers";
+import { formatStatisticAnswer } from "../utils/formatAnswers";
 
 // question components
-import QuestionSingleSelect from '@/components/questions/SingleSelectQuestion.vue';
-import QuestionMultiSelect from '@/components/questions/MultiSelectQuestion.vue';
-import QuestionNumeric from '@/components/questions/NumericQuestion.vue';
-import QuestionText from '@/components/questions/TextQuestion.vue';
-import QuestionSort from '@/components/questions/SortQuestion.vue';
+import QuestionSingleSelect from "@/components/questions/SingleSelectQuestion.vue";
+import QuestionMultiSelect from "@/components/questions/MultiSelectQuestion.vue";
+import QuestionNumeric from "@/components/questions/NumericQuestion.vue";
+import QuestionText from "@/components/questions/TextQuestion.vue";
+import QuestionSort from "@/components/questions/SortQuestion.vue";
 
 const props = defineProps({
   show: { type: Boolean, default: false },
   challengeId: { type: String, required: false },
 });
-const emit = defineEmits(['close', 'submitted']);
+const emit = defineEmits(["close", "submitted"]);
 
 const loading = ref(false);
 const error = ref(null);
 const challenge = ref(null);
-const questions = ref([]);       // API form
-const answers = reactive({});    // map questionId -> model
+const questions = ref([]); // API form
+const answers = reactive({}); // map questionId -> model
 const sortModels = reactive({}); // map questionId -> [{ id,label } ...] for UI sort
-const qErrors = reactive({});    // map questionId -> error string
+const qErrors = reactive({}); // map questionId -> error string
 const submitting = ref(false);
 
-const log = (...a) => console.log('[ChallengeModal]', ...a);
-const err = (...a) => console.error('[ChallengeModal]', ...a);
+const log = (...a) => console.log("[ChallengeModal]", ...a);
+const err = (...a) => console.error("[ChallengeModal]", ...a);
 
 // absolute URLs for images
 const challengeImgSrc = computed(() => resolvedImage(challenge.value));
@@ -226,7 +257,7 @@ function toSingleSelectUI(q) {
     id: q.id,
     text: q.text,
     hint: null,
-    options: (q.choiceConstraint?.choices || []).map(c => ({
+    options: (q.choiceConstraint?.choices || []).map((c) => ({
       id: c.id,
       label: c.text,
       value: c.id,
@@ -243,7 +274,7 @@ function toMultiSelectUI(q) {
     id: q.id,
     text: q.text,
     hint: minSel || maxSel ? hintForSelect(minSel, maxSel) : null,
-    options: (q.choiceConstraint?.choices || []).map(c => ({
+    options: (q.choiceConstraint?.choices || []).map((c) => ({
       id: c.id,
       label: c.text,
       value: c.id,
@@ -264,7 +295,7 @@ function toNumericUI(q) {
 }
 
 function toSortUI(q) {
-  const opts = (q.choiceConstraint?.choices || []).map(c => ({
+  const opts = (q.choiceConstraint?.choices || []).map((c) => ({
     id: c.id,
     label: c.text,
     image: c.image ? resolvedImage({ image: c.image }) : null,
@@ -272,7 +303,7 @@ function toSortUI(q) {
   return {
     id: q.id,
     text: q.text,
-    hint: 'Order the options (drag & drop).',
+    hint: "Order the options (drag & drop).",
     options: opts,
   };
 }
@@ -280,8 +311,8 @@ function toSortUI(q) {
 /** Hints */
 function rangeHint(constraint) {
   if (!constraint) return null;
-  const hasMin = typeof constraint.min === 'number';
-  const hasMax = typeof constraint.max === 'number';
+  const hasMin = typeof constraint.min === "number";
+  const hasMax = typeof constraint.max === "number";
   if (hasMin && hasMax) return `Enter a number from ${constraint.min} to ${constraint.max}.`;
   if (hasMin) return `Enter a number ≥ ${constraint.min}.`;
   if (hasMax) return `Enter a number ≤ ${constraint.max}.`;
@@ -296,46 +327,49 @@ function hintForSelect(minSel, maxSel) {
 
 // zoom in hint image
 const zoomedImage = ref(null);
-function openImage(src) { zoomedImage.value = src; }
-function closeImage() { zoomedImage.value = null; }
+function openImage(src) {
+  zoomedImage.value = src;
+}
+function closeImage() {
+  zoomedImage.value = null;
+}
 
 /** Init models per question type */
 function initAnswerModels(apiQuestions) {
-  Object.keys(qErrors).forEach(k => delete qErrors[k]);
+  Object.keys(qErrors).forEach((k) => delete qErrors[k]);
 
-  // === NEW: helper, který preferuje myAnswer ===
   const getAns = (q) => q?.myAnswer ?? q?.answer ?? null;
 
-  apiQuestions.forEach(q => {
-    const a = getAns(q); // ← používejme myAnswer / answer
+  apiQuestions.forEach((q) => {
+    const a = getAns(q);
 
     switch (q.type) {
-      case 'single_select': {
+      case "single_select": {
         const preset = a?.selectedChoiceId || null;
         answers[q.id] = preset;
         break;
       }
-      case 'multi_select': {
+      case "multi_select": {
         const preset = Array.isArray(a?.selectedChoiceIds) ? a.selectedChoiceIds : [];
         answers[q.id] = preset;
         break;
       }
-      case 'text': {
-        answers[q.id] = a?.textAnswer ?? '';
+      case "text": {
+        answers[q.id] = a?.textAnswer ?? "";
         break;
       }
-      case 'numeric': {
-        const num = (typeof a?.numericAnswer === 'number') ? a.numericAnswer : null;
+      case "numeric": {
+        const num = typeof a?.numericAnswer === "number" ? a.numericAnswer : null;
         answers[q.id] = num;
         break;
       }
-      case 'sort': {
-        const base = (q.choiceConstraint?.choices || []).map(c => c.id);
+      case "sort": {
+        const base = (q.choiceConstraint?.choices || []).map((c) => c.id);
         const preset = Array.isArray(a?.orderedChoiceIds) ? a.orderedChoiceIds : base;
         answers[q.id] = preset.slice();
 
-        const opts = (q.choiceConstraint?.choices || []).map(c => ({ id: c.id, label: c.text }));
-        const ordered = preset.map(id => opts.find(o => o.id === id)).filter(Boolean);
+        const opts = (q.choiceConstraint?.choices || []).map((c) => ({ id: c.id, label: c.text }));
+        const ordered = preset.map((id) => opts.find((o) => o.id === id)).filter(Boolean);
         sortModels[q.id] = ordered;
         break;
       }
@@ -351,7 +385,7 @@ watch(
   () => {
     for (const qId of Object.keys(sortModels)) {
       const arr = sortModels[qId];
-      if (Array.isArray(arr)) answers[qId] = arr.map(o => o.id);
+      if (Array.isArray(arr)) answers[qId] = arr.map((o) => o.id);
     }
   },
   { deep: true }
@@ -359,27 +393,27 @@ watch(
 
 /** Validation — only for NOT expired (editable) questions */
 function validateAnswers() {
-  Object.keys(qErrors).forEach(k => delete qErrors[k]);
+  Object.keys(qErrors).forEach((k) => delete qErrors[k]);
 
   for (const q of questions.value) {
-    if (isQuestionReadOnly(q)) continue; // skip validation for read-only (expired)
+    if (isQuestionReadOnly(q)) continue;
 
     const val = answers[q.id];
 
-    if (q.type === 'single_select') {
+    if (q.type === "single_select") {
       if (!val) {
-        qErrors[q.id] = 'Select an answer.';
+        qErrors[q.id] = "Select an answer.";
         continue;
       }
     }
 
-    if (q.type === 'multi_select') {
+    if (q.type === "multi_select") {
       const arr = Array.isArray(val) ? val : [];
       const minSel = q.choiceConstraint?.minSelections ?? 1;
       const maxSel = q.choiceConstraint?.maxSelections ?? null;
 
       if (arr.length < minSel) {
-        qErrors[q.id] = minSel === 1 ? 'Select at least one option.' : `Select at least ${minSel} options.`;
+        qErrors[q.id] = minSel === 1 ? "Select at least one option." : `Select at least ${minSel} options.`;
         continue;
       }
       if (maxSel != null && arr.length > maxSel) {
@@ -388,17 +422,17 @@ function validateAnswers() {
       }
     }
 
-    if (q.type === 'text') {
-      const str = (val ?? '').toString().trim();
+    if (q.type === "text") {
+      const str = (val ?? "").toString().trim();
       if (!str) {
-        qErrors[q.id] = 'Please enter a text answer.';
+        qErrors[q.id] = "Please enter a text answer.";
         continue;
       }
     }
 
-    if (q.type === 'numeric') {
-      if (val === null || val === '' || Number.isNaN(Number(val))) {
-        qErrors[q.id] = 'Enter a numeric value.';
+    if (q.type === "numeric") {
+      if (val === null || val === "" || Number.isNaN(Number(val))) {
+        qErrors[q.id] = "Enter a numeric value.";
         continue;
       }
       const num = Number(val);
@@ -414,10 +448,10 @@ function validateAnswers() {
       }
     }
 
-    if (q.type === 'sort') {
+    if (q.type === "sort") {
       const arr = Array.isArray(val) ? val : [];
       if (arr.length === 0) {
-        qErrors[q.id] = 'The order cannot be empty.';
+        qErrors[q.id] = "The order cannot be empty.";
         continue;
       }
     }
@@ -429,15 +463,12 @@ function validateAnswers() {
 /** Read-only label helpers */
 function choiceMap(q) {
   const map = new Map();
-  (q.choiceConstraint?.choices || []).forEach(c => map.set(c.id, c.text));
+  (q.choiceConstraint?.choices || []).forEach((c) => map.set(c.id, c.text));
   return map;
 }
 
 function roSingleLabel(q) {
-  const id =
-    q.myAnswer?.selectedChoiceId ??
-    q.answer?.selectedChoiceId ??
-    null;
+  const id = q.myAnswer?.selectedChoiceId ?? q.answer?.selectedChoiceId ?? null;
   if (!id) return null;
   return choiceMap(q).get(id) || id;
 }
@@ -445,23 +476,27 @@ function roSingleLabel(q) {
 function roMultiLabels(q) {
   const ids = Array.isArray(q.myAnswer?.selectedChoiceIds)
     ? q.myAnswer.selectedChoiceIds
-    : (Array.isArray(q.answer?.selectedChoiceIds) ? q.answer.selectedChoiceIds : []);
+    : Array.isArray(q.answer?.selectedChoiceIds)
+      ? q.answer.selectedChoiceIds
+      : [];
   const map = choiceMap(q);
-  return ids.map(id => map.get(id) || id);
+  return ids.map((id) => map.get(id) || id);
 }
 
 function roSortLabels(q) {
   const ids = Array.isArray(q.myAnswer?.orderedChoiceIds)
     ? q.myAnswer.orderedChoiceIds
-    : (Array.isArray(q.answer?.orderedChoiceIds) ? q.answer.orderedChoiceIds : []);
+    : Array.isArray(q.answer?.orderedChoiceIds)
+      ? q.answer.orderedChoiceIds
+      : [];
   const map = choiceMap(q);
-  return ids.map(id => map.get(id) || id);
+  return ids.map((id) => map.get(id) || id);
 }
 
 /** Fetch challenge */
 async function fetchChallenge() {
   if (!props.challengeId) {
-    log('⚠️ fetchChallenge skipped: missing challengeId');
+    log("⚠️ fetchChallenge skipped: missing challengeId");
     return;
   }
 
@@ -473,7 +508,7 @@ async function fetchChallenge() {
     challenge.value = {
       id: data.id,
       name: data.name,
-      description: data.description || '',
+      description: data.description || "",
       hintText: data.hintText ?? null,
       hintImage: data.hintImage ?? null,
       isExpired: !!data.isExpired,
@@ -484,8 +519,8 @@ async function fetchChallenge() {
     questions.value = Array.isArray(data.questions) ? data.questions : [];
     initAnswerModels(questions.value);
   } catch (e) {
-    err('fetchChallenge failed:', e);
-    error.value = e?.message || 'Failed to load challenge.';
+    err("fetchChallenge failed:", e);
+    error.value = e?.message || "Failed to load challenge.";
   } finally {
     loading.value = false;
   }
@@ -494,14 +529,14 @@ async function fetchChallenge() {
 /** Submit (Answer.challenge schema) — send ALL editable (not expired) answers */
 async function handleSubmit() {
   if (!challenge.value) return;
-  if (readOnly.value) return; // expired → no submit
+  if (readOnly.value) return;
 
   if (!validateAnswers()) return;
 
-  const editableQuestions = questions.value.filter(q => !isQuestionReadOnly(q));
+  const editableQuestions = questions.value.filter((q) => !isQuestionReadOnly(q));
   const payload = {
     challengeId: challenge.value.id,
-    answers: editableQuestions.map(q => {
+    answers: editableQuestions.map((q) => {
       const model = answers[q.id];
       const answer = {
         textAnswer: null,
@@ -512,19 +547,19 @@ async function handleSubmit() {
       };
 
       switch (q.type) {
-        case 'single_select':
+        case "single_select":
           answer.selectedChoiceId = model || null;
           break;
-        case 'multi_select':
+        case "multi_select":
           answer.selectedChoiceIds = Array.isArray(model) ? model : [];
           break;
-        case 'text':
-          answer.textAnswer = (model ?? '').toString();
+        case "text":
+          answer.textAnswer = (model ?? "").toString();
           break;
-        case 'numeric':
-          answer.numericAnswer = (model === '' || model === null) ? null : Number(model);
+        case "numeric":
+          answer.numericAnswer = model === "" || model === null ? null : Number(model);
           break;
-        case 'sort':
+        case "sort":
           answer.orderedChoiceIds = Array.isArray(model) ? model : [];
           break;
       }
@@ -536,9 +571,9 @@ async function handleSubmit() {
   submitting.value = true;
   try {
     await apiAnswerChallenge(payload);
-    emit('submitted');
+    emit("submitted");
   } catch (e) {
-    err('handleSubmit failed:', e);
+    err("handleSubmit failed:", e);
   } finally {
     submitting.value = false;
   }
@@ -548,39 +583,45 @@ function formatCorrectAnswer(question) {
   const answer = question.correctAnswer;
   if (!answer) return null;
 
-  // 1) Numeric
-  if (answer.numericAnswer !== null) {
+  if (answer.numericAnswer !== null && answer.numericAnswer !== undefined) {
     return answer.numericAnswer;
   }
 
-  // 2) Text
   if (answer.textAnswer) {
     return answer.textAnswer;
   }
 
-  // 3) Single select
   if (answer.selectedChoiceId) {
-    const choice = question.choiceConstraint?.choices.find(
-      c => c.id === answer.selectedChoiceId
-    );
+    const choice = question.choiceConstraint?.choices.find((c) => c.id === answer.selectedChoiceId);
     return choice ? choice.text : answer.selectedChoiceId;
   }
 
-  // 4) Multi select
   if (Array.isArray(answer.selectedChoiceIds) && answer.selectedChoiceIds.length > 0) {
     return answer.selectedChoiceIds
-      .map(id => {
-        const choice = question.choiceConstraint?.choices.find(c => c.id === id);
+      .map((id) => {
+        const choice = question.choiceConstraint?.choices.find((c) => c.id === id);
         return choice ? choice.text : id;
       })
-      .join(', ');
+      .join(", ");
   }
 
   return null;
 }
 
 // mount & watchers
-onMounted(() => { if (props.show) fetchChallenge(); });
-watch(() => props.show, (val) => { if (val) fetchChallenge(); });
-watch(() => props.challengeId, (val, oldVal) => { if (props.show && val && val !== oldVal) fetchChallenge(); });
+onMounted(() => {
+  if (props.show) fetchChallenge();
+});
+watch(
+  () => props.show,
+  (val) => {
+    if (val) fetchChallenge();
+  }
+);
+watch(
+  () => props.challengeId,
+  (val, oldVal) => {
+    if (props.show && val && val !== oldVal) fetchChallenge();
+  }
+);
 </script>
