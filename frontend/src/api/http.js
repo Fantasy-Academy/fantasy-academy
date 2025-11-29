@@ -132,6 +132,28 @@ export async function apiFetch(path, opts = {}) {
     throw err;
   }
 
+      // AUTO-LOGOUT ON 401
+    if (res.status === 401) {
+      console.warn('[apiFetch] 401 → auto-logout triggered');
+
+      // prevent infinite logout loop
+      if (!window.__redirectingToLogin) {
+        window.__redirectingToLogin = true;
+
+        // clear local session
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+
+        // optional: call your logout() if available globally
+        try {
+          import('@/services/authService').then(m => m.logoutUser?.());
+        } catch {}
+
+        // force redirect
+        window.location.href = '/login';
+      }
+    }
+
   // ----- SUCCESS BRANCH -----
   if (res.status === 204) {
     if (API_DEBUG) console.info('[apiFetch OK]', { id: reqId, url, method, status: 204 });
