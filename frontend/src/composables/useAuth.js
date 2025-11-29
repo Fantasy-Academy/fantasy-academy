@@ -77,12 +77,11 @@ export function useAuth() {
     }
   }
 
-  function logout() {
-    const token = localStorage.getItem('accessToken');
-    console.info('[useAuth] logout', { hadToken: !!token });
-    logoutUser();
-    user.value = null;
-  }
+function logout() {
+  console.info('[useAuth] logout');
+  logoutUser();
+  user.value = null;
+}
 
   return {
     user,
