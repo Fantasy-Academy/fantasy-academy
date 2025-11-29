@@ -132,6 +132,8 @@ export async function apiFetch(path, opts = {}) {
     throw err;
   }
 
+  
+
   // ----- SUCCESS BRANCH -----
   if (res.status === 204) {
     if (API_DEBUG) console.info('[apiFetch OK]', { id: reqId, url, method, status: 204 });
