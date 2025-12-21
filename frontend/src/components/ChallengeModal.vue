@@ -203,7 +203,7 @@
 </style>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed } from "vue";
+import { ref, reactive, onBeforeUnmount, onMounted, watch, computed } from "vue";
 import { apiGetChallengeDetail, apiAnswerChallenge } from "@/api/challenges";
 import { resolvedImage, onImgError } from "@/utils/imageHelpers";
 import { formatStatisticAnswer } from "../utils/formatAnswers";
@@ -610,11 +610,13 @@ function formatCorrectAnswer(question) {
 
 // mount & watchers
 onMounted(() => {
+    window.addEventListener("keydown", onKeydown);
   if (props.show) fetchChallenge();
 });
 watch(
   () => props.show,
   (val) => {
+    document.body.style.overflow = val ? "hidden" : "";
     if (val) fetchChallenge();
   }
 );
@@ -624,4 +626,14 @@ watch(
     if (props.show && val && val !== oldVal) fetchChallenge();
   }
 );
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", onKeydown);
+});
+
+function onKeydown(e) {
+  if (e.key === "Escape" && props.show) {
+    emit("close");
+  }
+}
 </script>
