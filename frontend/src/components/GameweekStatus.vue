@@ -4,15 +4,27 @@
 
     <p v-if="loading" class="text-blue-black">Loading...</p>
 
-    <p v-else-if="currentGameweek" class="text-lg font-semibold text-blue-black">
-      Current gameweek: {{ currentGameweek.number }}
-    </p>
+    <template v-else-if="currentGameweek">
+      <p class="text-lg font-semibold text-blue-black">
+        Current gameweek: {{ currentGameweek.number }}
+      </p>
+      <p class="text-sm text-blue-black/80">
+        Ends at: {{ formatDateTime(currentGameweek.endsAt) }}
+      </p>
+    </template>
 
-    <p v-else-if="nextGameweek" class="text-lg font-semibold text-blue-black">
-      Next gameweek starts soon: GW {{ nextGameweek.number }}
-    </p>
+    <template v-else-if="nextGameweek">
+      <p class="text-lg font-semibold text-blue-black">
+        Next gameweek: GW {{ nextGameweek.number }}
+      </p>
+      <p class="text-sm text-blue-black/80">
+        Starts at: {{ formatDateTime(nextGameweek.startsAt) }}
+      </p>
+    </template>
 
-    <p v-else class="text-sm text-blue-black">No active gameweek.</p>
+    <p v-else class="text-sm text-blue-black">
+      No active gameweek.
+    </p>
   </div>
 </template>
 
@@ -27,8 +39,13 @@ const {
   loadGameweeks,
 } = useGameweek();
 
-// 🔥 Tohle ti chybělo:
-onMounted(() => {
-  loadGameweeks();
-});
+onMounted(loadGameweeks);
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('cs-CZ', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
 </script>
