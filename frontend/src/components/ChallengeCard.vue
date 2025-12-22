@@ -23,7 +23,11 @@
         <span v-if="challenge.maxPoints != null" class="font-semibold text-blue-black">
           {{ challenge.maxPoints }} FAPs
         </span>
-
+        <!-- Evaluated label -->
+        <span v-if="challenge.isEvaluated"
+          class="rounded-full bg-indigo-500/15 px-3 py-1 text-indigo-600 font-semibold">
+          Evaluated
+        </span>
         <span v-if="challenge.isAnswered" class="rounded-full bg-pistachio/20 px-3 py-1 text-pistachio font-semibold">
           Answered
         </span>
