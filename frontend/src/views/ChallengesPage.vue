@@ -60,7 +60,7 @@ const selectedId = ref(null);
 const activeFilter = ref('active');
 
 // helpers to derive status from challenge
-const isCompleted = (challenge) => !!challenge.isAnswered; // or c.isEvaluated if that’s your definition
+const isCompleted = (challenge) => !!challenge.isAnswered;
 const isExpired = (challenge) => !!challenge.isExpired;
 const isActive = (challenge) => {
   // Active = started, not expired, not completed
