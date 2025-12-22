@@ -33,7 +33,7 @@
     </div>
     <!-- List -->
     <div v-else class="flex flex-col gap-2">
-      <ChallengeCard v-for="c in filteredChallenges" :key="c.id" :challenge="c" @select="openChallenge(c.id)" />
+      <ChallengeCard v-for="challenge in filteredChallenges" :key="challenge.id" :challenge="challenge" @select="openChallenge(challenge.id)" />
     </div>
 
     <!-- Modal -->
@@ -60,12 +60,12 @@ const selectedId = ref(null);
 const activeFilter = ref('active');
 
 // helpers to derive status from challenge
-const isCompleted = (c) => !!c.isAnswered; // or c.isEvaluated if that’s your definition
-const isExpired = (c) => !!c.isExpired;
-const isActive = (c) => {
+const isCompleted = (challenge) => !!challenge.isAnswered; // or c.isEvaluated if that’s your definition
+const isExpired = (challenge) => !!challenge.isExpired;
+const isActive = (challenge) => {
   // Active = started, not expired, not completed
-  const started = c.isStarted ?? true;
-  return started && !isExpired(c) && !isCompleted(c);
+  const started = challenge.isStarted ?? true;
+  return started && !isExpired(challenge) && !isCompleted(challenge);
 };
 
 // filtered list
