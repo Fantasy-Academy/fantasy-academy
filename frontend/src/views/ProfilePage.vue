@@ -231,7 +231,10 @@
                 class="inline-flex items-center bg-dark-white px-2 py-0.5 rounded-full font-semibold text-blue-black">
                 {{ c.challengeName }}
               </span>
-
+              <button class="ml-auto text-xs font-semibold text-vibrant-coral hover:underline cursor-pointer"
+                @click="openChallengeFromAnswers(c.challengeId)">
+                View challenge
+              </button>
               <span class="text-cool-gray">·</span>
 
               <span class="text-cool-gray">Gameweek {{ c.gameweek }}</span>
@@ -273,6 +276,8 @@
       </div>
     </template>
   </section>
+  <ChallengeModal v-if="showChallengeModal" :show="showChallengeModal" :challenge-id="selectedChallengeId"
+    @close="showChallengeModal = false" />
 </template>
 
 <script setup>
@@ -285,6 +290,7 @@ import GameweekStatus from '../components/GameweekStatus.vue';
 import { usePlayerAnswers } from '@/composables/usePlayerAnswers';
 import { formatAnswer, formatCorrectAnswer } from '@/utils/formatAnswers';
 import { watchEffect } from 'vue';
+import ChallengeModal from '../components/ChallengeModal.vue';
 
 const { user } = useAuth();
 const { me, loading, error, load } = useProfile();
@@ -296,6 +302,14 @@ const {
   error: playerAnswersError,
   loadPlayerAnswers,
 } = usePlayerAnswers();
+
+const showChallengeModal = ref(false);
+const selectedChallengeId = ref(null);
+
+function openChallengeFromAnswers(challengeId) {
+  selectedChallengeId.value = challengeId;
+  showChallengeModal.value = true;
+}
 
 document.title = 'Fantasy Academy | Profile';
 
