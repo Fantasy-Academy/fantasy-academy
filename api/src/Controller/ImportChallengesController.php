@@ -39,7 +39,7 @@ final class ImportChallengesController extends AbstractController
 
                 $this->addFlash('success', 'Challenges imported successfully.');
             } catch (Throwable $exception) {
-                $this->addFlash('error', $exception->getMessage());
+                $this->addFlash('danger', $exception->getMessage());
 
                 $this->logger->error('Challenge import failed', [
                     'exception' => $exception,

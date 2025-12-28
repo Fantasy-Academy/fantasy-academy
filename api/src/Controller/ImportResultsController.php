@@ -51,7 +51,7 @@ final class ImportResultsController extends AbstractController
                     implode(', ', $warning->missingIds)
                 ));
             } catch (Throwable $exception) {
-                $this->addFlash('error', $exception->getMessage());
+                $this->addFlash('danger', $exception->getMessage());
 
                 $this->logger->error('Results import failed', [
                     'exception' => $exception,

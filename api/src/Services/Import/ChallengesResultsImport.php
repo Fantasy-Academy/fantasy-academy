@@ -92,7 +92,7 @@ readonly final class ChallengesResultsImport
 
             // Validate UUID format (lenient - accepts any UUID-like string, not just RFC 4122)
             if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $playerChallengeAnswerIdString)) {
-                $missingIds[] = $playerChallengeAnswerIdString;
+                $missingIds[] = sprintf('Row %d: %s', $row, $playerChallengeAnswerIdString);
                 continue;
             }
 
@@ -101,7 +101,7 @@ readonly final class ChallengesResultsImport
             try {
                 $playerChallengeAnswer = $this->playerChallengeAnswerRepository->get($playerChallengeAnswerId);
             } catch (PlayerChallengeAnswerNotFound) {
-                $missingIds[] = $playerChallengeAnswerIdString;
+                $missingIds[] = sprintf('Row %d: %s', $row, $playerChallengeAnswerIdString);
                 continue;
             }
 

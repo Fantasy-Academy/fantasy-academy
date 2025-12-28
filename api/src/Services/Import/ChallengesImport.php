@@ -109,37 +109,41 @@ readonly final class ChallengesImport
         /** @var array<string, Challenge> $challengesById */
         $challengesById = [];
 
+        $excelRow = 2; // Excel rows start at 2 (row 1 is header)
         foreach ($challengesRows as $row) {
             $id = (string) ($row[$challengeIdKey] ?? '');
             $id = trim($id);
 
             if ($id === '') {
-                throw new ImportFailed('Missing challenge ID in the challenges sheet');
+                throw new ImportFailed('Missing challenge ID.', $excelRow, $challengeIdKey);
             }
 
             if (isset($challengesById[$id])) {
-                throw new ImportFailed(sprintf('Duplicate challenge ID "%s" found in the challenges sheet.', $id));
+                throw new ImportFailed(sprintf('Duplicate challenge ID "%s".', $id), $excelRow, $challengeIdKey);
             }
 
-            $this->assertChallengeRow($row);
+            $this->assertChallengeRow($row, $excelRow);
             $challengesById[$id] = $this->createOrUpdateChallenge($row);
+            $excelRow++;
         }
 
         // Validate questions: first column must reference an existing challenge ID. Throw if not found or if empty.
+        $questionExcelRow = 2; // Excel rows start at 2 (row 1 is header)
         foreach ($questionsRows as $row) {
             $challengeId = isset($row[$challengeIdOfQuestionKey]) ? (string) $row[$challengeIdOfQuestionKey] : '';
             $challengeId = trim($challengeId);
 
             if ($challengeId === '') {
-                throw new ImportFailed(sprintf('Question has empty challenge ID in the first column on sheet "%s".', $questionSheetName));
+                throw new ImportFailed('Empty challenge ID.', $questionExcelRow, $challengeIdOfQuestionKey);
             }
 
             if (!isset($challengesById[$challengeId])) {
-                throw new ImportFailed(sprintf('Question references non-existing challenge ID "%s".', $challengeId));
+                throw new ImportFailed(sprintf('Non-existing challenge ID "%s".', $challengeId), $questionExcelRow, $challengeIdOfQuestionKey);
             }
 
-            $this->assertQuestionRow($row);
+            $this->assertQuestionRow($row, $questionExcelRow);
             $this->createOrUpdateQuestion($row, $challengesById[$challengeId]);
+            $questionExcelRow++;
         }
 
         $this->entityManager->flush();
@@ -558,7 +562,7 @@ readonly final class ChallengesImport
      * @phpstan-assert ImportChallengeRow $row
      * @phpstan-ignore-next-line
      */
-    private function assertChallengeRow(array $row): void
+    private function assertChallengeRow(array $row, int $excelRow): void
     {
         // Minimal runtime presence checks for required keys; extend as needed
         foreach ([
@@ -569,7 +573,7 @@ readonly final class ChallengesImport
             'skill_longtermvision',
         ] as $key) {
             if (!array_key_exists($key, $row)) {
-                throw new ImportFailed(sprintf('Missing required challenge column "%s".', $key));
+                throw new ImportFailed('Missing required column.', $excelRow, $key);
             }
         }
     }
@@ -578,13 +582,13 @@ readonly final class ChallengesImport
      * @phpstan-assert ImportQuestionRow $row
      * @phpstan-ignore-next-line
      */
-    private function assertQuestionRow(array $row): void
+    private function assertQuestionRow(array $row, int $excelRow): void
     {
         foreach ([
             'challenge_id','text','type','image','numeric_type_min','numeric_type_max','choices','choices_min_selections','choices_max_selections',
         ] as $key) {
             if (!array_key_exists($key, $row)) {
-                throw new ImportFailed(sprintf('Missing required question column "%s".', $key));
+                throw new ImportFailed('Missing required column.', $excelRow, $key);
             }
         }
 
@@ -592,26 +596,26 @@ readonly final class ChallengesImport
         if ($row['choices'] !== null && is_string($row['choices']) && trim($row['choices']) !== '') {
             $choicesJson = $row['choices'];
             if (!json_validate($choicesJson)) {
-                throw new ImportFailed('Invalid JSON format in choices column.');
+                throw new ImportFailed('Invalid JSON format.', $excelRow, 'choices');
             }
 
             $choicesData = json_decode($choicesJson, associative: true);
 
             if (!is_array($choicesData) || !array_is_list($choicesData)) {
-                throw new ImportFailed('Choices must be a JSON array.');
+                throw new ImportFailed('Must be a JSON array.', $excelRow, 'choices');
             }
 
             foreach ($choicesData as $index => $choice) {
                 if (!is_array($choice)) {
-                    throw new ImportFailed(sprintf('Choice at index %d must be an object with "text" and "description" fields.', $index));
+                    throw new ImportFailed(sprintf('Choice at index %d must be an object with "text" and "description" fields.', $index), $excelRow, 'choices');
                 }
 
                 if (!array_key_exists('text', $choice)) {
-                    throw new ImportFailed(sprintf('Choice at index %d is missing required field "text".', $index));
+                    throw new ImportFailed(sprintf('Choice at index %d is missing required field "text".', $index), $excelRow, 'choices');
                 }
 
                 if (!array_key_exists('description', $choice)) {
-                    throw new ImportFailed(sprintf('Choice at index %d is missing required field "description".', $index));
+                    throw new ImportFailed(sprintf('Choice at index %d is missing required field "description".', $index), $excelRow, 'choices');
                 }
             }
         }
