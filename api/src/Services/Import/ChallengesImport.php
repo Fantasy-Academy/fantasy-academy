@@ -70,16 +70,43 @@ readonly final class ChallengesImport
         private ProvideIdentity $provideIdentity,
         private EntityManagerInterface $entityManager,
         private ClockInterface $clock,
+        private SpreadsheetReader $spreadsheetReader,
     ) {
     }
 
     public function importFile(UploadedFile $file): void
     {
+        $spreadsheet = $this->loadSpreadsheet($file);
+
+        $sheetChallenges = $spreadsheet->getSheet(0);
+        $sheetQuestions = $spreadsheet->getSheet(1);
+
+        /** @var array<int, array<string, string|null>> $challengesRows */
+        $challengesRows = $this->spreadsheetReader->readSheetAsAssoc($sheetChallenges);
+
+        /** @var array<int, array<string, string|null>> $questionsRows */
+        $questionsRows = $this->spreadsheetReader->readSheetAsAssoc($sheetQuestions);
+
+        $challengeIdKey = $this->getFirstColumnHeaderKey($sheetChallenges);
+
+        $challengesById = $this->processChallengeRows($challengesRows, $challengeIdKey);
+        $importedQuestionIds = $this->processQuestionRows($questionsRows, $challengesById);
+
+        $this->deleteRemovedQuestions($challengesById, $importedQuestionIds);
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @return \PhpOffice\PhpSpreadsheet\Spreadsheet
+     */
+    private function loadSpreadsheet(UploadedFile $file): \PhpOffice\PhpSpreadsheet\Spreadsheet
+    {
         $path = $file->getPathname();
 
         /** @var \PhpOffice\PhpSpreadsheet\Reader\Xlsx $reader */
         $reader = IOFactory::createReader('Xlsx');
-        $reader->setReadDataOnly(false); // load styles/number formats so we can get formatted text
+        $reader->setReadDataOnly(false);
 
         /** @var array<int, string> $allSheets */
         $allSheets = $reader->listWorksheetNames($path);
@@ -88,41 +115,31 @@ readonly final class ChallengesImport
             throw new ImportFailed('The workbook must contain at least two sheets.');
         }
 
-        // First sheet: challenges; Second sheet: questions
         $challengeSheetName = $allSheets[0];
-        $questionSheetName  = $allSheets[1];
+        $questionSheetName = $allSheets[1];
         $reader->setLoadSheetsOnly([$challengeSheetName, $questionSheetName]);
 
-        $spreadsheet = $reader->load($path);
+        return $reader->load($path);
+    }
 
-        $sheetChallenges = $spreadsheet->getSheetByName($challengeSheetName) ?? $spreadsheet->getSheet(0);
-        $sheetQuestions  = $spreadsheet->getSheetByName($questionSheetName) ?? $spreadsheet->getSheet(1);
-
-        /** @var array<int, array<string, string|null>> $challengesRows */
-        $challengesRows = $this->readSheetAsAssoc($sheetChallenges);
-
-        /** @var array<int, array<string, string|null>> $questionsRows */
-        $questionsRows = $this->readSheetAsAssoc($sheetQuestions);
-
-        // Determine the header key (normalized) for the first column on challenges sheet
-        $challengeIdKey = $this->getFirstColumnHeaderKey($sheetChallenges);
-        // Questions sheet: use explicit 'challenge_id' column (question_id is optional first column)
-        $challengeIdOfQuestionKey = 'challenge_id';
-
-        /** @var array<string, Challenge> $challengesById */
+    /**
+     * @param array<int, array<string, string|null>> $rows
+     * @return array<string, Challenge>
+     */
+    private function processChallengeRows(array $rows, string $idKey): array
+    {
         $challengesById = [];
+        $excelRow = 2;
 
-        $excelRow = 2; // Excel rows start at 2 (row 1 is header)
-        foreach ($challengesRows as $row) {
-            $id = (string) ($row[$challengeIdKey] ?? '');
-            $id = trim($id);
+        foreach ($rows as $row) {
+            $id = trim((string) ($row[$idKey] ?? ''));
 
             if ($id === '') {
-                throw new ImportFailed('Missing challenge ID.', $excelRow, $challengeIdKey);
+                throw new ImportFailed('Missing challenge ID.', $excelRow, $idKey);
             }
 
             if (isset($challengesById[$id])) {
-                throw new ImportFailed(sprintf('Duplicate challenge ID "%s".', $id), $excelRow, $challengeIdKey);
+                throw new ImportFailed(sprintf('Duplicate challenge ID "%s".', $id), $excelRow, $idKey);
             }
 
             $this->assertChallengeRow($row, $excelRow);
@@ -130,39 +147,41 @@ readonly final class ChallengesImport
             $excelRow++;
         }
 
-        // Track imported question IDs per challenge for deletion logic
-        /** @var array<string, array<string>> $importedQuestionIdsByChallenge challenge_id => [question_id, ...] */
-        $importedQuestionIdsByChallenge = [];
+        return $challengesById;
+    }
 
-        // Initialize tracking for all challenges
-        foreach ($challengesById as $challengeId => $challenge) {
-            $importedQuestionIdsByChallenge[$challengeId] = [];
-        }
+    /**
+     * @param array<int, array<string, string|null>> $rows
+     * @param array<string, Challenge> $challengesById
+     * @return array<string, array<string>>
+     */
+    private function processQuestionRows(array $rows, array $challengesById): array
+    {
+        $importedQuestionIdsByChallenge = array_fill_keys(array_keys($challengesById), []);
+        $excelRow = 2;
 
-        // Validate questions: first column must reference an existing challenge ID. Throw if not found or if empty.
-        $questionExcelRow = 2; // Excel rows start at 2 (row 1 is header)
-        foreach ($questionsRows as $row) {
-            $challengeId = isset($row[$challengeIdOfQuestionKey]) ? (string) $row[$challengeIdOfQuestionKey] : '';
-            $challengeId = trim($challengeId);
+        foreach ($rows as $row) {
+            $challengeId = trim((string) ($row['challenge_id'] ?? ''));
 
             if ($challengeId === '') {
-                throw new ImportFailed('Empty challenge ID.', $questionExcelRow, $challengeIdOfQuestionKey);
+                throw new ImportFailed('Empty challenge ID.', $excelRow, 'challenge_id');
             }
 
             if (!isset($challengesById[$challengeId])) {
-                throw new ImportFailed(sprintf('Non-existing challenge ID "%s".', $challengeId), $questionExcelRow, $challengeIdOfQuestionKey);
+                throw new ImportFailed(
+                    sprintf('Non-existing challenge ID "%s".', $challengeId),
+                    $excelRow,
+                    'challenge_id'
+                );
             }
 
-            $this->assertQuestionRow($row, $questionExcelRow);
-            $question = $this->createOrUpdateQuestionById($row, $challengesById[$challengeId], $questionExcelRow);
+            $this->assertQuestionRow($row, $excelRow);
+            $question = $this->createOrUpdateQuestionById($row, $challengesById[$challengeId], $excelRow);
             $importedQuestionIdsByChallenge[$challengeId][] = $question->id->toRfc4122();
-            $questionExcelRow++;
+            $excelRow++;
         }
 
-        // Delete questions that are not in the import
-        $this->deleteRemovedQuestions($challengesById, $importedQuestionIdsByChallenge);
-
-        $this->entityManager->flush();
+        return $importedQuestionIdsByChallenge;
     }
 
     private function getFirstColumnHeaderKey(Worksheet $ws): string
@@ -170,67 +189,7 @@ readonly final class ChallengesImport
         /** @var null|string $raw */
         $raw = $ws->getCell('A1')->getValue();
 
-        return $this->normalizeHeader((string) $raw);
-    }
-
-    /**
-     * Reads a worksheet into an array of associative rows using the first row as headers.
-     * Values are taken as displayed text (strings), preserving nulls for empty cells.
-     * Empty rows are skipped.
-     *
-     * @return list<array<mixed>>
-     */
-    private function readSheetAsAssoc(Worksheet $ws): array
-    {
-        $highestRow = $ws->getHighestRow();
-        $highestColumn = $ws->getHighestColumn();
-
-        // Build header map from row 1
-        $headerRow = $ws->rangeToArray("A1:{$highestColumn}1", null, true, true, true)[1] ?? [];
-        $headers = [];
-
-        foreach ($headerRow as $col => $value) {
-            /** @var null|string $value */
-            $headers[$col] = $this->normalizeHeader((string) $value);
-        }
-
-        $rows = [];
-
-        for ($r = 2; $r <= $highestRow; $r++) {
-            $rowCells = $ws->rangeToArray("A{$r}:{$highestColumn}{$r}", null, true, true, true)[$r] ?? [];
-            $assoc = [];
-            $allEmpty = true;
-
-            foreach ($rowCells as $col => $value) {
-                $key = $headers[$col] ?? $col;
-
-                // With formatData=true (rangeToArray) and readDataOnly=false, $value is the
-                // displayed text from Excel. Keep it as-is (string) and preserve nulls.
-                if ($value !== null && $value !== '') {
-                    $allEmpty = false;
-                }
-
-                $assoc[$key] = $value === null ? null : $value;
-            }
-
-            if (!$allEmpty) {
-                $rows[] = $assoc;
-            }
-        }
-
-        return $rows;
-    }
-
-    /**
-     * Normalizes header names to snake_case alphanumeric keys.
-     */
-    private function normalizeHeader(string $raw): string
-    {
-        $k = strtolower(trim($raw));
-        $k = preg_replace('/\s+/', '_', $k) ?? '';
-        $k = preg_replace('/[^a-z0-9_]/', '', $k) ?? '';
-
-        return $k !== '' ? $k : 'col';
+        return $this->spreadsheetReader->normalizeHeader((string) $raw);
     }
 
     /**
@@ -332,6 +291,21 @@ readonly final class ChallengesImport
     }
 
     /**
+     * @param ImportQuestionRow $row
+     */
+    private function createNumericConstraint(array $row): ?NumericQuestionConstraint
+    {
+        if ($row['numeric_type_min'] === null && $row['numeric_type_max'] === null) {
+            return null;
+        }
+
+        return new NumericQuestionConstraint(
+            min: $row['numeric_type_min'] !== null ? (int) $row['numeric_type_min'] : null,
+            max: $row['numeric_type_max'] !== null ? (int) $row['numeric_type_max'] : null,
+        );
+    }
+
+    /**
      * Create or update a question based on the question_id column.
      * - If question_id is empty: create a new question
      * - If question_id is a valid UUID: update the existing question
@@ -387,20 +361,8 @@ readonly final class ChallengesImport
      */
     private function updateQuestion(Question $question, array $row): Question
     {
-        $numericConstraint = null;
-        $choiceConstraint = null;
-
-        if ($row['numeric_type_min'] !== null || $row['numeric_type_max'] !== null) {
-            $numericConstraint = new NumericQuestionConstraint(
-                min: $row['numeric_type_min'] !== null ? (int) $row['numeric_type_min'] : null,
-                max: $row['numeric_type_max'] !== null ? (int) $row['numeric_type_max'] : null,
-            );
-        }
-
-        if ($row['choices'] !== null && json_validate($row['choices'])) {
-            $choiceConstraint = $this->createOrUpdateChoiceConstraint($row, $question->choiceConstraint);
-        }
-
+        $numericConstraint = $this->createNumericConstraint($row);
+        $choiceConstraint = $this->createChoiceConstraintFromRow($row, $question->choiceConstraint);
         $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
 
         $question->update(
@@ -512,20 +474,8 @@ readonly final class ChallengesImport
      */
     private function createQuestion(array $row, Challenge $challenge): Question
     {
-        $numericConstraint = null;
-        $choiceConstraint = null;
-
-        if ($row['numeric_type_min'] !== null || $row['numeric_type_max'] !== null) {
-            $numericConstraint = new NumericQuestionConstraint(
-                min: $row['numeric_type_min'] !== null ? (int) $row['numeric_type_min'] : null,
-                max: $row['numeric_type_max'] !== null ? (int) $row['numeric_type_max'] : null,
-            );
-        }
-
-        if ($row['choices'] !== null && json_validate($row['choices'])) {
-            $choiceConstraint = $this->createChoiceConstraint($row);
-        }
-
+        $numericConstraint = $this->createNumericConstraint($row);
+        $choiceConstraint = $this->createChoiceConstraintFromRow($row);
         $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
 
         $question = new Question(
@@ -547,45 +497,14 @@ readonly final class ChallengesImport
     /**
      * @param ImportQuestionRow $row
      */
-    private function createChoiceConstraint(array $row): ChoiceQuestionConstraint
-    {
-        assert($row['choices'] !== null);
-
-        /**
-         * @var array<array{
-         *     text: string,
-         *     description: null|string,
-         *     image?: null|string,
-         * }> $choicesInfo
-         */
-        $choicesInfo = json_decode($row['choices'], associative: true);
-        $choices = [];
-
-        foreach ($choicesInfo as $choice) {
-            $choices[] = new Choice(
-                id: $this->provideIdentity->next(),
-                text: $choice['text'],
-                description: $choice['description'],
-                image: $choice['image'] ?? null,
-            );
+    private function createChoiceConstraintFromRow(
+        array $row,
+        ?ChoiceQuestionConstraint $existingConstraint = null
+    ): ?ChoiceQuestionConstraint {
+        if ($row['choices'] === null || !json_validate($row['choices'])) {
+            return null;
         }
 
-        return new ChoiceQuestionConstraint(
-            choices: $choices,
-            minSelections: $row['choices_min_selections'] !== null ? (int) $row['choices_min_selections'] : null,
-            maxSelections: $row['choices_max_selections'] !== null ? (int) $row['choices_max_selections'] : null,
-        );
-    }
-
-    /**
-     * Create or update choice constraint, reusing existing choice IDs when updating.
-     *
-     * @param ImportQuestionRow $row
-     */
-    private function createOrUpdateChoiceConstraint(array $row, null|ChoiceQuestionConstraint $existingConstraint): ChoiceQuestionConstraint
-    {
-        assert($row['choices'] !== null);
-
         /**
          * @var array<array{
          *     text: string,
@@ -594,34 +513,27 @@ readonly final class ChallengesImport
          * }> $choicesInfo
          */
         $choicesInfo = json_decode($row['choices'], associative: true);
-        $choices = [];
 
-        // Build a map of existing choices by text for quick lookup
+        // Build lookup map for existing choices (for ID reuse when updating)
         $existingChoicesByText = [];
         if ($existingConstraint !== null) {
-            foreach ($existingConstraint->choices as $existingChoice) {
-                $existingChoicesByText[$existingChoice->text] = $existingChoice;
+            foreach ($existingConstraint->choices as $choice) {
+                $existingChoicesByText[$choice->text] = $choice;
             }
         }
 
-        foreach ($choicesInfo as $choice) {
-            // Reuse existing choice ID if the text matches, otherwise generate new ID
-            if (isset($existingChoicesByText[$choice['text']])) {
-                $existingChoice = $existingChoicesByText[$choice['text']];
-                $choices[] = new Choice(
-                    id: $existingChoice->id,
-                    text: $choice['text'],
-                    description: $choice['description'],
-                    image: $choice['image'] ?? null,
-                );
-            } else {
-                $choices[] = new Choice(
-                    id: $this->provideIdentity->next(),
-                    text: $choice['text'],
-                    description: $choice['description'],
-                    image: $choice['image'] ?? null,
-                );
-            }
+        $choices = [];
+        foreach ($choicesInfo as $choiceData) {
+            $choiceId = isset($existingChoicesByText[$choiceData['text']])
+                ? $existingChoicesByText[$choiceData['text']]->id
+                : $this->provideIdentity->next();
+
+            $choices[] = new Choice(
+                id: $choiceId,
+                text: $choiceData['text'],
+                description: $choiceData['description'],
+                image: $choiceData['image'] ?? null,
+            );
         }
 
         return new ChoiceQuestionConstraint(
