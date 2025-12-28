@@ -244,8 +244,11 @@ final class ChallengesResultsImportTest extends ApiTestCase
             // Verify warning details
             $this->assertSame(2, $e->importedCount, 'Should import 2 valid answers');
             $this->assertCount(2, $e->missingIds, 'Should have 2 missing IDs');
-            $this->assertContains('99999999-9999-9999-9999-999999999999', $e->missingIds);
-            $this->assertContains('88888888-8888-8888-8888-888888888888', $e->missingIds);
+
+            // missingIds contains formatted strings like "Row N: UUID"
+            $missingIdsString = implode(', ', $e->missingIds);
+            $this->assertStringContainsString('99999999-9999-9999-9999-999999999999', $missingIdsString);
+            $this->assertStringContainsString('88888888-8888-8888-8888-888888888888', $missingIdsString);
 
             // Verify message format
             $this->assertStringContainsString('2 results imported successfully', $e->getMessage());

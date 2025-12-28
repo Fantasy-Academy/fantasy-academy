@@ -64,15 +64,17 @@ final class ChallengeTemplateExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Verify all required question headers match import structure
-        $this->assertSame('challenge_id', $questionsSheet->getCell('A1')->getValue());
-        $this->assertSame('text', $questionsSheet->getCell('B1')->getValue());
-        $this->assertSame('type', $questionsSheet->getCell('C1')->getValue());
-        $this->assertSame('image', $questionsSheet->getCell('D1')->getValue());
-        $this->assertSame('numeric_type_min', $questionsSheet->getCell('E1')->getValue());
-        $this->assertSame('numeric_type_max', $questionsSheet->getCell('F1')->getValue());
-        $this->assertSame('choices', $questionsSheet->getCell('G1')->getValue());
-        $this->assertSame('choices_min_selections', $questionsSheet->getCell('H1')->getValue());
-        $this->assertSame('choices_max_selections', $questionsSheet->getCell('I1')->getValue());
+        // question_id is now the first column
+        $this->assertSame('question_id', $questionsSheet->getCell('A1')->getValue());
+        $this->assertSame('challenge_id', $questionsSheet->getCell('B1')->getValue());
+        $this->assertSame('text', $questionsSheet->getCell('C1')->getValue());
+        $this->assertSame('type', $questionsSheet->getCell('D1')->getValue());
+        $this->assertSame('image', $questionsSheet->getCell('E1')->getValue());
+        $this->assertSame('numeric_type_min', $questionsSheet->getCell('F1')->getValue());
+        $this->assertSame('numeric_type_max', $questionsSheet->getCell('G1')->getValue());
+        $this->assertSame('choices', $questionsSheet->getCell('H1')->getValue());
+        $this->assertSame('choices_min_selections', $questionsSheet->getCell('I1')->getValue());
+        $this->assertSame('choices_max_selections', $questionsSheet->getCell('J1')->getValue());
     }
 
     public function testChallengesSheetHasNoDataRows(): void
@@ -128,9 +130,9 @@ final class ChallengeTemplateExportTest extends ApiTestCase
         $spreadsheet = $this->exporter->exportTemplate();
         $questionsSheet = $spreadsheet->getSheet(1);
 
-        // Extract all headers from row 1
+        // Extract all headers from row 1 (now includes question_id as first column)
         $headers = [];
-        for ($col = 'A'; $col <= 'I'; $col++) {
+        for ($col = 'A'; $col <= 'J'; $col++) {
             $headers[] = $questionsSheet->getCell($col . '1')->getValue();
         }
 
@@ -168,7 +170,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
             }
         }
 
-        for ($col = 'A'; $col <= 'I'; $col++) {
+        for ($col = 'A'; $col <= 'J'; $col++) {
             $header = $questionsSheet->getCell($col . '1')->getValue();
             if ($header !== null && is_string($header)) {
                 $this->assertMatchesRegularExpression(

@@ -66,20 +66,32 @@ final class ChallengesExportTest extends ApiTestCase
         $spreadsheet = $this->exporter->exportChallenges([ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]);
         $questionsSheet = $spreadsheet->getSheet(1);
 
-        $this->assertSame('challenge_id', $questionsSheet->getCell('A1')->getValue());
-        $this->assertSame('text', $questionsSheet->getCell('B1')->getValue());
-        $this->assertSame('type', $questionsSheet->getCell('C1')->getValue());
-        $this->assertSame('image', $questionsSheet->getCell('D1')->getValue());
-        $this->assertSame('numeric_type_min', $questionsSheet->getCell('E1')->getValue());
-        $this->assertSame('numeric_type_max', $questionsSheet->getCell('F1')->getValue());
-        $this->assertSame('choices', $questionsSheet->getCell('G1')->getValue());
-        $this->assertSame('choices_min_selections', $questionsSheet->getCell('H1')->getValue());
-        $this->assertSame('choices_max_selections', $questionsSheet->getCell('I1')->getValue());
-        $this->assertSame('correct_text_answer', $questionsSheet->getCell('J1')->getValue());
-        $this->assertSame('correct_numeric_answer', $questionsSheet->getCell('K1')->getValue());
-        $this->assertSame('correct_selected_choice_text', $questionsSheet->getCell('L1')->getValue());
-        $this->assertSame('correct_selected_choice_texts', $questionsSheet->getCell('M1')->getValue());
-        $this->assertSame('correct_ordered_choice_texts', $questionsSheet->getCell('N1')->getValue());
+        // question_id should be the first column
+        $this->assertSame('question_id', $questionsSheet->getCell('A1')->getValue());
+        $this->assertSame('challenge_id', $questionsSheet->getCell('B1')->getValue());
+        $this->assertSame('text', $questionsSheet->getCell('C1')->getValue());
+        $this->assertSame('type', $questionsSheet->getCell('D1')->getValue());
+        $this->assertSame('image', $questionsSheet->getCell('E1')->getValue());
+        $this->assertSame('numeric_type_min', $questionsSheet->getCell('F1')->getValue());
+        $this->assertSame('numeric_type_max', $questionsSheet->getCell('G1')->getValue());
+        $this->assertSame('choices', $questionsSheet->getCell('H1')->getValue());
+        $this->assertSame('choices_min_selections', $questionsSheet->getCell('I1')->getValue());
+        $this->assertSame('choices_max_selections', $questionsSheet->getCell('J1')->getValue());
+        $this->assertSame('correct_text_answer', $questionsSheet->getCell('K1')->getValue());
+        $this->assertSame('correct_numeric_answer', $questionsSheet->getCell('L1')->getValue());
+        $this->assertSame('correct_selected_choice_text', $questionsSheet->getCell('M1')->getValue());
+        $this->assertSame('correct_selected_choice_texts', $questionsSheet->getCell('N1')->getValue());
+        $this->assertSame('correct_ordered_choice_texts', $questionsSheet->getCell('O1')->getValue());
+    }
+
+    public function testQuestionsSheetContainsQuestionId(): void
+    {
+        $spreadsheet = $this->exporter->exportChallenges([ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]);
+        $questionsSheet = $spreadsheet->getSheet(1);
+
+        // Verify question_id is populated with the correct UUID
+        $questionId = $questionsSheet->getCell('A2')->getValue();
+        $this->assertSame(ExpiredChallengeFixture::QUESTION_7_ID, $questionId);
     }
 
     public function testChallengesSheetContainsChallengeData(): void
@@ -138,9 +150,10 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Verify at least one question exists (row 2)
-        $this->assertSame(ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID, $questionsSheet->getCell('A2')->getValue());
-        $this->assertIsString($questionsSheet->getCell('B2')->getValue()); // question text
-        $this->assertIsString($questionsSheet->getCell('C2')->getValue()); // question type
+        // Column A = question_id, B = challenge_id, C = text, D = type
+        $this->assertSame(ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID, $questionsSheet->getCell('B2')->getValue());
+        $this->assertIsString($questionsSheet->getCell('C2')->getValue()); // question text
+        $this->assertIsString($questionsSheet->getCell('D2')->getValue()); // question type
     }
 
     public function testQuestionsSheetContainsTextQuestionWithCorrectAnswer(): void
@@ -149,11 +162,12 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Find the text question row (Question 7)
+        // Column D = type, Column K = correct_text_answer (shifted due to question_id)
         $foundTextQuestion = false;
         for ($row = 2; $row <= 10; $row++) {
-            $questionType = $questionsSheet->getCell("C{$row}")->getValue();
+            $questionType = $questionsSheet->getCell("D{$row}")->getValue();
             if ($questionType === 'text') {
-                $correctAnswer = $questionsSheet->getCell("J{$row}")->getValue();
+                $correctAnswer = $questionsSheet->getCell("K{$row}")->getValue();
                 if ($correctAnswer !== null) {
                     $this->assertIsString($correctAnswer);
                     $this->assertEquals('This is the correct text answer', $correctAnswer);
@@ -191,11 +205,12 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Count questions from each challenge
+        // Column B = challenge_id (shifted due to question_id in column A)
         $expiredChallengeQuestions = 0;
         $currentChallenge2Questions = 0;
 
         for ($row = 2; $row <= 100; $row++) {
-            $challengeId = $questionsSheet->getCell("A{$row}")->getValue();
+            $challengeId = $questionsSheet->getCell("B{$row}")->getValue();
             if ($challengeId === null) {
                 break;
             }
@@ -217,13 +232,14 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Find the numeric question row (Question 10)
+        // Column B = challenge_id, D = type, L = correct_numeric_answer (shifted)
         $foundNumericQuestion = false;
         for ($row = 2; $row <= 10; $row++) {
-            $questionId = $questionsSheet->getCell("A{$row}")->getValue();
-            if ($questionId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
-                $questionType = $questionsSheet->getCell("C{$row}")->getValue();
+            $challengeId = $questionsSheet->getCell("B{$row}")->getValue();
+            if ($challengeId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
+                $questionType = $questionsSheet->getCell("D{$row}")->getValue();
                 if ($questionType === 'numeric') {
-                    $correctAnswer = $questionsSheet->getCell("K{$row}")->getValue();
+                    $correctAnswer = $questionsSheet->getCell("L{$row}")->getValue();
                     $this->assertNotNull($correctAnswer, 'Numeric question should have correct answer');
                     $this->assertIsFloat($correctAnswer);
                     $this->assertEquals(42.0, $correctAnswer);
@@ -242,13 +258,14 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Find the single-select question row (Question 8)
+        // Column B = challenge_id, D = type, M = correct_selected_choice_text (shifted)
         $foundSingleSelectQuestion = false;
         for ($row = 2; $row <= 10; $row++) {
-            $questionId = $questionsSheet->getCell("A{$row}")->getValue();
-            if ($questionId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
-                $questionType = $questionsSheet->getCell("C{$row}")->getValue();
+            $challengeId = $questionsSheet->getCell("B{$row}")->getValue();
+            if ($challengeId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
+                $questionType = $questionsSheet->getCell("D{$row}")->getValue();
                 if ($questionType === 'single_select') {
-                    $correctAnswer = $questionsSheet->getCell("L{$row}")->getValue();
+                    $correctAnswer = $questionsSheet->getCell("M{$row}")->getValue();
                     $this->assertNotNull($correctAnswer, 'Single-select question should have correct answer');
                     $this->assertIsString($correctAnswer);
                     $this->assertEquals('Red', $correctAnswer);
@@ -267,13 +284,14 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Find the multi-select question row (Question 9)
+        // Column B = challenge_id, D = type, N = correct_selected_choice_texts (shifted)
         $foundMultiSelectQuestion = false;
         for ($row = 2; $row <= 10; $row++) {
-            $questionId = $questionsSheet->getCell("A{$row}")->getValue();
-            if ($questionId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
-                $questionType = $questionsSheet->getCell("C{$row}")->getValue();
+            $challengeId = $questionsSheet->getCell("B{$row}")->getValue();
+            if ($challengeId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
+                $questionType = $questionsSheet->getCell("D{$row}")->getValue();
                 if ($questionType === 'multi_select') {
-                    $correctAnswer = $questionsSheet->getCell("M{$row}")->getValue();
+                    $correctAnswer = $questionsSheet->getCell("N{$row}")->getValue();
                     $this->assertNotNull($correctAnswer, 'Multi-select question should have correct answer');
                     $this->assertIsString($correctAnswer);
                     // Verify it's valid JSON
@@ -299,13 +317,14 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // Find a question with choices (Question 8 - single select)
+        // Column B = challenge_id, D = type, H = choices (shifted)
         $foundChoiceQuestion = false;
         for ($row = 2; $row <= 10; $row++) {
-            $questionId = $questionsSheet->getCell("A{$row}")->getValue();
-            if ($questionId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
-                $questionType = $questionsSheet->getCell("C{$row}")->getValue();
+            $challengeId = $questionsSheet->getCell("B{$row}")->getValue();
+            if ($challengeId === ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID) {
+                $questionType = $questionsSheet->getCell("D{$row}")->getValue();
                 if ($questionType === 'single_select' || $questionType === 'multi_select') {
-                    $choicesJson = $questionsSheet->getCell("G{$row}")->getValue();
+                    $choicesJson = $questionsSheet->getCell("H{$row}")->getValue();
                     $this->assertNotNull($choicesJson, 'Choices field should not be null for choice questions');
                     $this->assertIsString($choicesJson);
 
@@ -350,9 +369,9 @@ final class ChallengesExportTest extends ApiTestCase
             }
         }
 
-        // Extract all headers from Questions sheet
+        // Extract all headers from Questions sheet (now O columns due to question_id)
         $questionHeaders = [];
-        for ($col = 'A'; $col <= 'N'; $col++) {
+        for ($col = 'A'; $col <= 'O'; $col++) {
             $header = $questionsSheet->getCell($col . '1')->getValue();
             if ($header !== null) {
                 $questionHeaders[] = $header;
@@ -369,9 +388,9 @@ final class ChallengesExportTest extends ApiTestCase
         ];
         $this->assertSame($expectedChallengeHeaders, $challengeHeaders);
 
-        // Verify question headers match template export format
+        // Verify question headers match template export format (question_id is first column now)
         $expectedQuestionHeaders = [
-            'challenge_id', 'text', 'type', 'image', 'numeric_type_min', 'numeric_type_max',
+            'question_id', 'challenge_id', 'text', 'type', 'image', 'numeric_type_min', 'numeric_type_max',
             'choices', 'choices_min_selections', 'choices_max_selections',
             'correct_text_answer', 'correct_numeric_answer', 'correct_selected_choice_text',
             'correct_selected_choice_texts', 'correct_ordered_choice_texts',
@@ -397,7 +416,8 @@ final class ChallengesExportTest extends ApiTestCase
             }
         }
 
-        for ($col = 'A'; $col <= 'N'; $col++) {
+        // Now O columns due to question_id
+        for ($col = 'A'; $col <= 'O'; $col++) {
             $header = $questionsSheet->getCell($col . '1')->getValue();
             if (is_string($header)) {
                 $this->assertMatchesRegularExpression(

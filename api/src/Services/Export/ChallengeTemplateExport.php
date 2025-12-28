@@ -42,6 +42,7 @@ readonly final class ChallengeTemplateExport
         $questionsSheet = $spreadsheet->createSheet();
         $questionsSheet->setTitle('Questions');
         $questionsSheet->fromArray([
+            'question_id',
             'challenge_id',
             'text',
             'type',

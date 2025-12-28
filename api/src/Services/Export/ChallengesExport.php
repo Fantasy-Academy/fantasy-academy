@@ -97,6 +97,7 @@ readonly final class ChallengesExport
         $questionsSheet = $spreadsheet->createSheet();
         $questionsSheet->setTitle('Questions');
         $questionsSheet->fromArray([
+            'question_id',
             'challenge_id',
             'text',
             'type',
@@ -218,6 +219,7 @@ readonly final class ChallengesExport
         }
 
         return [
+            $question->id->toRfc4122(),
             $question->challenge->id->toRfc4122(),
             $question->text,
             $question->type->value,

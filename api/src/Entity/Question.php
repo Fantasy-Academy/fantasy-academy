@@ -34,14 +34,17 @@ class Question
         #[JoinColumn(nullable: false)]
         readonly public Challenge $challenge,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: Types::TEXT)]
-        readonly public string $text,
+        public string $text,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column]
-        readonly public QuestionType $type,
+        public QuestionType $type,
 
+        #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(nullable: true)]
-        readonly public null|string $image,
+        public null|string $image,
 
         #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
         #[Column(type: NumericQuestionConstraintDoctrineType::NAME, nullable: true)]
@@ -58,10 +61,16 @@ class Question
     }
 
     public function update(
+        string $text,
+        QuestionType $type,
+        null|string $image,
         null|NumericQuestionConstraint $numericConstraint = null,
         null|ChoiceQuestionConstraint $choiceConstraint = null,
         null|Answer $correctAnswer = null,
     ): void {
+        $this->text = $text;
+        $this->type = $type;
+        $this->image = $image;
         $this->numericConstraint = $numericConstraint;
         $this->choiceConstraint = $choiceConstraint;
         $this->correctAnswer = $correctAnswer;

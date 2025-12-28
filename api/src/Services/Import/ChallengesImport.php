@@ -7,6 +7,7 @@ namespace FantasyAcademy\API\Services\Import;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use FantasyAcademy\API\Entity\Challenge;
+use FantasyAcademy\API\Entity\PlayerAnsweredQuestion;
 use FantasyAcademy\API\Entity\Question;
 use FantasyAcademy\API\Exceptions\ImportFailed;
 use FantasyAcademy\API\Services\ProvideIdentity;
@@ -46,6 +47,7 @@ use Symfony\Component\Uid\Uuid;
  *  }
  *
  * @phpstan-type ImportQuestionRow array{
+ *      question_id?: null|string,
  *      challenge_id: string,
  *      text: string,
  *      type: string,
@@ -102,9 +104,10 @@ readonly final class ChallengesImport
         /** @var array<int, array<string, string|null>> $questionsRows */
         $questionsRows = $this->readSheetAsAssoc($sheetQuestions);
 
-        // Determine the header key (normalized) for the first column on each sheet
+        // Determine the header key (normalized) for the first column on challenges sheet
         $challengeIdKey = $this->getFirstColumnHeaderKey($sheetChallenges);
-        $challengeIdOfQuestionKey = $this->getFirstColumnHeaderKey($sheetQuestions);
+        // Questions sheet: use explicit 'challenge_id' column (question_id is optional first column)
+        $challengeIdOfQuestionKey = 'challenge_id';
 
         /** @var array<string, Challenge> $challengesById */
         $challengesById = [];
@@ -127,6 +130,15 @@ readonly final class ChallengesImport
             $excelRow++;
         }
 
+        // Track imported question IDs per challenge for deletion logic
+        /** @var array<string, array<string>> $importedQuestionIdsByChallenge challenge_id => [question_id, ...] */
+        $importedQuestionIdsByChallenge = [];
+
+        // Initialize tracking for all challenges
+        foreach ($challengesById as $challengeId => $challenge) {
+            $importedQuestionIdsByChallenge[$challengeId] = [];
+        }
+
         // Validate questions: first column must reference an existing challenge ID. Throw if not found or if empty.
         $questionExcelRow = 2; // Excel rows start at 2 (row 1 is header)
         foreach ($questionsRows as $row) {
@@ -142,9 +154,13 @@ readonly final class ChallengesImport
             }
 
             $this->assertQuestionRow($row, $questionExcelRow);
-            $this->createOrUpdateQuestion($row, $challengesById[$challengeId]);
+            $question = $this->createOrUpdateQuestionById($row, $challengesById[$challengeId], $questionExcelRow);
+            $importedQuestionIdsByChallenge[$challengeId][] = $question->id->toRfc4122();
             $questionExcelRow++;
         }
+
+        // Delete questions that are not in the import
+        $this->deleteRemovedQuestions($challengesById, $importedQuestionIdsByChallenge);
 
         $this->entityManager->flush();
     }
@@ -316,47 +332,179 @@ readonly final class ChallengesImport
     }
 
     /**
+     * Create or update a question based on the question_id column.
+     * - If question_id is empty: create a new question
+     * - If question_id is a valid UUID: update the existing question
+     *
      * @param ImportQuestionRow $row
      */
-    private function createOrUpdateQuestion(array $row, Challenge $challenge): Question
+    private function createOrUpdateQuestionById(array $row, Challenge $challenge, int $excelRow): Question
     {
-        // Try to find existing question by matching text in the challenge
-        /** @var array<Question> $existingQuestions */
-        $existingQuestions = $this->entityManager->getRepository(Question::class)->findBy([
-            'challenge' => $challenge,
-            'text' => $row['text'],
-        ]);
+        $questionId = isset($row['question_id']) ? trim((string) $row['question_id']) : '';
 
-        $existingQuestion = count($existingQuestions) > 0 ? $existingQuestions[0] : null;
+        // If question_id is empty, create a new question
+        if ($questionId === '') {
+            return $this->createQuestion($row, $challenge);
+        }
 
-        if ($existingQuestion instanceof Question) {
-            // Update existing question
-            $numericConstraint = null;
-            $choiceConstraint = null;
+        // Try to find existing question by UUID
+        try {
+            $uuid = Uuid::fromString($questionId);
+            $existingQuestion = $this->entityManager->find(Question::class, $uuid);
 
-            if ($row['numeric_type_min'] !== null || $row['numeric_type_max'] !== null) {
-                $numericConstraint = new NumericQuestionConstraint(
-                    min: $row['numeric_type_min'] !== null ? (int) $row['numeric_type_min'] : null,
-                    max: $row['numeric_type_max'] !== null ? (int) $row['numeric_type_max'] : null,
+            if (!$existingQuestion instanceof Question) {
+                throw new ImportFailed(
+                    sprintf('Question with ID "%s" not found.', $questionId),
+                    $excelRow,
+                    'question_id'
                 );
             }
 
-            if ($row['choices'] !== null && json_validate($row['choices'])) {
-                $choiceConstraint = $this->createOrUpdateChoiceConstraint($row, $existingQuestion->choiceConstraint);
+            // Verify the question belongs to the correct challenge
+            if (!$existingQuestion->challenge->id->equals($challenge->id)) {
+                throw new ImportFailed(
+                    sprintf('Question with ID "%s" belongs to a different challenge.', $questionId),
+                    $excelRow,
+                    'question_id'
+                );
             }
 
-            $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
-
-            $existingQuestion->update(
-                numericConstraint: $numericConstraint,
-                choiceConstraint: $choiceConstraint,
-                correctAnswer: $correctAnswer,
+            // Update the existing question with all properties
+            return $this->updateQuestion($existingQuestion, $row);
+        } catch (\InvalidArgumentException) {
+            throw new ImportFailed(
+                sprintf('Invalid question ID format "%s".', $questionId),
+                $excelRow,
+                'question_id'
             );
+        }
+    }
 
-            return $existingQuestion;
+    /**
+     * Update an existing question with all properties from the import row.
+     *
+     * @param ImportQuestionRow $row
+     */
+    private function updateQuestion(Question $question, array $row): Question
+    {
+        $numericConstraint = null;
+        $choiceConstraint = null;
+
+        if ($row['numeric_type_min'] !== null || $row['numeric_type_max'] !== null) {
+            $numericConstraint = new NumericQuestionConstraint(
+                min: $row['numeric_type_min'] !== null ? (int) $row['numeric_type_min'] : null,
+                max: $row['numeric_type_max'] !== null ? (int) $row['numeric_type_max'] : null,
+            );
         }
 
-        return $this->createQuestion($row, $challenge);
+        if ($row['choices'] !== null && json_validate($row['choices'])) {
+            $choiceConstraint = $this->createOrUpdateChoiceConstraint($row, $question->choiceConstraint);
+        }
+
+        $correctAnswer = $this->createCorrectAnswerFromRow($row, $choiceConstraint);
+
+        $question->update(
+            text: $row['text'],
+            type: QuestionType::from($row['type']),
+            image: $row['image'],
+            numericConstraint: $numericConstraint,
+            choiceConstraint: $choiceConstraint,
+            correctAnswer: $correctAnswer,
+        );
+
+        return $question;
+    }
+
+    /**
+     * Delete questions that exist in the database but are not in the import.
+     * Throws ImportFailed if any question to be deleted has player answers.
+     *
+     * @param array<string, Challenge> $challengesById
+     * @param array<string, array<string>> $importedQuestionIdsByChallenge
+     */
+    private function deleteRemovedQuestions(array $challengesById, array $importedQuestionIdsByChallenge): void
+    {
+        if (count($challengesById) === 0) {
+            return;
+        }
+
+        // Get all existing questions for all imported challenges in ONE query
+        $challengeUuids = array_map(fn (Challenge $c) => $c->id, array_values($challengesById));
+        $existingQuestions = $this->getExistingQuestionsForChallenges($challengeUuids);
+
+        // Find questions to delete (not in import)
+        $questionsToDelete = [];
+        foreach ($existingQuestions as $question) {
+            $challengeId = $question->challenge->id->toRfc4122();
+            $importedIds = $importedQuestionIdsByChallenge[$challengeId] ?? [];
+
+            if (!in_array($question->id->toRfc4122(), $importedIds, true)) {
+                $questionsToDelete[] = $question;
+            }
+        }
+
+        if (count($questionsToDelete) === 0) {
+            return;
+        }
+
+        // Check which questions have answers in ONE query
+        $questionUuids = array_map(fn (Question $q) => $q->id, $questionsToDelete);
+        $questionIdsWithAnswers = $this->getQuestionIdsWithAnswers($questionUuids);
+
+        foreach ($questionsToDelete as $question) {
+            if (in_array($question->id->toRfc4122(), $questionIdsWithAnswers, true)) {
+                throw new ImportFailed(
+                    sprintf('Cannot delete question "%s" because it has player answers.', $question->text)
+                );
+            }
+            $this->entityManager->remove($question);
+        }
+    }
+
+    /**
+     * Get all existing questions for multiple challenges in ONE query.
+     *
+     * @param array<Uuid> $challengeIds
+     * @return array<Question>
+     */
+    private function getExistingQuestionsForChallenges(array $challengeIds): array
+    {
+        if (count($challengeIds) === 0) {
+            return [];
+        }
+
+        /** @var array<Question> */
+        return $this->entityManager->createQueryBuilder()
+            ->select('q')
+            ->from(Question::class, 'q')
+            ->where('q.challenge IN (:challenges)')
+            ->setParameter('challenges', $challengeIds)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Get IDs of questions that have player answers in ONE query.
+     *
+     * @param array<Uuid> $questionIds
+     * @return array<string> UUIDs as strings
+     */
+    private function getQuestionIdsWithAnswers(array $questionIds): array
+    {
+        if (count($questionIds) === 0) {
+            return [];
+        }
+
+        /** @var array<array{question_id: string}> $results */
+        $results = $this->entityManager->createQueryBuilder()
+            ->select('DISTINCT IDENTITY(paq.question) as question_id')
+            ->from(PlayerAnsweredQuestion::class, 'paq')
+            ->where('paq.question IN (:questions)')
+            ->setParameter('questions', $questionIds)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_column($results, 'question_id');
     }
 
     /**

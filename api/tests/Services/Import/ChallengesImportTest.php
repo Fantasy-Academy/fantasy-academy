@@ -235,7 +235,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_missing_challenge_column.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Missing required challenge column "name"');
+        $this->expectExceptionMessage("column 'name': Missing required column");
 
         $this->importer->importFile($file);
     }
@@ -245,7 +245,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_missing_question_column.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Missing required question column "type"');
+        $this->expectExceptionMessage("column 'type': Missing required column");
 
         $this->importer->importFile($file);
     }
@@ -255,7 +255,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_duplicate_challenge_id.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Duplicate challenge ID "C001" found in the challenges sheet');
+        $this->expectExceptionMessage('Duplicate challenge ID "C001"');
 
         $this->importer->importFile($file);
     }
@@ -265,7 +265,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_invalid_challenge_reference.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Question references non-existing challenge ID "C999"');
+        $this->expectExceptionMessage('Non-existing challenge ID "C999"');
 
         $this->importer->importFile($file);
     }
@@ -275,7 +275,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_empty_challenge_id.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Missing challenge ID in the challenges sheet');
+        $this->expectExceptionMessage('Missing challenge ID');
 
         $this->importer->importFile($file);
     }
@@ -285,7 +285,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_empty_question_challenge_id.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Question has empty challenge ID');
+        $this->expectExceptionMessage('Empty challenge ID');
 
         $this->importer->importFile($file);
     }
@@ -314,7 +314,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_invalid_json_choices.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Invalid JSON format in choices column');
+        $this->expectExceptionMessage('Invalid JSON format');
 
         $this->importer->importFile($file);
     }
@@ -441,7 +441,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_choices_not_array.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Choices must be a JSON array');
+        $this->expectExceptionMessage('Must be a JSON array');
 
         $this->importer->importFile($file);
     }
@@ -461,7 +461,7 @@ final class ChallengesImportTest extends ApiTestCase
         $file = $this->createUploadedFile('challenge_import_missing_gameweek.xlsx');
 
         $this->expectException(ImportFailed::class);
-        $this->expectExceptionMessage('Missing required challenge column "gameweek"');
+        $this->expectExceptionMessage("column 'gameweek': Missing required column");
 
         $this->importer->importFile($file);
     }
@@ -480,6 +480,78 @@ final class ChallengesImportTest extends ApiTestCase
         $challenge2 = $this->entityManager->find(Challenge::class, Uuid::fromString('01933333-0000-7000-8000-000000000002'));
         $this->assertInstanceOf(Challenge::class, $challenge2);
         $this->assertSame(2, $challenge2->gameweek);
+    }
+
+    public function testImportWithQuestionIdUpdatesExistingQuestion(): void
+    {
+        // First import creates the question
+        $file1 = $this->createUploadedFile('challenge_import_valid.xlsx');
+        $this->importer->importFile($file1);
+        $this->entityManager->clear();
+
+        // Get the created question UUID
+        $question = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000006'));
+        $this->assertInstanceOf(Question::class, $question);
+        $this->assertSame('Who will you transfer in as your premium midfielder?', $question->text);
+
+        // Second import updates the question by question_id with new text
+        $file2 = $this->createUploadedFile('challenge_import_update_by_question_id.xlsx');
+        $this->importer->importFile($file2);
+        $this->entityManager->clear();
+
+        // Verify the question text was updated
+        $updatedQuestion = $this->entityManager->find(Question::class, Uuid::fromString('01933333-0000-7000-8000-000000000006'));
+        $this->assertInstanceOf(Question::class, $updatedQuestion);
+        $this->assertSame('Updated question text via question_id', $updatedQuestion->text);
+    }
+
+    public function testImportWithEmptyQuestionIdCreatesNewQuestion(): void
+    {
+        // Import file where question_id column exists but is empty
+        $file = $this->createUploadedFile('challenge_import_empty_question_id.xlsx');
+        $this->importer->importFile($file);
+        $this->entityManager->clear();
+
+        // Verify new questions were created with generated UUIDs
+        $allQuestions = $this->entityManager->getRepository(Question::class)->findAll();
+        $this->assertGreaterThan(0, count($allQuestions), 'Should have created questions');
+    }
+
+    public function testImportDeletesQuestionNotInImport(): void
+    {
+        // First import creates questions
+        $file1 = $this->createUploadedFile('challenge_import_with_multiple_questions.xlsx');
+        $this->importer->importFile($file1);
+        $this->entityManager->clear();
+
+        // Verify questions were created
+        $challenge = $this->entityManager->find(Challenge::class, Uuid::fromString('01933333-0000-7000-8000-000000000001'));
+        $this->assertInstanceOf(Challenge::class, $challenge);
+
+        $questions = $this->entityManager->getRepository(Question::class)->findBy(['challenge' => $challenge]);
+        $questionCountBefore = count($questions);
+        $this->assertGreaterThan(1, $questionCountBefore, 'Should have created multiple questions');
+
+        // Second import for same challenge has fewer questions - one is omitted
+        $file2 = $this->createUploadedFile('challenge_import_with_fewer_questions.xlsx');
+        $this->importer->importFile($file2);
+        $this->entityManager->clear();
+
+        // Verify question was deleted
+        $questionsAfter = $this->entityManager->getRepository(Question::class)->findBy(['challenge' => $challenge]);
+        $this->assertLessThan($questionCountBefore, count($questionsAfter), 'Question should have been deleted');
+    }
+
+    public function testImportFailsToDeleteQuestionWithAnswers(): void
+    {
+        // Use the ExpiredChallengeFixture which has a question with player answers
+        // Import for that challenge without the question - should fail
+        $file = $this->createUploadedFile('challenge_import_delete_answered_question.xlsx');
+
+        $this->expectException(ImportFailed::class);
+        $this->expectExceptionMessage('Cannot delete question');
+
+        $this->importer->importFile($file);
     }
 
     private function createUploadedFile(string $filename): UploadedFile
