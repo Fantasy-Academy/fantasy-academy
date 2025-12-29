@@ -1,23 +1,29 @@
 <template>
   <section class="w-full max-w-6xl mx-auto px-4 py-8">
-    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-3xl font-bold text-blue-black">Challenges</h1>
+    <header class="mb-6 rounded-lg
+                sm:p-5 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+
+      <div class="flex flex-col gap-2">
+        <GameweekStatus />
+      </div>
 
       <!-- Filter pills -->
-      <nav class="flex flex-wrap gap-2">
-        <button v-for="opt in filters" :key="opt.value" type="button" @click="activeFilter = opt.value"
-          class="rounded-full px-3 py-1.5 text-sm font-semibold border transition" :class="activeFilter === opt.value
-            ? 'bg-blue-black text-white border-blue-black'
-            : 'bg-white text-blue-black border-charcoal/20 hover:bg-dark-white'">
+      <nav class="flex flex-wrap gap-2 sm:gap-3">
+        <button v-for="opt in filters" :key="opt.value" type="button" @click="activeFilter = opt.value" class="px-4 py-2 rounded-full text-sm font-semibold border transition-all
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-purple/60" :class="activeFilter === opt.value
+              ? 'bg-dark-purple text-white border-dark-purple shadow-sm'
+              : 'bg-white text-blue-black border-charcoal/20 hover:bg-dark-white hover:shadow-sm'">
+
           {{ opt.label }}
+
           <span v-if="opt.badge != null"
             class="ml-2 rounded-full bg-dark-white px-2 py-0.5 text-xs font-bold text-blue-black">
             {{ opt.badge }}
           </span>
         </button>
       </nav>
+
     </header>
-    <GameweekStatus class="mb-6"/>
     <!-- States -->
     <p v-if="error" class="mb-4 rounded-xl border border-vibrant-coral/30 bg-vibrant-coral/10 p-3 text-vibrant-coral">
       {{ error }}
@@ -32,8 +38,12 @@
       <span v-else-if="activeFilter === 'expired'">No expired challenges.</span>
     </div>
     <!-- List -->
-    <div v-else class="flex flex-col gap-2">
-      <ChallengeCard v-for="challenge in filteredChallenges" :key="challenge.id" :challenge="challenge" @select="openChallenge(challenge.id)" />
+    <div v-else   class="grid w-full gap-8 mx-auto
+         grid-cols-1
+         sm:grid-cols-2
+         sm:[grid-template-columns:repeat(2,1fr)]">
+      <ChallengeCard v-for="challenge in filteredChallenges" :key="challenge.id" :challenge="challenge"
+        @select="openChallenge(challenge.id)" />
     </div>
 
     <!-- Modal -->

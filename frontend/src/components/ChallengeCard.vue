@@ -1,52 +1,72 @@
 <template>
-  <article
-    class="flex flex-col sm:flex-row gap-5 rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm transition hover:shadow-main cursor-pointer"
-    @click="$emit('select', challenge.id)">
-    <!-- Image -->
-    <div class="flex items-center justify-center overflow-hidden rounded-xl bg-dark-white aspect-square 
-         max-w-[80px] max-h-[80px] sm:w-28 sm:h-28 shrink-0 mx-auto sm:mx-0">
+  <article class="flex flex-col overflow-hidden rounded-lg shadow-sm w-full">
+
+    <!-- TOP IMAGE -->
+    <div class="relative h-40 w-full overflow-hidden rounded-t-lg">
       <img v-if="resolvedImage(challenge)" :src="resolvedImage(challenge)" :alt="challenge.name"
-        class="h-full w-full object-contain" loading="lazy" @error="onImgError" />
-      <span v-else class="text-xs text-cool-gray">No image</span>
-    </div>
+        class="absolute inset-0 h-full w-full object-cover" loading="lazy" @error="onImgError" />
 
-    <!-- Content -->
-    <div class="flex-1 min-w-0 flex flex-col">
-      <h3 class="truncate font-alexandria text-lg font-bold text-blue-black mb-1">
-        {{ challenge.name }}
-      </h3>
-      <p class="line-clamp-3 text-sm text-cool-gray mb-3">
-        {{ challenge.shortDescription || '—' }}
-      </p>
+      <span v-else class="text-xs text-cool-gray absolute inset-0 flex items-center justify-center">
+        No image
+      </span>
 
-      <div class="mt-auto flex flex-wrap items-center gap-3 text-xs text-cool-gray">
-        <span v-if="challenge.maxPoints != null" class="font-semibold text-blue-black">
-          {{ challenge.maxPoints }} FAPs
-        </span>
-        <!-- Evaluated label -->
+      <!-- BADGES -->
+      <div class="absolute top-2 right-2 z-10 flex flex-wrap gap-2 justify-end">
+
+        <!-- Evaluated badge -->
         <span v-if="challenge.isEvaluated"
-          class="rounded-full bg-indigo-500/15 px-3 py-1 text-indigo-600 font-semibold">
+          class="px-3 py-1 bg-indigo-500/60 text-white rounded-full text-xs font-semibold">
           Evaluated
         </span>
-        <span v-if="challenge.isAnswered" class="rounded-full bg-pistachio/20 px-3 py-1 text-pistachio font-semibold">
-          Answered
-        </span>
-        <span v-else-if="challenge.isExpired"
-          class="rounded-full bg-vibrant-coral/10 px-3 py-1 text-vibrant-coral font-semibold">
-          Expired
-        </span>
-        <span v-else class="rounded-full bg-golden-yellow/20 px-3 py-1 text-golden-yellow font-semibold">
-          Active
+
+        <!-- Completed badge -->
+        <span v-if="challenge.isAnswered"
+          class="px-3 py-1 bg-green-500/60 text-white rounded-full text-xs font-semibold">
+          Completed
         </span>
 
-        <!-- Expiration info -->
-        <span class="ml-auto text-xs italic text-cool-gray">
+        <!-- Expiring / Expired badge -->
+        <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="expirationText.includes('Expired')
+          ? 'bg-vibrant-coral/60 text-white'
+          : 'bg-golden-yellow/60 text-blue-black'">
           {{ expirationText }}
         </span>
-        <img v-if='challenge.isExpired' :src="ExpiredIcon" alt="expired clock Icon" class="h-4" />
-        <img v-if='!challenge.isExpired' :src="ActiveIcon" alt="active clock Icon" class="h-4" />
+
+      </div>
+      <div class="absolute bottom-2 left-2 z-10 px-3 py-1 bg-dark-white/60 rounded-full text-xs font-semibold">
+        {{ challenge.maxPoints }}FAPs
       </div>
     </div>
+
+    <!-- CONTENT -->
+    <div class="flex flex-row gap-4 p-4 bg-dark-white">
+      <div class="w-20 h-20 rounded overflow-hidden flex-shrink-0">
+        <img v-if="resolvedImage(challenge)" :src="resolvedImage(challenge)" :alt="challenge.name"
+          class="h-full w-full object-cover" loading="lazy" @error="onImgError" />
+        <span v-else class="text-xs text-cool-gray">No image</span>
+      </div>
+
+      <div class="flex flex-col gap-1 flex-1">
+        <h1 class="font-bold line-clamp-1">{{ challenge.name }}</h1>
+        <h2 class="text-sm text-blue-black/70 line-clamp-2">{{ challenge.description }}</h2>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="p-4">
+      <button class="w-full text-center rounded-lg font-semibold cursor-pointer
+         bg-dark-purple text-white          
+         px-3 py-2 shadow-sm transition duration-240
+
+         hover:bg-gradient-to-r             
+         hover:from-dark-purple
+         hover:to-light-purple
+         hover:animate-gradient
+         hover:text-white" @click="$emit('select', challenge.id)">
+        Open Challenge
+      </button>
+    </div>
+
   </article>
 </template>
 
