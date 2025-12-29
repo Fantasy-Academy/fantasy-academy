@@ -15,25 +15,25 @@
 
         <!-- Evaluated badge -->
         <span v-if="challenge.isEvaluated"
-          class="px-3 py-1 bg-indigo-500/60 text-white rounded-full text-xs font-semibold">
+          class="px-3 py-1 bg-indigo-500/90 text-white rounded-full text-xs font-semibold">
           Evaluated
         </span>
 
         <!-- Completed badge -->
         <span v-if="challenge.isAnswered"
-          class="px-3 py-1 bg-green-500/60 text-white rounded-full text-xs font-semibold">
+          class="px-3 py-1 bg-green-500/90 text-white rounded-full text-xs font-semibold">
           Completed
         </span>
 
         <!-- Expiring / Expired badge -->
         <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="expirationText.includes('Expired')
-          ? 'bg-vibrant-coral/60 text-white'
-          : 'bg-golden-yellow/60 text-blue-black'">
+          ? 'bg-vibrant-coral/90 text-white'
+          : 'bg-golden-yellow/90 text-blue-black'">
           {{ expirationText }}
         </span>
 
       </div>
-      <div class="absolute bottom-2 left-2 z-10 px-3 py-1 bg-dark-white/60 rounded-full text-xs font-semibold">
+      <div class="absolute bottom-2 left-2 z-10 px-3 py-1 bg-dark-white/90 rounded-full text-xs font-semibold">
         {{ challenge.maxPoints }}FAPs
       </div>
     </div>
