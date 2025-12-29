@@ -1,20 +1,20 @@
 <template>
-  <div class="rounded-xl bg-golden-yellow p-4 shadow-sm border border-charcoal/10">
-    <p class="text-sm text-blue-black font-alexandria">Gameweek</p>
+  <div class="rounded-xl text-white  bg-light-purple p-4 shadow-sm border border-charcoal/10 ">
+    <p class="text-sm font-alexandria">Gameweek</p>
 
-    <p v-if="loading" class="text-blue-black">Loading...</p>
+    <p v-if="loading">Loading...</p>
 
     <template v-else-if="currentGameweek">
-      <p class="text-lg font-semibold text-blue-black">
+      <p class="text-lg font-semibold">
         Current gameweek: {{ currentGameweek.number }}
       </p>
-      <p class="text-sm text-blue-black/80">
+      <p class="text-sm">
         Ends at: {{ formatDateTime(currentGameweek.endsAt) }}
       </p>
     </template>
 
     <template v-else-if="nextGameweek">
-      <p class="text-lg font-semibold text-blue-black">
+      <p class="text-lg font-semibold">
         Next gameweek: GW {{ nextGameweek.number }}
       </p>
       <p class="text-sm text-blue-black/80">
@@ -22,7 +22,7 @@
       </p>
     </template>
 
-    <p v-else class="text-sm text-blue-black">
+    <p v-else class="text-sm">
       No active gameweek.
     </p>
   </div>

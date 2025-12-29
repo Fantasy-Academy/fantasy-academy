@@ -2,7 +2,7 @@
 
 /* Tailwind v4: definice vlastních tokenů přes @theme */
 @theme {
-  /* Colors -> budou dostupné jako bg-blue-black, text-cool-gray, ... */
+  /* Colors */
   --color-blue-black: #2A313A;
   --color-cool-gray: #94A3B8;
   --color-dark-white: #F0F4F8;
@@ -10,8 +10,10 @@
   --color-vibrant-coral: #FF6F61;
   --color-golden-yellow: #FFD700;
   --color-pistachio: #A8D5BA;
+  --color-dark-purple: #6A01FE;
+  --color-light-purple: #D08BFF;
 
-  /* Fonts -> budou dostupné jako font-bebas-neue, font-alexandria, ... */
+  /* Fonts */
   --font-sans: "Open Sans", sans-serif;
   --font-alexandria: "Alexandria", sans-serif;
   --font-bebas-neue: "Bebas Neue", sans-serif;
@@ -19,12 +21,27 @@
   --font-nunito: "Nunito", sans-serif;
   --font-caveat: "Caveat", sans-serif;
 
-  /* Shadows -> budou dostupné jako shadow-main, shadow-sharp */
+  /* Shadows */
   --shadow-sharp: 6px 6px 0px 0px #94A3B8;
-  --shadow-main:  6px 6px 0px 0px #3C4858;
+  --shadow-main:  4px 4px 0px 0px #3C4858;
+
+  /* 🚀 Gradient Animation Tokens */
+  --animate-gradient: gradient 4s ease infinite;
+
+  @keyframes gradient {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 }
 
-/* Volitelné: helper pro „soft“ panel background */
+/* Helper class - můžeš použít pro buttony, cardy, cokoliv */
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: var(--animate-gradient);
+}
+
+/* Volitelné: soft panel */
 .panel {
   @apply rounded-2xl border border-charcoal/10 bg-white shadow-sm;
 }
