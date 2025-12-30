@@ -362,7 +362,7 @@ final class ChallengesExportTest extends ApiTestCase
 
         // Extract all headers from Challenges sheet
         $challengeHeaders = [];
-        for ($col = 'A'; $col <= 'T'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col = str_increment($col)) {
             $header = $challengesSheet->getCell($col . '1')->getValue();
             if ($header !== null) {
                 $challengeHeaders[] = $header;
@@ -371,7 +371,7 @@ final class ChallengesExportTest extends ApiTestCase
 
         // Extract all headers from Questions sheet (now O columns due to question_id)
         $questionHeaders = [];
-        for ($col = 'A'; $col <= 'O'; $col++) {
+        for ($col = 'A'; $col <= 'O'; $col = str_increment($col)) {
             $header = $questionsSheet->getCell($col . '1')->getValue();
             if ($header !== null) {
                 $questionHeaders[] = $header;
@@ -405,7 +405,7 @@ final class ChallengesExportTest extends ApiTestCase
         $questionsSheet = $spreadsheet->getSheet(1);
 
         // All headers should be lowercase with underscores (snake_case)
-        for ($col = 'A'; $col <= 'T'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col = str_increment($col)) {
             $header = $challengesSheet->getCell($col . '1')->getValue();
             if (is_string($header)) {
                 $this->assertMatchesRegularExpression(
@@ -417,7 +417,7 @@ final class ChallengesExportTest extends ApiTestCase
         }
 
         // Now O columns due to question_id
-        for ($col = 'A'; $col <= 'O'; $col++) {
+        for ($col = 'A'; $col <= 'O'; $col = str_increment($col)) {
             $header = $questionsSheet->getCell($col . '1')->getValue();
             if (is_string($header)) {
                 $this->assertMatchesRegularExpression(

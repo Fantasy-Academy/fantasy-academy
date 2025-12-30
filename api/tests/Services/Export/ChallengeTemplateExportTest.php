@@ -104,7 +104,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
 
         // Extract all headers from row 1
         $headers = [];
-        for ($col = 'A'; $col <= 'T'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col = str_increment($col)) {
             $headers[] = $challengesSheet->getCell($col . '1')->getValue();
         }
 
@@ -132,7 +132,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
 
         // Extract all headers from row 1 (now includes question_id as first column)
         $headers = [];
-        for ($col = 'A'; $col <= 'J'; $col++) {
+        for ($col = 'A'; $col <= 'J'; $col = str_increment($col)) {
             $headers[] = $questionsSheet->getCell($col . '1')->getValue();
         }
 
@@ -159,7 +159,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
 
         // All headers should be lowercase with underscores (snake_case)
         // This matches the normalizeHeader method in ChallengesImport
-        for ($col = 'A'; $col <= 'T'; $col++) {
+        for ($col = 'A'; $col <= 'T'; $col = str_increment($col)) {
             $header = $challengesSheet->getCell($col . '1')->getValue();
             if ($header !== null && is_string($header)) {
                 $this->assertMatchesRegularExpression(
@@ -170,7 +170,7 @@ final class ChallengeTemplateExportTest extends ApiTestCase
             }
         }
 
-        for ($col = 'A'; $col <= 'J'; $col++) {
+        for ($col = 'A'; $col <= 'J'; $col = str_increment($col)) {
             $header = $questionsSheet->getCell($col . '1')->getValue();
             if ($header !== null && is_string($header)) {
                 $this->assertMatchesRegularExpression(
