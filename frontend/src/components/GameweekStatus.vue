@@ -1,7 +1,5 @@
 <template>
-  <div class="rounded-xl text-white  bg-light-purple p-4 shadow-sm border border-charcoal/10 ">
-    <p class="text-sm font-alexandria">Gameweek</p>
-
+  <div class="rounded-lg text-white  bg-light-purple px-3 py-2 shadow-sm border border-charcoal/10 ">
     <p v-if="loading">Loading...</p>
 
     <template v-else-if="currentGameweek">
