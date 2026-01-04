@@ -59,14 +59,16 @@
                   <div v-for="q in questions" :key="q.id" class="mt-2">
 
                     <p v-if="getPlayerAnswer(q)">
-                      <span :class="hasPoints(q) ? 'text-green-600 font-semibold' : 'text-vibrant-coral font-semibold'">
-                        Your answer: {{ getPlayerAnswer(q) }}
+                      <span class="text-blue-black font-medium">
+                        <span class="font-bold">Your answer:</span>
+                        {{ getPlayerAnswer(q) }}
                       </span>
                     </p>
 
                     <p v-if="formatCorrectAnswer(q) && challenge.isEvaluated">
-                      <span :class="hasPoints(q) ? 'text-green-600 font-semibold' : 'text-vibrant-coral font-semibold'">
-                        Correct: {{ formatCorrectAnswer(q) }}
+                      <span class="text-blue-black font-medium">
+                        <span class="font-bold">Correct:</span>
+                        {{ formatCorrectAnswer(q) }}
                       </span>
                     </p>
 
@@ -609,11 +611,6 @@ function getPlayerAnswer(q) {
       .join(", ");
   }
   return "—";
-}
-
-function hasPoints(q) {
-  // body za otázku po evaluaci
-  return typeof q.points === "number" && q.points > 0;
 }
 
 const showResultsMobile = ref(false);
