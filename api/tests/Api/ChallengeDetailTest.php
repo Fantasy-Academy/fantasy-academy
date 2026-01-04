@@ -304,7 +304,7 @@ final class ChallengeDetailTest extends ApiTestCase
         }
     }
 
-    public function testCorrectAnswerIsNullWhenNotProvided(): void
+    public function testCorrectAnswerIsProperlyProvided(): void
     {
         $client = self::createClient();
         $token = TestingLogin::getJwt($client, UserFixture::USER_3_EMAIL);
@@ -323,11 +323,24 @@ final class ChallengeDetailTest extends ApiTestCase
         $this->assertIsArray($responseData);
         $this->assertIsArray($responseData['questions']);
 
-        // Verify correctAnswer is NULL when not set on questions
+        // Verify correctAnswer is properly set on questions
         foreach ($responseData['questions'] as $question) {
             $this->assertIsArray($question);
             $this->assertArrayHasKey('correctAnswer', $question);
-            $this->assertNull($question['correctAnswer']);
+            $this->assertIsArray($question['correctAnswer']);
         }
+
+        // Verify specific correct answer for Q1 (SingleSelect - "Im good")
+        $questions = $responseData['questions'];
+        $q1 = null;
+        foreach ($questions as $question) {
+            if ($question['id'] === CurrentChallenge1Fixture::QUESTION_1_ID) {
+                $q1 = $question;
+                break;
+            }
+        }
+        $this->assertNotNull($q1, 'Question 1 should be present');
+        $this->assertEquals(CurrentChallenge1Fixture::CHOICE_1_ID, $q1['correctAnswer']['selectedChoiceId']);
+        $this->assertEquals('Im good', $q1['correctAnswer']['selectedChoiceText']);
     }
 }

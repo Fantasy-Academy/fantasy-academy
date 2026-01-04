@@ -186,13 +186,14 @@ final class PlayersAnswersExportTest extends ApiTestCase
         $this->assertSame(900, $pointsSheet->getCell('E3')->getValue());
 
         // Second challenge answers (rows 5-7)
+        // After fixture fix: USER_1=1000 (all correct), USER_2=400 (all wrong), USER_3=200 (all wrong)
         $this->assertSame(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID, $pointsSheet->getCell('C5')->getValue());
         $this->assertSame('Another expired challenge', $pointsSheet->getCell('D5')->getValue());
-        $this->assertSame(600, $pointsSheet->getCell('E5')->getValue());
+        $this->assertSame(1000, $pointsSheet->getCell('E5')->getValue());
 
         $this->assertSame(ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID, $pointsSheet->getCell('C6')->getValue());
         $this->assertSame('Another expired challenge', $pointsSheet->getCell('D6')->getValue());
-        $this->assertSame(700, $pointsSheet->getCell('E6')->getValue());
+        $this->assertSame(400, $pointsSheet->getCell('E6')->getValue());
     }
 
     public function testExportWithEmptyData(): void

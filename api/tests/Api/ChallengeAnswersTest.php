@@ -183,7 +183,7 @@ final class ChallengeAnswersTest extends ApiTestCase
         $this->assertIsArray($responseData['players']);
         $this->assertCount(3, $responseData['players']); // 3 users answered this challenge
 
-        // Find User 1's answers (should be last with 600 points)
+        // Find User 1's answers (should be first with 1000 points - all correct)
         $user1Data = null;
         foreach ($responseData['players'] as $player) {
             if ($player['userId'] === UserFixture::USER_1_ID) {
@@ -193,7 +193,7 @@ final class ChallengeAnswersTest extends ApiTestCase
         }
 
         $this->assertNotNull($user1Data, 'User 1 should be in results');
-        $this->assertEquals(600, $user1Data['points']);
+        $this->assertEquals(1000, $user1Data['points']);
         $this->assertIsArray($user1Data['questions']);
         $this->assertCount(3, $user1Data['questions']); // 3 questions in ExpiredChallenge2
 

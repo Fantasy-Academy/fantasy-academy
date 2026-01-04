@@ -7,6 +7,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use FantasyAcademy\API\Entity\Challenge;
 use FantasyAcademy\API\Entity\Question;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
 use FantasyAcademy\API\Value\QuestionType;
 use Psr\Clock\ClockInterface;
@@ -59,6 +60,9 @@ final class CurrentChallenge3Fixture extends Fixture
             image: 'https://placecats.com/600/400',
             numericConstraint: null,
             choiceConstraint: null,
+            correctAnswer: new Answer(
+                textAnswer: 'Correct answer',
+            ),
         );
 
         $manager->persist($question5);
@@ -74,6 +78,9 @@ final class CurrentChallenge3Fixture extends Fixture
                 max: 42,
             ),
             choiceConstraint: null,
+            correctAnswer: new Answer(
+                numericAnswer: 21.0,
+            ),
         );
 
         $manager->persist($question6);

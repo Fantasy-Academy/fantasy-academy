@@ -34,7 +34,7 @@ final class ChallengesTest extends ApiTestCase
         $responseData = json_decode($response->getContent(), true);
 
         $this->assertIsArray($responseData);
-        $this->assertCount(6, $responseData);
+        $this->assertCount(10, $responseData);
 
         // Verify all challenges have isAnswered = false and myPoints = null for unauthenticated user
         foreach ($responseData as $challenge) {
@@ -61,7 +61,7 @@ final class ChallengesTest extends ApiTestCase
         $responseData = json_decode($response->getContent(), true);
 
         $this->assertIsArray($responseData);
-        $this->assertCount(6, $responseData);
+        $this->assertCount(10, $responseData);
 
         // Find specific challenges and verify their answered status
         $challengesById = [];

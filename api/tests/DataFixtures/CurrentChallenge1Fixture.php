@@ -7,6 +7,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use FantasyAcademy\API\Entity\Challenge;
 use FantasyAcademy\API\Entity\Question;
+use FantasyAcademy\API\Value\Answer;
 use FantasyAcademy\API\Value\Choice;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use FantasyAcademy\API\Value\QuestionType;
@@ -86,6 +87,9 @@ final class CurrentChallenge1Fixture extends Fixture
                     ),
                 ],
             ),
+            correctAnswer: new Answer(
+                selectedChoiceId: Uuid::fromString(self::CHOICE_1_ID), // Im good
+            ),
         );
 
         $manager->persist($question1);
@@ -115,6 +119,12 @@ final class CurrentChallenge1Fixture extends Fixture
                 minSelections: 1,
                 maxSelections: 3,
             ),
+            correctAnswer: new Answer(
+                selectedChoiceIds: [
+                    Uuid::fromString(self::CHOICE_3_ID), // 42
+                    Uuid::fromString(self::CHOICE_5_ID), // 666
+                ],
+            ),
         );
 
         $manager->persist($question2);
@@ -143,6 +153,13 @@ final class CurrentChallenge1Fixture extends Fixture
                 ],
                 minSelections: 1,
                 maxSelections: 3,
+            ),
+            correctAnswer: new Answer(
+                orderedChoiceIds: [
+                    Uuid::fromString(self::CHOICE_6_ID), // 42
+                    Uuid::fromString(self::CHOICE_7_ID), // 420
+                    Uuid::fromString(self::CHOICE_8_ID), // 666
+                ],
             ),
         );
 

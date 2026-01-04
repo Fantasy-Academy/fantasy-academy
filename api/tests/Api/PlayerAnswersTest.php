@@ -40,9 +40,9 @@ final class PlayerAnswersTest extends ApiTestCase
         $this->assertArrayHasKey('challenges', $responseData);
         $this->assertIsArray($responseData['challenges']);
 
-        // User 1 has 2 evaluated challenges: ExpiredChallenge1 and ExpiredChallenge2
+        // User 1 has 6 evaluated challenges: ExpiredChallenge1, 2, 4, 5, 6, 7
         // ExpiredChallenge3 is NOT evaluated, so should not appear
-        $this->assertCount(2, $responseData['challenges']);
+        $this->assertCount(6, $responseData['challenges']);
 
         $challenges = $responseData['challenges'];
 
@@ -107,7 +107,7 @@ final class PlayerAnswersTest extends ApiTestCase
 
         // Verify ExpiredChallenge2 data
         $this->assertEquals('Another expired challenge', $expiredChallenge2Data['challengeName']);
-        $this->assertEquals(600, $expiredChallenge2Data['points']); // User 1 got 600 points
+        $this->assertEquals(1000, $expiredChallenge2Data['points']); // User 1 got 1000 points (all correct)
         $this->assertIsArray($expiredChallenge2Data['questions']);
         $this->assertCount(3, $expiredChallenge2Data['questions']); // 3 questions in ExpiredChallenge2
 
@@ -205,10 +205,11 @@ final class PlayerAnswersTest extends ApiTestCase
         // User 3 answered:
         // - ExpiredChallenge1 (evaluated) ✓
         // - ExpiredChallenge2 (evaluated) ✓
+        // - ExpiredChallenge4, 5, 6, 7 (evaluated) ✓
         // - CurrentChallenge1 (NOT evaluated) ✗
         // - CurrentChallenge2 (NOT evaluated) ✗
-        // So only 2 evaluated challenges should appear
-        $this->assertCount(2, $responseData['challenges']);
+        // So only 6 evaluated challenges should appear
+        $this->assertCount(6, $responseData['challenges']);
 
         // Verify both challenges are the evaluated ones
         $challengeIds = array_map(fn($challenge) => $challenge['challengeId'], $responseData['challenges']);
@@ -236,7 +237,7 @@ final class PlayerAnswersTest extends ApiTestCase
         $this->assertEquals(UserFixture::USER_4_ID, $responseData['id']);
         $this->assertArrayHasKey('challenges', $responseData);
         $this->assertIsArray($responseData['challenges']);
-        $this->assertCount(0, $responseData['challenges']); // User 4 has no answers
+        $this->assertCount(2, $responseData['challenges']); // User 4 answered ExpiredChallenge6 and ExpiredChallenge7
     }
 
     public function testPlayerAnswersWorksAsUnauthenticated(): void
@@ -257,6 +258,6 @@ final class PlayerAnswersTest extends ApiTestCase
         $this->assertEquals(UserFixture::USER_1_ID, $responseData['id']);
         $this->assertArrayHasKey('challenges', $responseData);
         $this->assertIsArray($responseData['challenges']);
-        $this->assertCount(2, $responseData['challenges']); // Same data as when authenticated
+        $this->assertCount(6, $responseData['challenges']); // Same data as when authenticated
     }
 }
