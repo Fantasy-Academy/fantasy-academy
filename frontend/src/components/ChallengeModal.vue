@@ -22,8 +22,8 @@
             {{ challenge.maxPoints }}FAPs
           </div>
           <div>
-            <img v-if="hintImgSrc" :src="hintImgSrc"
-              class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white" />
+            <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
+         cursor-zoom-in hover:opacity-90 transition" @click="openImage(hintImgSrc)" />
           </div>
           <div>
             <div class="bg-light-purple px-2 py-1 rounded text-white">
@@ -151,6 +151,17 @@
       </div>
 
     </section>
+  </div>
+  <!-- 🔍 Fullscreen image preview -->
+  <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+    @click="closeImage">
+    <img :src="zoomedImage" alt="Zoomed hint" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-xl cursor-zoom-out"
+      @click.stop />
+
+    <button class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-light-purple transition cursor-pointer"
+      @click="closeImage">
+      ✕
+    </button>
   </div>
 </template>
 
