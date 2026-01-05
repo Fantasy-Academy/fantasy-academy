@@ -26,21 +26,16 @@
          cursor-zoom-in hover:opacity-90 transition" @click="openImage(hintImgSrc)" />
           </div>
           <div>
-            <div class="bg-light-purple px-2 py-1 rounded text-white">
-              <h2>Your Outcome:</h2>
-              <p class="font-bold">
-                {{ challenge.userPoints }} FAPs
-              </p>
-            </div>
+
             <!-- 📱 Results Collapse (mobile only) -->
-            <div class="mt-2">
+            <div>
 
               <!-- 📱 Mobile toggle button -->
               <button
-                class="md:hidden w-full py-2 px-3 rounded bg-dark-white text-sm font-medium text-blue-black flex justify-between items-center"
+                class="md:hidden w-full py-2 px-3 rounded bg-dark-white text-sm font-bold text-light-purple flex justify-between items-center"
                 @click="toggleResultsMobile">
-                quick overview
-                <span>{{ showResultsMobile ? '▲' : '▼' }}</span>
+                Overview
+                <span class="text-light-purple">{{ showResultsMobile ? '▲' : '▼' }}</span>
               </button>
 
               <!-- 🖥 Desktop: always visible | 📱 Mobile: collapsible -->
@@ -49,7 +44,12 @@
                 showResultsMobile ? 'max-h-[1500px] mt-3' : 'max-h-0 md:max-h-none',
                 'md:max-h-none'
               ]">
-
+                <div class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                  <h2>Your Outcome:</h2>
+                  <p class="font-bold">
+                    {{ challenge.userPoints }} FAPs
+                  </p>
+                </div>
                 <!-- ✨ původní obsah, beze změny formátu -->
                 <div v-if="questions.every(q => !getPlayerAnswer(q))" class="mt-2 md:mt-0">
                   <span class="text-cool-gray">No answers yet!</span>
@@ -145,11 +145,60 @@
          bg-[length:200%_200%] shadow-sm transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Submitting…' : 'Submit answers' }}
             </button>
+            <!-- 📊 Answer statistics -->
+            <div v-if="questions.some(q => q.statistics)" class="mt-6">
 
+              <!-- TOGGLE – mobile + desktop -->
+              <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
+                Answer statistics
+                <span class="text-xs text-light-purple font-bold">
+                  {{ showStats ? '▲' : '▼' }}
+                </span>
+              </button>
+
+              <!-- COLLAPSIBLE CONTENT -->
+              <div :class="[
+                'transition-all duration-300 overflow-hidden',
+                showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
+              ]">
+
+                <!-- ⚠️ tvá původní struktura – NEDOTČENA -->
+                <div v-for="q in questions" :key="q.id">
+                  <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+                    <p class="text-sm font-semibold text-blue-black mb-3">
+                      {{ q.text }}
+                    </p>
+
+                    <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                      No answers yet.
+                    </div>
+
+                    <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+
+                      <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                        <span>{{ formatStatisticAnswer(stat) }}</span>
+                        <span>{{ stat.percentage.toFixed(1) }}%</span>
+                      </div>
+
+                      <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
+                        <div class="h-full bg-light-purple rounded-full transition-all duration-500"
+                          :style="{ width: stat.percentage + '%' }" />
+                      </div>
+
+                      <p class="text-xs text-cool-gray mt-1">
+                        {{ stat.count }} players
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
     </section>
   </div>
   <!-- 🔍 Fullscreen image preview -->
@@ -158,7 +207,8 @@
     <img :src="zoomedImage" alt="Zoomed hint" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-xl cursor-zoom-out"
       @click.stop />
 
-    <button class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-light-purple transition cursor-pointer"
+    <button
+      class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-light-purple transition cursor-pointer"
       @click="closeImage">
       ✕
     </button>
@@ -628,6 +678,13 @@ const showResultsMobile = ref(false);
 const toggleResultsMobile = () => {
   showResultsMobile.value = !showResultsMobile.value;
 };
+
+
+const showStats = ref(false);
+
+function toggleStats() {
+  showStats.value = !showStats.value;
+}
 
 let scrollY = 0;
 </script>
