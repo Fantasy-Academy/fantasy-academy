@@ -31,8 +31,8 @@
             <div>
 
               <!-- 📱 Mobile toggle button -->
-              <button
-                class="md:hidden w-full py-2 px-3 rounded bg-dark-white text-sm font-bold text-light-purple flex justify-between items-center"
+              <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
                 @click="toggleResultsMobile">
                 Overview
                 <span class="text-light-purple">{{ showResultsMobile ? '▲' : '▼' }}</span>
@@ -79,8 +79,61 @@
                 </div>
               </div>
             </div>
+            <!-- 📊 Answer statistics -->
+            <div v-if="questions.some(q => q.statistics)" class="mt-4 md:hidden">
+
+              <!-- TOGGLE – mobile + desktop -->
+              <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
+                Answer statistics
+                <span class="text-xs text-light-purple font-bold">
+                  {{ showStats ? '▲' : '▼' }}
+                </span>
+              </button>
+
+              <!-- COLLAPSIBLE CONTENT -->
+              <div :class="[
+                'transition-all duration-300 overflow-hidden',
+                showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
+              ]">
+
+                <!-- ⚠️ tvá původní struktura – NEDOTČENA -->
+                <div v-for="q in questions" :key="q.id">
+                  <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+                    <p class="text-sm font-semibold text-blue-black mb-3">
+                      {{ q.text }}
+                    </p>
+
+                    <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                      No answers yet.
+                    </div>
+
+                    <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+
+                      <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                        <span>{{ formatStatisticAnswer(stat) }}</span>
+                        <span>{{ stat.percentage.toFixed(1) }}%</span>
+                      </div>
+
+                      <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
+                        <div class="h-full bg-light-purple rounded-full transition-all duration-500"
+                          :style="{ width: stat.percentage + '%' }" />
+                      </div>
+
+                      <p class="text-xs text-cool-gray mt-1">
+                        {{ stat.count }} players
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
+
 
         <!-- Description -->
         <!-- Description / Right side -->
@@ -145,53 +198,47 @@
          bg-[length:200%_200%] shadow-sm transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Submitting…' : 'Submit answers' }}
             </button>
-            <!-- 📊 Answer statistics -->
-            <div v-if="questions.some(q => q.statistics)" class="mt-6">
-
-              <!-- TOGGLE – mobile + desktop -->
-              <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+          </div>
+          <!-- 📊 Answer statistics – DESKTOP ONLY -->
+          <div v-if="questions.some(q => q.statistics)" class="hidden md:block">
+            <!-- TOGGLE -->
+            <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
            text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
-                Answer statistics
-                <span class="text-xs text-light-purple font-bold">
-                  {{ showStats ? '▲' : '▼' }}
-                </span>
-              </button>
+              Answer statistics
+              <span class="text-xs text-light-purple font-bold">
+                {{ showStats ? '▲' : '▼' }}
+              </span>
+            </button>
 
-              <!-- COLLAPSIBLE CONTENT -->
-              <div :class="[
-                'transition-all duration-300 overflow-hidden',
-                showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
-              ]">
+            <!-- COLLAPSIBLE CONTENT (STEJNÝ OBSAH) -->
+            <div :class="[
+              'transition-all duration-300 overflow-hidden',
+              showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
+            ]">
+              <div v-for="q in questions" :key="q.id">
+                <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+                  <p class="text-sm font-semibold text-blue-black mb-3">
+                    {{ q.text }}
+                  </p>
 
-                <!-- ⚠️ tvá původní struktura – NEDOTČENA -->
-                <div v-for="q in questions" :key="q.id">
-                  <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+                  <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                    No answers yet.
+                  </div>
 
-                    <p class="text-sm font-semibold text-blue-black mb-3">
-                      {{ q.text }}
+                  <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+                    <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                      <span>{{ formatStatisticAnswer(stat) }}</span>
+                      <span>{{ stat.percentage.toFixed(1) }}%</span>
+                    </div>
+
+                    <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
+                      <div class="h-full bg-light-purple rounded-full transition-all duration-500"
+                        :style="{ width: stat.percentage + '%' }" />
+                    </div>
+
+                    <p class="text-xs text-cool-gray mt-1">
+                      {{ stat.count }} players
                     </p>
-
-                    <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
-                      No answers yet.
-                    </div>
-
-                    <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
-
-                      <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
-                        <span>{{ formatStatisticAnswer(stat) }}</span>
-                        <span>{{ stat.percentage.toFixed(1) }}%</span>
-                      </div>
-
-                      <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
-                        <div class="h-full bg-light-purple rounded-full transition-all duration-500"
-                          :style="{ width: stat.percentage + '%' }" />
-                      </div>
-
-                      <p class="text-xs text-cool-gray mt-1">
-                        {{ stat.count }} players
-                      </p>
-                    </div>
-
                   </div>
                 </div>
               </div>
