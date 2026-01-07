@@ -12,12 +12,13 @@ use Doctrine\ORM\Event\PostUpdateEventArgs;
 use Doctrine\ORM\Events;
 use FantasyAcademy\API\Entity\EntityWithEvents;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 #[AsDoctrineListener(event: Events::postPersist)]
 #[AsDoctrineListener(event: Events::postUpdate)]
 #[AsDoctrineListener(event: Events::postRemove)]
 #[AsDoctrineListener(event: Events::postFlush)]
-final class DomainEventsSubscriber
+final class DomainEventsSubscriber implements ResetInterface
 {
     /** @var array<EntityWithEvents> */
     private array $entities = [];
@@ -67,5 +68,10 @@ final class DomainEventsSubscriber
                 $this->messageBus->dispatch($event);
             }
         }
+    }
+
+    public function reset(): void
+    {
+        $this->entities = [];
     }
 }
