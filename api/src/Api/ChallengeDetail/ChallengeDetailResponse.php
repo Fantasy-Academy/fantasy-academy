@@ -7,6 +7,7 @@ namespace FantasyAcademy\API\Api\ChallengeDetail;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use DateTimeImmutable;
+use FantasyAcademy\API\Value\ChallengeSkillDistribution;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -27,6 +28,14 @@ use Symfony\Component\Uid\Uuid;
  *     my_points: null|int,
  *     show_statistics_continuously: bool,
  *     gameweek: null|int,
+ *     skill_analytical: float,
+ *     skill_strategic_planning: float,
+ *     skill_adaptability: float,
+ *     skill_premier_league_knowledge: float,
+ *     skill_risk_management: float,
+ *     skill_decision_making_under_pressure: float,
+ *     skill_financial_management: float,
+ *     skill_long_term_vision: float,
  * }
  */
 #[ApiResource(
@@ -40,6 +49,7 @@ readonly final class ChallengeDetailResponse
 {
     /**
      * @param array<QuestionResponse> $questions
+     * @param array<ChallengeSkillDistribution> $skillDistribution
      */
     public function __construct(
         public Uuid $id,
@@ -61,14 +71,16 @@ readonly final class ChallengeDetailResponse
         public null|string $hintImage,
         public null|int $myPoints,
         public null|int $gameweek,
+        public array $skillDistribution,
     ) {
     }
 
     /**
      * @param ChallengeDetailResponseRow $row
      * @param array<QuestionResponse> $questions
+     * @param array<ChallengeSkillDistribution> $skillDistribution
      */
-    public static function fromArray(array $row, DateTimeImmutable $now, array $questions): self
+    public static function fromArray(array $row, DateTimeImmutable $now, array $questions, array $skillDistribution): self
     {
         $answeredAt = $row['answered_at'] !== null ? new DateTimeImmutable($row['answered_at']) : null;
         $startsAt = new DateTimeImmutable($row['starts_at']);
@@ -94,6 +106,7 @@ readonly final class ChallengeDetailResponse
             hintImage: $row['hint_image'],
             myPoints: $row['my_points'],
             gameweek: $row['gameweek'],
+            skillDistribution: $skillDistribution,
         );
     }
 }

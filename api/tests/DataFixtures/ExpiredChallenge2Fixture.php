@@ -48,14 +48,14 @@ final class ExpiredChallenge2Fixture extends Fixture
             maxPoints: 1000,
             hintText: 'This hint came too late',
             hintImage: 'https://placecats.com/800/600',
-            skillAnalytical: 10,
-            skillStrategicPlanning: 10,
-            skillAdaptability: 10,
-            skillPremierLeagueKnowledge: 10,
+            skillAnalytical: 20,
+            skillStrategicPlanning: 15,
+            skillAdaptability: 0, // Will not appear in skillDistribution
+            skillPremierLeagueKnowledge: 25,
             skillRiskManagement: 10,
-            skillDecisionMakingUnderPressure: 10,
-            skillFinancialManagement: 10,
-            skillLongTermVision: 10,
+            skillDecisionMakingUnderPressure: 0, // Will not appear in skillDistribution
+            skillFinancialManagement: 15,
+            skillLongTermVision: 15, // Sum = 100
             gameweek: 2,
         );
 
