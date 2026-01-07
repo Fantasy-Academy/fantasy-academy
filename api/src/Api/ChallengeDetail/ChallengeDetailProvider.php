@@ -11,7 +11,9 @@ use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Entity\User;
 use FantasyAcademy\API\Exceptions\ChallengeNotFound;
 use FantasyAcademy\API\Value\AnswerStatistic;
+use FantasyAcademy\API\Value\ChallengeSkillDistribution;
 use FantasyAcademy\API\Value\QuestionStatistics;
+use FantasyAcademy\API\Value\Skill;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
@@ -74,7 +76,43 @@ SQL;
             $row,
             $this->clock->now(),
             $this->getQuestions($challengeId, $userId, $shouldShowStatistics),
+            $this->buildSkillDistribution($row),
         );
+    }
+
+    /**
+     * Build skill distribution array from challenge row data.
+     * Only includes skills with percentage > 0.
+     *
+     * @param ChallengeDetailResponseRow $row
+     *
+     * @return array<ChallengeSkillDistribution>
+     */
+    private function buildSkillDistribution(array $row): array
+    {
+        $skillColumns = [
+            'skill_analytical' => Skill::Analytical,
+            'skill_strategic_planning' => Skill::StrategicPlanning,
+            'skill_adaptability' => Skill::Adaptability,
+            'skill_premier_league_knowledge' => Skill::PremierLeagueKnowledge,
+            'skill_risk_management' => Skill::RiskManagement,
+            'skill_decision_making_under_pressure' => Skill::DecisionMakingUnderPressure,
+            'skill_financial_management' => Skill::FinancialManagement,
+            'skill_long_term_vision' => Skill::LongTermVision,
+        ];
+
+        $distribution = [];
+        foreach ($skillColumns as $column => $skill) {
+            $percentage = (float) $row[$column];
+            if ($percentage > 0) {
+                $distribution[] = new ChallengeSkillDistribution(
+                    name: $skill->value,
+                    percentage: $percentage,
+                );
+            }
+        }
+
+        return $distribution;
     }
 
     /**

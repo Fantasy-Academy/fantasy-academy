@@ -7,6 +7,7 @@ namespace FantasyAcademy\API\Tests\Api;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FantasyAcademy\API\Tests\DataFixtures\CurrentChallenge1Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\CurrentChallenge2Fixture;
+use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallenge2Fixture;
 use FantasyAcademy\API\Tests\DataFixtures\ExpiredChallengeFixture;
 use FantasyAcademy\API\Tests\DataFixtures\UserFixture;
 use FantasyAcademy\API\Tests\TestingLogin;
@@ -342,5 +343,45 @@ final class ChallengeDetailTest extends ApiTestCase
         $this->assertNotNull($q1, 'Question 1 should be present');
         $this->assertEquals(CurrentChallenge1Fixture::CHOICE_1_ID, $q1['correctAnswer']['selectedChoiceId']);
         $this->assertEquals('Im good', $q1['correctAnswer']['selectedChoiceText']);
+    }
+
+    public function testSkillDistributionIsIncludedInResponse(): void
+    {
+        $client = self::createClient();
+
+        $response = $client->request('GET', '/api/challenges/' . ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        /** @var array{skillDistribution: array<array{name: string, percentage: float|int}>} $responseData */
+        $responseData = json_decode($response->getContent(), true);
+
+        $skillDistribution = $responseData['skillDistribution'];
+
+        // ExpiredChallenge2Fixture has 6 skills with percentage > 0 (Adaptability and DecisionMakingUnderPressure are 0)
+        $this->assertCount(6, $skillDistribution);
+
+        // Build a map of skill name => percentage for easier assertions
+        $skillMap = [];
+        foreach ($skillDistribution as $skill) {
+            $skillMap[$skill['name']] = $skill['percentage'];
+        }
+
+        // Verify expected skills are present with correct percentages
+        $this->assertEquals(20, $skillMap['Analytical']);
+        $this->assertEquals(15, $skillMap['Strategic Planning']);
+        $this->assertEquals(25, $skillMap['Premier League Knowledge']);
+        $this->assertEquals(10, $skillMap['Risk Management']);
+        $this->assertEquals(15, $skillMap['Financial Management']);
+        $this->assertEquals(15, $skillMap['Long Term Vision']);
+
+        // Verify skills with 0% are NOT included
+        $this->assertArrayNotHasKey('Adaptability', $skillMap);
+        $this->assertArrayNotHasKey('Decision Making Under Pressure', $skillMap);
     }
 }
