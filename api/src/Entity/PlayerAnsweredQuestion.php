@@ -21,12 +21,12 @@ class PlayerAnsweredQuestion
     public function __construct(
         #[Id]
         #[ManyToOne]
-        #[JoinColumn(nullable: false)]
+        #[JoinColumn]
         readonly public Question $question,
 
         #[Id]
         #[ManyToOne(inversedBy: 'answeredQuestions')]
-        #[JoinColumn(nullable: false)]
+        #[JoinColumn]
         readonly public PlayerChallengeAnswer $challengeAnswer,
 
         #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
