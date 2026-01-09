@@ -6,7 +6,7 @@ namespace FantasyAcademy\API\Doctrine;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
-use Doctrine\DBAL\Types\JsonbType;
+use Doctrine\DBAL\Types\JsonType;
 use FantasyAcademy\API\Value\Answer;
 use Symfony\Component\Uid\Uuid;
 
@@ -19,7 +19,7 @@ use Symfony\Component\Uid\Uuid;
  *     ordered_choice_ids: null|array<string>,
  * }
  */
-final class AnswerDoctrineType extends JsonbType
+final class AnswerDoctrineType extends JsonType
 {
     public const string NAME = 'answer';
 

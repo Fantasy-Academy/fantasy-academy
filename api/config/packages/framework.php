@@ -22,6 +22,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             'log' => true,
         ],
         'trusted_headers' => ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port', 'x-forwarded-prefix'],
-        'trusted_proxies' => '127.0.0.1,REMOTE_ADDR',
+        'trusted_proxies' => '%env(TRUSTED_PROXIES)%',
     ]);
 };

@@ -1,11 +1,13 @@
 <?php declare(strict_types=1);
 
-use Symfony\Component\Mailer\Messenger\SendEmailMessage;
-use Symfony\Config\FrameworkConfig;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-return static function (FrameworkConfig $framework): void {
-    $messenger = $framework->messenger();
-
-    $messenger->transport('async')
-        ->dsn('sync://');
+return static function (ContainerConfigurator $containerConfigurator): void {
+    $containerConfigurator->extension('framework', [
+        'messenger' => [
+            'transports' => [
+                'async' => 'sync://',
+            ],
+        ],
+    ]);
 };

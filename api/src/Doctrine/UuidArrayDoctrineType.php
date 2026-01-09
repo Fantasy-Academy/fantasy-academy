@@ -6,10 +6,10 @@ namespace FantasyAcademy\API\Doctrine;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
-use Doctrine\DBAL\Types\JsonbType;
+use Doctrine\DBAL\Types\JsonType;
 use Symfony\Component\Uid\Uuid;
 
-final class UuidArrayDoctrineType extends JsonbType
+final class UuidArrayDoctrineType extends JsonType
 {
     public const string NAME = 'uuid[]';
 

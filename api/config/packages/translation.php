@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 
-use Symfony\Config\FrameworkConfig;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-return static function (FrameworkConfig $framework): void {
-    $framework->defaultLocale('en');
+return static function (ContainerConfigurator $containerConfigurator): void {
+    $containerConfigurator->extension('framework', [
+        'default_locale' => 'en',
+    ]);
 };
