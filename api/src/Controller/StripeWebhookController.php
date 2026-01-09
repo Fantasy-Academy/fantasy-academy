@@ -6,6 +6,7 @@ namespace FantasyAcademy\API\Controller;
 
 use FantasyAcademy\API\Exceptions\Stripe\InvalidWebhookSignature;
 use FantasyAcademy\API\Message\Subscription\HandleCheckoutCompleted;
+use FantasyAcademy\API\Message\Subscription\HandleInvoicePaymentFailed;
 use FantasyAcademy\API\Message\Subscription\HandleSubscriptionDeleted;
 use FantasyAcademy\API\Message\Subscription\HandleSubscriptionUpdated;
 use FantasyAcademy\API\Services\Stripe\WebhookVerifierInterface;
@@ -43,6 +44,7 @@ final class StripeWebhookController extends AbstractController
             'checkout.session.completed' => $this->handleCheckoutCompleted($data),
             'customer.subscription.updated' => $this->handleSubscriptionUpdated($data),
             'customer.subscription.deleted' => $this->handleSubscriptionDeleted($data),
+            'invoice.payment_failed' => $this->handleInvoicePaymentFailed($data),
             default => null,
         };
 
@@ -122,6 +124,27 @@ final class StripeWebhookController extends AbstractController
 
         $this->messageBus->dispatch(new HandleSubscriptionDeleted(
             subscriptionId: $subscriptionId,
+        ));
+    }
+
+    /**
+     * @param \Stripe\Invoice|\Stripe\StripeObject $invoice
+     */
+    private function handleInvoicePaymentFailed($invoice): void
+    {
+        /** @var array<string, mixed> $invoiceArray */
+        $invoiceArray = $invoice->toArray();
+
+        $subscriptionId = is_string($invoiceArray['subscription'] ?? null) ? $invoiceArray['subscription'] : null;
+        $customerId = is_string($invoiceArray['customer'] ?? null) ? $invoiceArray['customer'] : null;
+
+        if ($subscriptionId === null || $customerId === null) {
+            return;
+        }
+
+        $this->messageBus->dispatch(new HandleInvoicePaymentFailed(
+            subscriptionId: $subscriptionId,
+            customerId: $customerId,
         ));
     }
 }

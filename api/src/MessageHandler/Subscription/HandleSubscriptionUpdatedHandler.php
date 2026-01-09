@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\MessageHandler\Subscription;
 
 use DateTimeImmutable;
+use FantasyAcademy\API\Exceptions\SubscriptionNotFound;
 use FantasyAcademy\API\Message\Subscription\HandleSubscriptionUpdated;
 use FantasyAcademy\API\Repository\SubscriptionRepository;
 use Psr\Clock\ClockInterface;
@@ -21,15 +22,15 @@ readonly final class HandleSubscriptionUpdatedHandler
     ) {
     }
 
+    /**
+     * @throws SubscriptionNotFound
+     */
     public function __invoke(HandleSubscriptionUpdated $message): void
     {
         $subscription = $this->subscriptionRepository->findByStripeSubscriptionId($message->subscriptionId);
 
         if ($subscription === null) {
-            $this->logger->warning('Subscription not found for update', [
-                'subscriptionId' => $message->subscriptionId,
-            ]);
-            return;
+            throw new SubscriptionNotFound();
         }
 
         $now = $this->clock->now();

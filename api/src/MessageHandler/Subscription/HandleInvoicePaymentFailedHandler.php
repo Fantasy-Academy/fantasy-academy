@@ -6,14 +6,14 @@ namespace FantasyAcademy\API\MessageHandler\Subscription;
 
 use FantasyAcademy\API\Entity\Subscription;
 use FantasyAcademy\API\Exceptions\SubscriptionNotFound;
-use FantasyAcademy\API\Message\Subscription\HandleSubscriptionDeleted;
+use FantasyAcademy\API\Message\Subscription\HandleInvoicePaymentFailed;
 use FantasyAcademy\API\Repository\SubscriptionRepository;
 use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-readonly final class HandleSubscriptionDeletedHandler
+readonly final class HandleInvoicePaymentFailedHandler
 {
     public function __construct(
         private SubscriptionRepository $subscriptionRepository,
@@ -25,7 +25,7 @@ readonly final class HandleSubscriptionDeletedHandler
     /**
      * @throws SubscriptionNotFound
      */
-    public function __invoke(HandleSubscriptionDeleted $message): void
+    public function __invoke(HandleInvoicePaymentFailed $message): void
     {
         $subscription = $this->subscriptionRepository->findByStripeSubscriptionId($message->subscriptionId);
 
@@ -35,18 +35,18 @@ readonly final class HandleSubscriptionDeletedHandler
 
         $now = $this->clock->now();
 
-        // Mark as canceled - we don't delete the record, just update status
         $subscription->updateFromStripe(
-            status: Subscription::STATUS_CANCELED,
+            status: Subscription::STATUS_PAST_DUE,
             currentPeriodStart: $subscription->currentPeriodStart,
             currentPeriodEnd: $subscription->currentPeriodEnd,
-            canceledAt: $now,
-            cancelAtPeriodEnd: false,
+            canceledAt: $subscription->canceledAt,
+            cancelAtPeriodEnd: $subscription->cancelAtPeriodEnd,
             now: $now,
         );
 
-        $this->logger->info('Subscription marked as deleted', [
+        $this->logger->warning('Subscription payment failed', [
             'subscriptionId' => $message->subscriptionId,
+            'customerId' => $message->customerId,
         ]);
     }
 }

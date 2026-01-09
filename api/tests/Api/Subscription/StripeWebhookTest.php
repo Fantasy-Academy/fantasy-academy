@@ -17,6 +17,7 @@ use Stripe\Event;
  * @covers \FantasyAcademy\API\MessageHandler\Subscription\HandleCheckoutCompletedHandler
  * @covers \FantasyAcademy\API\MessageHandler\Subscription\HandleSubscriptionUpdatedHandler
  * @covers \FantasyAcademy\API\MessageHandler\Subscription\HandleSubscriptionDeletedHandler
+ * @covers \FantasyAcademy\API\MessageHandler\Subscription\HandleInvoicePaymentFailedHandler
  */
 final class StripeWebhookTest extends ApiTestCase
 {
@@ -150,6 +151,40 @@ final class StripeWebhookTest extends ApiTestCase
         ];
 
         // Mock the webhook verifier
+        $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
+        $mockVerifier
+            ->method('verify')
+            ->willReturn(Event::constructFrom($eventData));
+        $container->set(WebhookVerifierInterface::class, $mockVerifier);
+
+        $client->request('POST', '/api/webhooks/stripe', [
+            'headers' => [
+                'Stripe-Signature' => 'valid_signature',
+            ],
+            'body' => json_encode($eventData),
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains(['received' => true]);
+    }
+
+    public function testHandlesInvoicePaymentFailed(): void
+    {
+        $client = self::createClient();
+        $container = $client->getContainer();
+
+        $eventData = [
+            'id' => 'evt_test_payment_failed',
+            'type' => 'invoice.payment_failed',
+            'data' => [
+                'object' => [
+                    'id' => 'in_test_invoice',
+                    'subscription' => SubscriptionFixture::ACTIVE_STRIPE_SUBSCRIPTION_ID,
+                    'customer' => SubscriptionFixture::ACTIVE_STRIPE_CUSTOMER_ID,
+                ],
+            ],
+        ];
+
         $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
         $mockVerifier
             ->method('verify')

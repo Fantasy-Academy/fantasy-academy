@@ -104,7 +104,7 @@ Creates a Stripe Checkout Session and returns the URL for redirecting the user.
 
 **Parameters**:
 - `plan` (required): `"monthly"` or `"yearly"`
-- `successUrl` (optional): Where to redirect after successful payment
+- `successUrl` (optional): Where to redirect after successful payment. Use `{CHECKOUT_SESSION_ID}` as a literal placeholder - Stripe automatically replaces it with the actual session ID when redirecting.
 - `cancelUrl` (optional): Where to redirect if user cancels
 
 **Response**:

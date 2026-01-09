@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FantasyAcademy\API\Services\Doctrine;
 
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;
@@ -42,6 +43,9 @@ readonly final class FixDoctrineMigrationTableSchema
         $table->addColumn($this->configuration->getExecutedAtColumnName(), 'datetime', ['notnull' => false]);
         $table->addColumn($this->configuration->getExecutionTimeColumnName(), 'integer', ['notnull' => false]);
 
-        $table->setPrimaryKey([$this->configuration->getVersionColumnName()]);
+        $primaryKey = PrimaryKeyConstraint::editor()
+            ->setUnquotedColumnNames($this->configuration->getVersionColumnName())
+            ->create();
+        $table->addPrimaryKeyConstraint($primaryKey);
     }
 }
