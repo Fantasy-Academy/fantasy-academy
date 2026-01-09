@@ -6,7 +6,7 @@ namespace FantasyAcademy\API\Doctrine;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
-use Doctrine\DBAL\Types\JsonType;
+use Doctrine\DBAL\Types\JsonbType;
 use FantasyAcademy\API\Value\NumericQuestionConstraint;
 
 /**
@@ -15,7 +15,7 @@ use FantasyAcademy\API\Value\NumericQuestionConstraint;
  *     max: null|int,
  * }
  */
-final class NumericQuestionConstraintDoctrineType extends JsonType
+final class NumericQuestionConstraintDoctrineType extends JsonbType
 {
     public const string NAME = 'numeric_question_constraint';
 

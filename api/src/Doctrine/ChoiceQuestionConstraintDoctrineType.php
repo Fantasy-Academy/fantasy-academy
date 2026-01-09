@@ -6,7 +6,7 @@ namespace FantasyAcademy\API\Doctrine;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
-use Doctrine\DBAL\Types\JsonType;
+use Doctrine\DBAL\Types\JsonbType;
 use FantasyAcademy\API\Value\Choice;
 use FantasyAcademy\API\Value\ChoiceQuestionConstraint;
 use Symfony\Component\Uid\Uuid;
@@ -24,7 +24,7 @@ use Symfony\Component\Uid\Uuid;
  *     max_selections: null|int,
  * }
  */
-final class ChoiceQuestionConstraintDoctrineType extends JsonType
+final class ChoiceQuestionConstraintDoctrineType extends JsonbType
 {
     public const string NAME = 'choice_question_constraint';
 

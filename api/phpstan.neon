@@ -24,6 +24,7 @@ parameters:
     doctrine:
         objectManagerLoader: tests/object-manager.php
     checkUninitializedProperties: true
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - "#should return non-empty-string but returns string#"
         -
