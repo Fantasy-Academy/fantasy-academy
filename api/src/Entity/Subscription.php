@@ -18,9 +18,8 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity]
-#[Table(name: 'subscription')]
-#[Index(columns: ['stripe_subscription_id'], name: 'idx_subscription_stripe_subscription_id')]
-#[Index(columns: ['stripe_customer_id'], name: 'idx_subscription_stripe_customer_id')]
+#[Index(columns: ['stripe_subscription_id'])]
+#[Index(columns: ['stripe_customer_id'])]
 class Subscription
 {
     public const string STATUS_ACTIVE = 'active';

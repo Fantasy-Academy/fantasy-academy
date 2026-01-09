@@ -28,12 +28,13 @@ readonly final class CreateCheckoutSessionHandler
     public function __invoke(CreateCheckoutSession $message): CheckoutSessionResponse
     {
         $user = $this->userRepository->getById($message->userId());
+        $userId = $user->id->toString();
 
         // Create Stripe customer if not exists
         $customerId = $user->stripeCustomerId;
         if ($customerId === null) {
-            $customer = $this->stripeClient->createCustomer($user->email, $user->name);
-            $user->setStripeCustomerId($customer->customerId);
+            $customer = $this->stripeClient->createCustomer($user->email, $user->name, $userId);
+            $user->updateStripeCustomerId($customer->customerId);
             $customerId = $customer->customerId;
         }
 
@@ -51,12 +52,13 @@ readonly final class CreateCheckoutSessionHandler
         $successUrl = $message->successUrl ?? $this->frontendUri . '/subscription/success?session_id={CHECKOUT_SESSION_ID}';
         $cancelUrl = $message->cancelUrl ?? $this->frontendUri . '/subscription/cancel';
 
-        // Create checkout session
+        // Create checkout session with user_id in metadata
         $session = $this->stripeClient->createCheckoutSession(
             $customerId,
             $priceId,
             $successUrl,
             $cancelUrl,
+            $userId,
         );
 
         return new CheckoutSessionResponse(

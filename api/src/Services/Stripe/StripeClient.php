@@ -24,12 +24,16 @@ readonly final class StripeClient implements StripeClientInterface
         $this->client = new BaseStripeClient($secretKey);
     }
 
-    public function createCustomer(string $email, ?string $name = null): CustomerResult
+    public function createCustomer(string $email, ?string $name = null, ?string $userId = null): CustomerResult
     {
         $params = ['email' => $email];
 
         if ($name !== null) {
             $params['name'] = $name;
+        }
+
+        if ($userId !== null) {
+            $params['metadata'] = ['user_id' => $userId];
         }
 
         $customer = $this->client->customers->create($params);
@@ -45,8 +49,9 @@ readonly final class StripeClient implements StripeClientInterface
         string $priceId,
         string $successUrl,
         string $cancelUrl,
+        ?string $userId = null,
     ): CheckoutSessionResult {
-        $session = $this->client->checkout->sessions->create([
+        $params = [
             'customer' => $customerId,
             'mode' => 'subscription',
             'line_items' => [
@@ -57,7 +62,14 @@ readonly final class StripeClient implements StripeClientInterface
             ],
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
-        ]);
+        ];
+
+        if ($userId !== null) {
+            $params['metadata'] = ['user_id' => $userId];
+            $params['subscription_data'] = ['metadata' => ['user_id' => $userId]];
+        }
+
+        $session = $this->client->checkout->sessions->create($params);
 
         return new CheckoutSessionResult(
             sessionId: $session->id,

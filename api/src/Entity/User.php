@@ -120,7 +120,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
         $this->lastActivity = $now;
     }
 
-    public function setStripeCustomerId(string $customerId): void
+    public function updateStripeCustomerId(string $customerId): void
     {
         $this->stripeCustomerId = $customerId;
     }

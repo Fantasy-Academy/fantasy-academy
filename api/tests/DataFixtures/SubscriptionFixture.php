@@ -43,7 +43,7 @@ final class SubscriptionFixture extends Fixture implements DependentFixtureInter
         // Active subscription for USER_2 (user@example.com)
         $user2 = $manager->getRepository(User::class)->find(Uuid::fromString(UserFixture::USER_2_ID));
         assert($user2 instanceof User);
-        $user2->setStripeCustomerId(self::ACTIVE_STRIPE_CUSTOMER_ID);
+        $user2->updateStripeCustomerId(self::ACTIVE_STRIPE_CUSTOMER_ID);
 
         $activeSubscription = new Subscription(
             id: Uuid::fromString(self::ACTIVE_SUBSCRIPTION_ID),
@@ -61,7 +61,7 @@ final class SubscriptionFixture extends Fixture implements DependentFixtureInter
         // Canceled but still active subscription for USER_3 (user3@example.com)
         $user3 = $manager->getRepository(User::class)->find(Uuid::fromString(UserFixture::USER_3_ID));
         assert($user3 instanceof User);
-        $user3->setStripeCustomerId(self::CANCELED_STRIPE_CUSTOMER_ID);
+        $user3->updateStripeCustomerId(self::CANCELED_STRIPE_CUSTOMER_ID);
 
         $canceledSubscription = new Subscription(
             id: Uuid::fromString(self::CANCELED_SUBSCRIPTION_ID),
@@ -87,7 +87,7 @@ final class SubscriptionFixture extends Fixture implements DependentFixtureInter
         // Expired subscription for USER_4 (user4@example.com)
         $user4 = $manager->getRepository(User::class)->find(Uuid::fromString(UserFixture::USER_4_ID));
         assert($user4 instanceof User);
-        $user4->setStripeCustomerId(self::EXPIRED_STRIPE_CUSTOMER_ID);
+        $user4->updateStripeCustomerId(self::EXPIRED_STRIPE_CUSTOMER_ID);
 
         $expiredSubscription = new Subscription(
             id: Uuid::fromString(self::EXPIRED_SUBSCRIPTION_ID),
