@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+declare(strict_types=1);
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $containerConfigurator->extension('nelmio_cors', [
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
+return App::config([
+    'nelmio_cors' => [
         'paths' => [
             '^/api' => [
                 'allow_origin' => ['*'],
@@ -13,5 +15,5 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 'max_age' => 3600,
             ],
         ],
-    ]);
-};
+    ],
+]);

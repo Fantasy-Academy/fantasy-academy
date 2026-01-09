@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use FantasyAcademy\API\Entity\User;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $containerConfigurator->extension('security', [
+return App::config([
+    'security' => [
         'providers' => [
             'user_provider' => [
                 'entity' => [
@@ -32,7 +33,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 'stateless' => true,
                 'security' => false,
             ],
-            // Webhook endpoints - no authentication, secured by signature verification
             'webhooks' => [
                 'pattern' => '^/api/webhooks/',
                 'stateless' => true,
@@ -72,8 +72,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             ['path' => '^/api/subscription', 'roles' => [AuthenticatedVoter::IS_AUTHENTICATED_FULLY]],
             ['path' => '^/api/question/answer', 'roles' => [AuthenticatedVoter::IS_AUTHENTICATED_FULLY]],
             ['path' => '^/$', 'roles' => [AuthenticatedVoter::PUBLIC_ACCESS]],
-            ['path' => '^/admin', 'roles' => ['ROLE_ADMIN']], // require admin role for the admin area
+            ['path' => '^/admin', 'roles' => ['ROLE_ADMIN']],
             ['path' => '^/', 'roles' => [AuthenticatedVoter::PUBLIC_ACCESS]],
         ],
-    ]);
-};
+    ],
+]);

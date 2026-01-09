@@ -38,7 +38,7 @@ final class BillingPortalTest extends ApiTestCase
         $mockStripeClient = $this->createMock(StripeClientInterface::class);
         $mockStripeClient
             ->method('createPortalSession')
-            ->with(SubscriptionFixture::ACTIVE_STRIPE_CUSTOMER_ID, $this->isType('string'))
+            ->with(SubscriptionFixture::ACTIVE_STRIPE_CUSTOMER_ID, $this->isString())
             ->willReturn(new PortalSessionResult(
                 url: 'https://billing.stripe.com/session/test_portal_session',
             ));

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-return static function(ContainerConfigurator $configurator): void
-{
-    $services = $configurator->services();
-
-    $services->defaults()
-        ->autoconfigure()
-        ->autowire()
-        ->public();
-
-    // Data fixtures
-    $services->load('FantasyAcademy\\API\\Tests\\DataFixtures\\', __DIR__ . '/../tests/DataFixtures/{*.php}');
-};
+return App::config([
+    'services' => [
+        '_defaults' => [
+            'autoconfigure' => true,
+            'autowire' => true,
+            'public' => true,
+        ],
+        'FantasyAcademy\\API\\Tests\\DataFixtures\\' => [
+            'resource' => '../tests/DataFixtures/{*.php}',
+        ],
+    ],
+]);

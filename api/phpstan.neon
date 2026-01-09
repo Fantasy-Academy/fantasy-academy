@@ -14,8 +14,6 @@ parameters:
         - bin
         - tests
         - config
-    scanDirectories:
-        - var/cache/dev/Symfony
     scanFiles:
         - vendor/symfony/dependency-injection/Loader/Configurator/ContainerConfigurator.php
     excludePaths:
@@ -28,6 +26,10 @@ parameters:
     checkUninitializedProperties: true
     ignoreErrors:
         - "#should return non-empty-string but returns string#"
+        -
+            path: config/*
+            identifiers:
+                - argument.type
         -
             path: tests/*
             identifiers:

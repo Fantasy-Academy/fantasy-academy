@@ -1,11 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+declare(strict_types=1);
+
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $containerConfigurator->extension('sentry', [
+return App::config([
+    'sentry' => [
         'dsn' => '%env(SENTRY_DSN)%',
         'tracing' => [
             'enabled' => true,
@@ -27,5 +30,5 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             'traces_sample_rate' => '%env(float:SENTRY_TRACES_SAMPLE_RATE)%',
             'profiles_sample_rate' => '%env(float:SENTRY_PROFILES_SAMPLE_RATE)%',
         ],
-    ]);
-};
+    ],
+]);

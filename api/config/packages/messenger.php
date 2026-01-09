@@ -1,11 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\Mailer\Messenger\SendEmailMessage;
+declare(strict_types=1);
+
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use FantasyAcademy\API\Services\Symfony\Messenger\UserAwareMiddleware;
+use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $containerConfigurator->extension('framework', [
+return App::config([
+    'framework' => [
         'messenger' => [
             'failure_transport' => 'failed',
             'buses' => [
@@ -33,5 +36,5 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 SendEmailMessage::class => 'async',
             ],
         ],
-    ]);
-};
+    ],
+]);
