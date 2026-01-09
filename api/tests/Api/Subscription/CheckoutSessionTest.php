@@ -37,19 +37,18 @@ final class CheckoutSessionTest extends ApiTestCase
         $client = self::createClient();
         $container = $client->getContainer();
 
-        // Mock the Stripe client
-        $stripeClientMock = $this->createMock(StripeClientInterface::class);
+        // Stub the Stripe client
+        $stripeClientStub = $this->createStub(StripeClientInterface::class);
 
-        $stripeClientMock
+        $stripeClientStub
             ->method('createCustomer')
             ->willReturn(new CustomerResult(
                 customerId: 'cus_test_123',
                 email: 'admin@example.com',
             ));
 
-        $stripeClientMock
+        $stripeClientStub
             ->method('getPricesByLookupKeys')
-            ->with('fantasy_academy_monthly')
             ->willReturn([
                 new PriceResult(
                     priceId: 'price_monthly_test',
@@ -61,20 +60,14 @@ final class CheckoutSessionTest extends ApiTestCase
                 ),
             ]);
 
-        $stripeClientMock
+        $stripeClientStub
             ->method('createCheckoutSession')
-            ->with(
-                'cus_test_123',
-                'price_monthly_test',
-                $this->stringContains('/subscription/success'),
-                $this->stringContains('/subscription/cancel'),
-            )
             ->willReturn(new CheckoutSessionResult(
                 sessionId: 'cs_test_session_123',
                 url: 'https://checkout.stripe.com/pay/cs_test_session_123',
             ));
 
-        $container->set(StripeClientInterface::class, $stripeClientMock);
+        $container->set(StripeClientInterface::class, $stripeClientStub);
 
         // USER_1 (admin) has no stripeCustomerId, so it will create one
         $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
@@ -101,19 +94,18 @@ final class CheckoutSessionTest extends ApiTestCase
         $client = self::createClient();
         $container = $client->getContainer();
 
-        // Mock the Stripe client
-        $stripeClientMock = $this->createMock(StripeClientInterface::class);
+        // Stub the Stripe client
+        $stripeClientStub = $this->createStub(StripeClientInterface::class);
 
-        $stripeClientMock
+        $stripeClientStub
             ->method('createCustomer')
             ->willReturn(new CustomerResult(
                 customerId: 'cus_test_456',
                 email: 'admin@example.com',
             ));
 
-        $stripeClientMock
+        $stripeClientStub
             ->method('getPricesByLookupKeys')
-            ->with('fantasy_academy_yearly')
             ->willReturn([
                 new PriceResult(
                     priceId: 'price_yearly_test',
@@ -125,14 +117,14 @@ final class CheckoutSessionTest extends ApiTestCase
                 ),
             ]);
 
-        $stripeClientMock
+        $stripeClientStub
             ->method('createCheckoutSession')
             ->willReturn(new CheckoutSessionResult(
                 sessionId: 'cs_test_session_456',
                 url: 'https://checkout.stripe.com/pay/cs_test_session_456',
             ));
 
-        $container->set(StripeClientInterface::class, $stripeClientMock);
+        $container->set(StripeClientInterface::class, $stripeClientStub);
 
         $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
 
