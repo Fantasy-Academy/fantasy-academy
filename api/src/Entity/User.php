@@ -99,11 +99,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
         return $this->password;
     }
 
-    public function eraseCredentials(): void
-    {
-        // Just to satisfy the interface ...
-    }
-
     public function displayName(): string
     {
         return $this->name ?? $this->email;

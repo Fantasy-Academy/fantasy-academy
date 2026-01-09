@@ -41,7 +41,6 @@ trait WithUserId
 
             // Read the existing property value
             $prop = $ref->getProperty($name);
-            $prop->setAccessible(true);
 
             $args[] = $prop->getValue($this);
         }

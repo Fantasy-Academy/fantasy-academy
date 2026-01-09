@@ -2,14 +2,19 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+namespace Symfony\Component\Routing\Loader\Configurator;
 
-return static function (RoutingConfigurator $routingConfigurator): void {
-    $routingConfigurator->import(__DIR__ . '/../src/Controller', 'attribute');
-
-    $routingConfigurator->add('auth', '/api/login')
-        ->methods(['POST']);
-
-    $routingConfigurator->add('logout', '/logout')
-        ->methods(['GET']);
-};
+return Routes::config([
+    'controllers' => [
+        'resource' => '../src/Controller',
+        'type' => 'attribute',
+    ],
+    'auth' => [
+        'path' => '/api/login',
+        'methods' => ['POST'],
+    ],
+    'logout' => [
+        'path' => '/logout',
+        'methods' => ['GET'],
+    ],
+]);

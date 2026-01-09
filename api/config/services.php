@@ -2,72 +2,70 @@
 
 declare(strict_types=1);
 
-use Monolog\Processor\PsrLogMessageProcessor;
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use FantasyAcademy\API\Services\Doctrine\FixDoctrineMigrationTableSchema;
 use FantasyAcademy\API\Services\ProvideIdentity;
 use FantasyAcademy\API\Services\ProvideRandomIdentity;
 use FantasyAcademy\API\Services\Stripe\StripeClient;
 use FantasyAcademy\API\Services\Stripe\StripeClientInterface;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Monolog\Processor\PsrLogMessageProcessor;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
-return static function(ContainerConfigurator $configurator): void
-{
-    $parameters = $configurator->parameters();
-
-    # https://symfony.com/doc/current/performance.html#dump-the-service-container-into-a-single-file
-    $parameters->set('.container.dumper.inline_factories', true);
-
-    $parameters->set('doctrine.orm.enable_lazy_ghost_objects', true);
-
-    $services = $configurator->services();
-
-    $services->defaults()
-        ->autoconfigure()
-        ->autowire()
-        ->public();
-
-    $services->set(PdoSessionHandler::class)
-        ->args([
-            env('DATABASE_URL'),
-        ]);
-
-    $services->set(PsrLogMessageProcessor::class)
-        ->tag('monolog.processor');
-
-    // Repositories
-    $services->load('FantasyAcademy\\API\\Repository\\', __DIR__ . '/../src/Repository/{*Repository.php}');
-
-    // Message handlers
-    $services->load('FantasyAcademy\\API\\MessageHandler\\', __DIR__ . '/../src/MessageHandler/**/{*.php}');
-
-    // Console commands
-    $services->load('FantasyAcademy\\API\\ConsoleCommands\\', __DIR__ . '/../src/ConsoleCommands/**/{*.php}');
-
-    // Validators
-    $services->load('FantasyAcademy\\API\\Validation\\', __DIR__ . '/../src/Validation/**/{*Validator.php}');
-
-    // Services (excluding Value objects which are not services)
-    $services->load('FantasyAcademy\\API\\Services\\', __DIR__ . '/../src/Services/**/{*.php}')
-        ->exclude([__DIR__ . '/../src/Services/**/Value/']);
-    $services->load('FantasyAcademy\\API\\Query\\', __DIR__ . '/../src/Query/**/{*.php}');
-    $services->load('FantasyAcademy\\API\\FormType\\', __DIR__ . '/../src/FormType/**/{*.php}');
-
-    // Explicitly alias ProvideIdentity interface to production implementation
-    $services->alias(ProvideIdentity::class, ProvideRandomIdentity::class);
-
-    // Stripe client interface to implementation
-    $services->alias(StripeClientInterface::class, StripeClient::class);
-
-    // API
-    $services->load('FantasyAcademy\\API\\Controller\\', __DIR__ . '/../src/Controller/**/{*.php}');
-    $services->load('FantasyAcademy\\API\\Api\\', __DIR__ . '/../src/Api/**/{*Provider.php}');
-
-    /** @see https://github.com/doctrine/migrations/issues/1406 */
-    $services->set(FixDoctrineMigrationTableSchema::class)
-        ->autoconfigure(false)
-        ->arg('$dependencyFactory', service('doctrine.migrations.dependency_factory'))
-        ->tag('doctrine.event_listener', ['event' => 'postGenerateSchema']);
-};
+return App::config([
+    'parameters' => [
+        '.container.dumper.inline_factories' => true,
+    ],
+    'services' => [
+        '_defaults' => [
+            'autoconfigure' => true,
+            'autowire' => true,
+            'public' => true,
+        ],
+        PdoSessionHandler::class => [
+            'arguments' => [env('DATABASE_URL')],
+        ],
+        PsrLogMessageProcessor::class => [
+            'tags' => ['monolog.processor'],
+        ],
+        'FantasyAcademy\\API\\Repository\\' => [
+            'resource' => '../src/Repository/{*Repository.php}',
+        ],
+        'FantasyAcademy\\API\\MessageHandler\\' => [
+            'resource' => '../src/MessageHandler/**/{*.php}',
+        ],
+        'FantasyAcademy\\API\\ConsoleCommands\\' => [
+            'resource' => '../src/ConsoleCommands/**/{*.php}',
+        ],
+        'FantasyAcademy\\API\\Validation\\' => [
+            'resource' => '../src/Validation/**/{*Validator.php}',
+        ],
+        'FantasyAcademy\\API\\Services\\' => [
+            'resource' => '../src/Services/**/{*.php}',
+            'exclude' => ['../src/Services/**/Value/'],
+        ],
+        'FantasyAcademy\\API\\Query\\' => [
+            'resource' => '../src/Query/**/{*.php}',
+        ],
+        'FantasyAcademy\\API\\FormType\\' => [
+            'resource' => '../src/FormType/**/{*.php}',
+        ],
+        ProvideIdentity::class => '@' . ProvideRandomIdentity::class,
+        StripeClientInterface::class => '@' . StripeClient::class,
+        'FantasyAcademy\\API\\Controller\\' => [
+            'resource' => '../src/Controller/**/{*.php}',
+        ],
+        'FantasyAcademy\\API\\Api\\' => [
+            'resource' => '../src/Api/**/{*Provider.php}',
+        ],
+        FixDoctrineMigrationTableSchema::class => [
+            'autoconfigure' => false,
+            'arguments' => [
+                '$dependencyFactory' => service('doctrine.migrations.dependency_factory'),
+            ],
+            'tags' => [
+                ['doctrine.event_listener' => ['event' => 'postGenerateSchema']],
+            ],
+        ],
+    ],
+]);

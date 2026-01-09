@@ -1,11 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
+declare(strict_types=1);
 
-return static function (\Symfony\Config\FrameworkConfig $config) {
-    $config->mailer()->dsn(env('MAILER_DSN'));
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-    $config->mailer()->envelope()->sender('robot@fantasy-academy.com');
-
-    $config->mailer()->header('From', 'Fantasy Academy <robot@fantasy-academy.com>');
-};
+return App::config([
+    'framework' => [
+        'mailer' => [
+            'dsn' => '%env(MAILER_DSN)%',
+            'envelope' => [
+                'sender' => 'robot@fantasy-academy.com',
+            ],
+            'headers' => [
+                'From' => 'Fantasy Academy <robot@fantasy-academy.com>',
+            ],
+        ],
+    ],
+]);

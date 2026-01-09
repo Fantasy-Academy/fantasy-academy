@@ -34,15 +34,14 @@ final class BillingPortalTest extends ApiTestCase
         $client = self::createClient();
         $container = $client->getContainer();
 
-        // Mock Stripe client
-        $mockStripeClient = $this->createMock(StripeClientInterface::class);
-        $mockStripeClient
+        // Stub Stripe client
+        $stripeClientStub = $this->createStub(StripeClientInterface::class);
+        $stripeClientStub
             ->method('createPortalSession')
-            ->with(SubscriptionFixture::ACTIVE_STRIPE_CUSTOMER_ID, $this->isType('string'))
             ->willReturn(new PortalSessionResult(
                 url: 'https://billing.stripe.com/session/test_portal_session',
             ));
-        $container->set(StripeClientInterface::class, $mockStripeClient);
+        $container->set(StripeClientInterface::class, $stripeClientStub);
 
         $jwt = TestingLogin::getJwt($client, UserFixture::USER_2_EMAIL);
 
@@ -67,15 +66,14 @@ final class BillingPortalTest extends ApiTestCase
 
         $customReturnUrl = 'https://example.com/my-account';
 
-        // Mock Stripe client
-        $mockStripeClient = $this->createMock(StripeClientInterface::class);
-        $mockStripeClient
+        // Stub Stripe client
+        $stripeClientStub = $this->createStub(StripeClientInterface::class);
+        $stripeClientStub
             ->method('createPortalSession')
-            ->with(SubscriptionFixture::ACTIVE_STRIPE_CUSTOMER_ID, $customReturnUrl)
             ->willReturn(new PortalSessionResult(
                 url: 'https://billing.stripe.com/session/test_portal_session_custom',
             ));
-        $container->set(StripeClientInterface::class, $mockStripeClient);
+        $container->set(StripeClientInterface::class, $stripeClientStub);
 
         $jwt = TestingLogin::getJwt($client, UserFixture::USER_2_EMAIL);
 

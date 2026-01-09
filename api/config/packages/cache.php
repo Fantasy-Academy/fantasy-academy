@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-use Symfony\Config\FrameworkConfig;
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-return static function (FrameworkConfig $framework): void {
-    $cacheConfig = $framework->cache();
-};
+return App::config([
+    'framework' => [
+        'cache' => [],
+    ],
+]);

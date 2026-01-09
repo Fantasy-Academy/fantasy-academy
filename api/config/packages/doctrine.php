@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use FantasyAcademy\API\Doctrine\AnswerDoctrineType;
 use FantasyAcademy\API\Doctrine\ChoiceQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\NumericQuestionConstraintDoctrineType;
 use FantasyAcademy\API\Doctrine\UuidArrayDoctrineType;
 use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-
-    $containerConfigurator->extension('doctrine', [
+return App::config([
+    'doctrine' => [
         'dbal' => [
             'url' => '%env(resolve:DATABASE_URL)%',
             'types' => [
@@ -33,5 +33,5 @@ return static function (ContainerConfigurator $containerConfigurator): void {
                 ],
             ],
         ],
-    ]);
-};
+    ],
+]);

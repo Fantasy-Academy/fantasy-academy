@@ -14,8 +14,6 @@ parameters:
         - bin
         - tests
         - config
-    scanDirectories:
-        - var/cache/dev/Symfony
     scanFiles:
         - vendor/symfony/dependency-injection/Loader/Configurator/ContainerConfigurator.php
     excludePaths:
@@ -26,9 +24,13 @@ parameters:
     doctrine:
         objectManagerLoader: tests/object-manager.php
     checkUninitializedProperties: true
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        - "#Symfony\\\\Config\\\\Framework\\\\Messenger\\\\TransportConfig::options#"
         - "#should return non-empty-string but returns string#"
+        -
+            path: config/*
+            identifiers:
+                - argument.type
         -
             path: tests/*
             identifiers:

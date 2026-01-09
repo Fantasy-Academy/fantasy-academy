@@ -6,10 +6,8 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 return App::config([
     'framework' => [
-        'asset_mapper' => [
-            'paths' => [
-                'assets/',
-            ],
+        'property_info' => [
+            'with_constructor_extractor' => true,
         ],
     ],
 ]);

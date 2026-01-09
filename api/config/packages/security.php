@@ -2,91 +2,78 @@
 
 declare(strict_types=1);
 
-use Symfony\Config\Security\PasswordHasherConfig;
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use FantasyAcademy\API\Entity\User;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Config\SecurityConfig;
 
-return static function (SecurityConfig $securityConfig): void {
-    $securityConfig->provider('user_provider')
-        ->entity()
-            ->class(User::class)
-            ->property('email');
-
-    /** @var PasswordHasherConfig $hasher */
-    $hasher = $securityConfig->passwordHasher(PasswordAuthenticatedUserInterface::class);
-    $hasher->algorithm('auto');
-
-    $securityConfig->firewall('dev')
-        ->pattern('^/(_profiler|_wdt|css|images|js|assets)/')
-        ->security(false);
-
-    $securityConfig->firewall('stateless')
-        ->pattern('^(/-/health-check)')
-        ->stateless(true)
-        ->security(false);
-
-    // Webhook endpoints - no authentication, secured by signature verification
-    $securityConfig->firewall('webhooks')
-        ->pattern('^/api/webhooks/')
-        ->stateless(true)
-        ->security(false);
-
-    $mainFirewall = $securityConfig->firewall('main');
-    $mainFirewall
-        ->pattern('^/api')
-        ->stateless(true)
-        ->provider('user_provider')
-        ->stateless(true)
-        ->jwt();
-
-    $mainFirewall
-        ->jsonLogin()
-            ->checkPath('/api/login')
-            ->usernamePath('email')
-            ->passwordPath('password')
-            ->successHandler('lexik_jwt_authentication.handler.authentication_success')
-            ->failureHandler('lexik_jwt_authentication.handler.authentication_failure');
-
-    $adminFirewall = $securityConfig->firewall('admin');
-    $adminFirewall
-        ->pattern('^/(?!api)')
-        ->provider('user_provider')
-        ->formLogin()
-            ->loginPath('login')
-            ->checkPath('login')
-            ->enableCsrf(true)
-            ->defaultTargetPath('/admin/import-challenges');
-
-    $adminFirewall
-        ->logout()
-            ->path('logout')
-            ->target('/')
-            ->invalidateSession(true);
-
-    $securityConfig->accessControl()
-        ->path('^/api/me')
-        ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
-
-    $securityConfig->accessControl()
-        ->path('^/api/subscription')
-        ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
-
-    $securityConfig->accessControl()
-        ->path('^/api/question/answer')
-        ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
-
-
-    $securityConfig->accessControl()
-        ->path('^/$')
-        ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
-
-    $securityConfig->accessControl()
-        ->path('^/admin')
-        ->roles(['ROLE_ADMIN']); // require admin role for the admin area
-
-    $securityConfig->accessControl()
-        ->path('^/')
-        ->roles([AuthenticatedVoter::PUBLIC_ACCESS]);
-};
+return App::config([
+    'security' => [
+        'providers' => [
+            'user_provider' => [
+                'entity' => [
+                    'class' => User::class,
+                    'property' => 'email',
+                ],
+            ],
+        ],
+        'password_hashers' => [
+            PasswordAuthenticatedUserInterface::class => [
+                'algorithm' => 'auto',
+            ],
+        ],
+        'firewalls' => [
+            'dev' => [
+                'pattern' => '^/(_profiler|_wdt|css|images|js|assets)/',
+                'security' => false,
+            ],
+            'stateless' => [
+                'pattern' => '^(/-/health-check)',
+                'stateless' => true,
+                'security' => false,
+            ],
+            'webhooks' => [
+                'pattern' => '^/api/webhooks/',
+                'stateless' => true,
+                'security' => false,
+            ],
+            'main' => [
+                'pattern' => '^/api',
+                'stateless' => true,
+                'provider' => 'user_provider',
+                'jwt' => [],
+                'json_login' => [
+                    'check_path' => '/api/login',
+                    'username_path' => 'email',
+                    'password_path' => 'password',
+                    'success_handler' => 'lexik_jwt_authentication.handler.authentication_success',
+                    'failure_handler' => 'lexik_jwt_authentication.handler.authentication_failure',
+                ],
+            ],
+            'admin' => [
+                'pattern' => '^/(?!api)',
+                'provider' => 'user_provider',
+                'form_login' => [
+                    'login_path' => 'login',
+                    'check_path' => 'login',
+                    'enable_csrf' => true,
+                    'default_target_path' => '/admin/import-challenges',
+                ],
+                'logout' => [
+                    'path' => 'logout',
+                    'target' => '/',
+                    'invalidate_session' => true,
+                ],
+            ],
+        ],
+        'access_control' => [
+            ['path' => '^/api/me', 'roles' => [AuthenticatedVoter::IS_AUTHENTICATED_FULLY]],
+            ['path' => '^/api/subscription', 'roles' => [AuthenticatedVoter::IS_AUTHENTICATED_FULLY]],
+            ['path' => '^/api/question/answer', 'roles' => [AuthenticatedVoter::IS_AUTHENTICATED_FULLY]],
+            ['path' => '^/$', 'roles' => [AuthenticatedVoter::PUBLIC_ACCESS]],
+            ['path' => '^/admin', 'roles' => ['ROLE_ADMIN']],
+            ['path' => '^/', 'roles' => [AuthenticatedVoter::PUBLIC_ACCESS]],
+        ],
+    ],
+]);

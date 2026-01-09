@@ -55,18 +55,17 @@ final class StripeWebhookTest extends ApiTestCase
             ],
         ];
 
-        // Mock the webhook verifier
-        $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
-        $mockVerifier
+        // Stub the webhook verifier
+        $verifierStub = $this->createStub(WebhookVerifierInterface::class);
+        $verifierStub
             ->method('verify')
             ->willReturn(Event::constructFrom($eventData));
-        $container->set(WebhookVerifierInterface::class, $mockVerifier);
+        $container->set(WebhookVerifierInterface::class, $verifierStub);
 
-        // Mock the Stripe client to return subscription details
-        $mockStripeClient = $this->createMock(StripeClientInterface::class);
-        $mockStripeClient
+        // Stub the Stripe client to return subscription details
+        $stripeClientStub = $this->createStub(StripeClientInterface::class);
+        $stripeClientStub
             ->method('getSubscription')
-            ->with('sub_new_test_123')
             ->willReturn(new SubscriptionResult(
                 subscriptionId: 'sub_new_test_123',
                 customerId: SubscriptionFixture::ACTIVE_STRIPE_CUSTOMER_ID,
@@ -77,7 +76,7 @@ final class StripeWebhookTest extends ApiTestCase
                 canceledAt: null,
                 cancelAtPeriodEnd: false,
             ));
-        $container->set(StripeClientInterface::class, $mockStripeClient);
+        $container->set(StripeClientInterface::class, $stripeClientStub);
 
         $client->request('POST', '/api/webhooks/stripe', [
             'headers' => [
@@ -114,12 +113,12 @@ final class StripeWebhookTest extends ApiTestCase
             ],
         ];
 
-        // Mock the webhook verifier
-        $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
-        $mockVerifier
+        // Stub the webhook verifier
+        $verifierStub = $this->createStub(WebhookVerifierInterface::class);
+        $verifierStub
             ->method('verify')
             ->willReturn(Event::constructFrom($eventData));
-        $container->set(WebhookVerifierInterface::class, $mockVerifier);
+        $container->set(WebhookVerifierInterface::class, $verifierStub);
 
         $client->request('POST', '/api/webhooks/stripe', [
             'headers' => [
@@ -150,12 +149,12 @@ final class StripeWebhookTest extends ApiTestCase
             ],
         ];
 
-        // Mock the webhook verifier
-        $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
-        $mockVerifier
+        // Stub the webhook verifier
+        $verifierStub = $this->createStub(WebhookVerifierInterface::class);
+        $verifierStub
             ->method('verify')
             ->willReturn(Event::constructFrom($eventData));
-        $container->set(WebhookVerifierInterface::class, $mockVerifier);
+        $container->set(WebhookVerifierInterface::class, $verifierStub);
 
         $client->request('POST', '/api/webhooks/stripe', [
             'headers' => [
@@ -185,11 +184,11 @@ final class StripeWebhookTest extends ApiTestCase
             ],
         ];
 
-        $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
-        $mockVerifier
+        $verifierStub = $this->createStub(WebhookVerifierInterface::class);
+        $verifierStub
             ->method('verify')
             ->willReturn(Event::constructFrom($eventData));
-        $container->set(WebhookVerifierInterface::class, $mockVerifier);
+        $container->set(WebhookVerifierInterface::class, $verifierStub);
 
         $client->request('POST', '/api/webhooks/stripe', [
             'headers' => [
@@ -218,12 +217,12 @@ final class StripeWebhookTest extends ApiTestCase
             ],
         ];
 
-        // Mock the webhook verifier
-        $mockVerifier = $this->createMock(WebhookVerifierInterface::class);
-        $mockVerifier
+        // Stub the webhook verifier
+        $verifierStub = $this->createStub(WebhookVerifierInterface::class);
+        $verifierStub
             ->method('verify')
             ->willReturn(Event::constructFrom($eventData));
-        $container->set(WebhookVerifierInterface::class, $mockVerifier);
+        $container->set(WebhookVerifierInterface::class, $verifierStub);
 
         $client->request('POST', '/api/webhooks/stripe', [
             'headers' => [
