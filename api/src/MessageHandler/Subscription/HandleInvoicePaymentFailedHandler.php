@@ -33,6 +33,16 @@ readonly final class HandleInvoicePaymentFailedHandler
             throw new SubscriptionNotFound();
         }
 
+        // Only mark as past_due if subscription is currently active or trialing
+        // Ignore payment_failed for already canceled/expired subscriptions
+        if (!in_array($subscription->status, [Subscription::STATUS_ACTIVE, Subscription::STATUS_TRIALING], true)) {
+            $this->logger->info('Ignoring payment_failed for non-active subscription', [
+                'subscriptionId' => $message->subscriptionId,
+                'currentStatus' => $subscription->status,
+            ]);
+            return;
+        }
+
         $now = $this->clock->now();
 
         $subscription->updateFromStripe(
@@ -44,7 +54,7 @@ readonly final class HandleInvoicePaymentFailedHandler
             now: $now,
         );
 
-        $this->logger->warning('Subscription payment failed', [
+        $this->logger->warning('Subscription marked as past_due due to payment failure', [
             'subscriptionId' => $message->subscriptionId,
             'customerId' => $message->customerId,
         ]);
