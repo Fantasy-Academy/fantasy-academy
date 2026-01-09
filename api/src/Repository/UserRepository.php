@@ -56,4 +56,17 @@ readonly final class UserRepository
 
         throw new UserNotFound();
     }
+
+    public function findByStripeCustomerId(string $stripeCustomerId): ?User
+    {
+        $result = $this->entityManager->createQueryBuilder()
+            ->from(User::class, 'u')
+            ->select('u')
+            ->where('u.stripeCustomerId = :stripeCustomerId')
+            ->setParameter('stripeCustomerId', $stripeCustomerId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $result instanceof User ? $result : null;
+    }
 }

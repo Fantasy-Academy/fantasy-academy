@@ -27,6 +27,12 @@ return static function (SecurityConfig $securityConfig): void {
         ->stateless(true)
         ->security(false);
 
+    // Webhook endpoints - no authentication, secured by signature verification
+    $securityConfig->firewall('webhooks')
+        ->pattern('^/api/webhooks/')
+        ->stateless(true)
+        ->security(false);
+
     $mainFirewall = $securityConfig->firewall('main');
     $mainFirewall
         ->pattern('^/api')
@@ -61,6 +67,10 @@ return static function (SecurityConfig $securityConfig): void {
 
     $securityConfig->accessControl()
         ->path('^/api/me')
+        ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
+
+    $securityConfig->accessControl()
+        ->path('^/api/subscription')
         ->roles([AuthenticatedVoter::IS_AUTHENTICATED_FULLY]);
 
     $securityConfig->accessControl()

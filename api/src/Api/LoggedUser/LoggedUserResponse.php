@@ -44,6 +44,8 @@ final class LoggedUserResponse
         public int $availableChallenges,
         public PlayerStatistics $overallStatistics,
         public array $seasonsStatistics,
+        public bool $isMember = false,
+        public ?DateTimeImmutable $membershipExpiresAt = null,
     ) {
     }
 
@@ -51,8 +53,13 @@ final class LoggedUserResponse
      * @param LoggedUserResponseRow $data
      * @param array<PlayerSkill> $skills
      */
-    public static function fromArray(array $data, int $availableChallenges, array $skills): self
-    {
+    public static function fromArray(
+        array $data,
+        int $availableChallenges,
+        array $skills,
+        bool $isMember = false,
+        ?DateTimeImmutable $membershipExpiresAt = null,
+    ): self {
         return new self(
             id: Uuid::fromString($data['id']),
             name: $data['name'] ?? '-',
@@ -74,6 +81,8 @@ final class LoggedUserResponse
                     skills: [],
                 ),
             ],
+            isMember: $isMember,
+            membershipExpiresAt: $membershipExpiresAt,
         );
     }
 }

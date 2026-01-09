@@ -6,6 +6,8 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use FantasyAcademy\API\Services\Doctrine\FixDoctrineMigrationTableSchema;
 use FantasyAcademy\API\Services\ProvideIdentity;
 use FantasyAcademy\API\Services\ProvideRandomIdentity;
+use FantasyAcademy\API\Services\Stripe\StripeClient;
+use FantasyAcademy\API\Services\Stripe\StripeClientInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
@@ -47,13 +49,17 @@ return static function(ContainerConfigurator $configurator): void
     // Validators
     $services->load('FantasyAcademy\\API\\Validation\\', __DIR__ . '/../src/Validation/**/{*Validator.php}');
 
-    // Services
-    $services->load('FantasyAcademy\\API\\Services\\', __DIR__ . '/../src/Services/**/{*.php}');
+    // Services (excluding Value objects which are not services)
+    $services->load('FantasyAcademy\\API\\Services\\', __DIR__ . '/../src/Services/**/{*.php}')
+        ->exclude([__DIR__ . '/../src/Services/**/Value/']);
     $services->load('FantasyAcademy\\API\\Query\\', __DIR__ . '/../src/Query/**/{*.php}');
     $services->load('FantasyAcademy\\API\\FormType\\', __DIR__ . '/../src/FormType/**/{*.php}');
 
     // Explicitly alias ProvideIdentity interface to production implementation
     $services->alias(ProvideIdentity::class, ProvideRandomIdentity::class);
+
+    // Stripe client interface to implementation
+    $services->alias(StripeClientInterface::class, StripeClient::class);
 
     // API
     $services->load('FantasyAcademy\\API\\Controller\\', __DIR__ . '/../src/Controller/**/{*.php}');
