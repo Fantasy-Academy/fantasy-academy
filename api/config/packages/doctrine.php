@@ -14,6 +14,9 @@ return App::config([
     'doctrine' => [
         'dbal' => [
             'url' => '%env(resolve:DATABASE_URL)%',
+            'mapping_types' => [
+                'jsonb' => 'jsonb',
+            ],
             'types' => [
                 UuidType::NAME => UuidType::class,
                 UuidArrayDoctrineType::NAME => UuidArrayDoctrineType::class,
