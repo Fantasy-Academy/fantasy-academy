@@ -12,6 +12,7 @@ use FantasyAcademy\API\Exceptions\UserNotFound;
 use FantasyAcademy\API\Query\UserDisciplineQuery;
 use FantasyAcademy\API\Query\UserSkillsPercentilesQuery;
 use FantasyAcademy\API\Services\SkillsTransformer;
+use FantasyAcademy\API\Services\Subscription\SubscriptionChecker;
 use FantasyAcademy\API\Value\PlayerSkill;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
@@ -29,6 +30,7 @@ readonly final class LoggedUserProvider implements ProviderInterface
         private UserSkillsPercentilesQuery $userSkillsPercentilesQuery,
         private UserDisciplineQuery $userDisciplineQuery,
         private SkillsTransformer $skillsTransformer,
+        private SubscriptionChecker $subscriptionChecker,
     ) {}
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
@@ -82,7 +84,16 @@ SQL;
 
         $skills = $this->getPlayerSkills($userId);
 
-        return LoggedUserResponse::fromArray($row, $availableChallengesCount, $skills);
+        // Get subscription status
+        $isMember = $this->subscriptionChecker->isActive($userId);
+        $membershipExpiresAt = null;
+
+        $subscription = $this->subscriptionChecker->getActiveSubscription($userId);
+        if ($subscription !== null) {
+            $membershipExpiresAt = $subscription->currentPeriodEnd;
+        }
+
+        return LoggedUserResponse::fromArray($row, $availableChallengesCount, $skills, $isMember, $membershipExpiresAt);
     }
 
     private function getAvailableChallengesCount(Uuid $userId): int

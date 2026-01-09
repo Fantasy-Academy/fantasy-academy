@@ -38,6 +38,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
     #[Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     public null|DateTimeImmutable $lastActivity = null;
 
+    #[Immutable(Immutable::PRIVATE_WRITE_SCOPE)]
+    #[Column(length: 255, nullable: true)]
+    public ?string $stripeCustomerId = null;
+
     public function __construct(
         #[Id]
         #[Immutable]
@@ -114,5 +118,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, EntityW
     public function refreshLastActivity(DateTimeImmutable $now): void
     {
         $this->lastActivity = $now;
+    }
+
+    public function updateStripeCustomerId(string $customerId): void
+    {
+        $this->stripeCustomerId = $customerId;
     }
 }

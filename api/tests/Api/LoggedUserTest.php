@@ -104,6 +104,26 @@ final class LoggedUserTest extends ApiTestCase
                     'skills' => [],
                 ],
             ],
+            'isMember' => true,
+        ]);
+    }
+
+    public function testPlayerInfoShowsNotMemberForUserWithoutSubscription(): void
+    {
+        $client = self::createClient();
+        // USER_1 (admin@example.com) has no subscription
+        $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
+
+        $client->request('GET', '/api/me', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains([
+            'isMember' => false,
+            'membershipExpiresAt' => null,
         ]);
     }
 }
