@@ -52,8 +52,10 @@
                 </div>
                 <!-- ✨ původní obsah, beze změny formátu -->
                 <div v-if="questions.every(q => !getPlayerAnswer(q))" class="mt-2 md:mt-0">
-                  <span class="text-cool-gray">No answers yet!</span>
+                  <span v-if="challenge.isExpired" class="text-cool-gray"></span>
+                  <span v-else class="text-cool-gray">No answers yet!</span>
                 </div>
+
 
                 <div v-else class="md:mt-0">
                   <div v-for="q in questions" :key="q.id" class="mt-2">
@@ -202,7 +204,7 @@
           <!-- 📊 Answer statistics – DESKTOP ONLY -->
           <div v-if="questions.some(q => q.statistics)" class="hidden md:block">
             <!-- TOGGLE -->
-            <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+            <button class="w-full py-2 px-3 mt-4 rounded-lg bg-white border border-charcoal/10
            text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
               Answer statistics
               <span class="text-xs text-light-purple font-bold">
