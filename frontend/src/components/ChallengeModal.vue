@@ -1,8 +1,11 @@
 <template>
-  <div v-if="show" @click="$emit('close')" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  <div v-if="show" @click="$emit('close')" class="fixed inset-0 z-50 bg-black/40
+         flex items-start md:items-center justify-center
+         overflow-y-auto">
     <section class="relative flex flex-col md:flex-row gap-4 md:gap-6 bg-white rounded-lg
          w-full max-w-[95vw] md:w-[1100px]
-         max-h-[100vh] overflow-y-auto md:overflow-hidden" @click.stop>
+         h-[100dvh] md:h-auto
+         overflow-hidden" @click.stop>
 
       <!-- Close button top-right -->
       <button @click="$emit('close')" class="absolute top-3 right-3 z-50 text-charcoal hover:text-black transition
@@ -15,7 +18,7 @@
       </div>
 
       <!-- challenge exists -->
-      <div v-else class="flex flex-col md:flex-row w-full overflow-y-auto">
+      <div v-else class="flex flex-col md:flex-row w-full overflow-y-auto ">
         <div class="flex flex-col gap-6 py-6 px-6 w-full md:w-[420px] flex-shrink-0
          order-1 md:order-none bg-white">
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
@@ -44,7 +47,22 @@
                 showResultsMobile ? 'max-h-[1500px] mt-3' : 'max-h-0 md:max-h-none',
                 'md:max-h-none'
               ]">
-                <div class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                <div v-if="questions.every(q => !getPlayerAnswer(q)) && challenge.isExpired"
+                  class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                  <h2 class="font-bold">You missed this challenge!</h2>
+                  <p>Try your luck next time.</p>
+                </div>
+                <div v-else-if="questions.every(q => !getPlayerAnswer(q))"
+                  class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                  <h2 class="font-bold">Stay cool mate!</h2>
+                  <p>Choose your answer and wait for evaluation.</p>
+                </div>
+                <div v-else-if="questions.every(q => getPlayerAnswer(q)) && !challenge.isEvaluated"
+                  class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                  <h2 class="font-bold">Stay cool mate!</h2>
+                  <p>This challenge is still ongoing<span class="tracking-widest">...</span></p>
+                </div>
+                <div v-else class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
                   <h2>Your Outcome:</h2>
                   <p class="font-bold">
                     {{ challenge.userPoints }} FAPs
@@ -52,8 +70,10 @@
                 </div>
                 <!-- ✨ původní obsah, beze změny formátu -->
                 <div v-if="questions.every(q => !getPlayerAnswer(q))" class="mt-2 md:mt-0">
-                  <span class="text-cool-gray">No answers yet!</span>
+                  <span v-if="challenge.isExpired" class="text-cool-gray"></span>
+                  <span v-else class="text-cool-gray">No answers yet!</span>
                 </div>
+
 
                 <div v-else class="md:mt-0">
                   <div v-for="q in questions" :key="q.id" class="mt-2">
@@ -157,7 +177,7 @@
           </div>
 
           <!-- Answer form -->
-          <div class="flex-1 pr-4">
+          <div class="flex-1 pr">
 
             <!-- 🔥 Odpovídání na otázky (pokud není expired) -->
             <div v-for="q in questions" :key="q.id"
@@ -166,9 +186,10 @@
               <!-- Read-only (expired) -->
               <template v-if="isQuestionReadOnly(q)">
                 <p class="font-semibold mb-2">{{ q.text }}</p>
-                <p class="text-sm mb-1">
+                <p v-if="getPlayerAnswer(q)" class="text-sm mb-1">
                   <strong>Your answer:</strong> {{ getPlayerAnswer(q) }}
                 </p>
+                <p v-else></p>
                 <p class="text-sm">
                   <strong>Correct:</strong> {{ formatCorrectAnswer(q) }}
                 </p>
@@ -202,7 +223,7 @@
           <!-- 📊 Answer statistics – DESKTOP ONLY -->
           <div v-if="questions.some(q => q.statistics)" class="hidden md:block">
             <!-- TOGGLE -->
-            <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+            <button class="w-full py-2 px-3 mt-4 rounded-lg bg-white border border-charcoal/10
            text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
               Answer statistics
               <span class="text-xs text-light-purple font-bold">
