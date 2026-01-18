@@ -55,7 +55,7 @@
                 <div v-else-if="questions.every(q => !getPlayerAnswer(q))"
                   class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
                   <h2 class="font-bold">Stay cool mate!</h2>
-                  <p>Choose your answer and wait for evaluation.</p>
+                  <p>Choose your answer and wait for the evaluation.</p>
                 </div>
                 <div v-else-if="questions.every(q => getPlayerAnswer(q)) && !challenge.isEvaluated"
                   class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
