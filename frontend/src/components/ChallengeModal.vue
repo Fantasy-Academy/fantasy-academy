@@ -55,7 +55,7 @@
                 <div v-else-if="questions.every(q => !getPlayerAnswer(q))"
                   class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
                   <h2 class="font-bold">Stay cool mate!</h2>
-                  <p>Choose your answer and wait for evaluation.</p>
+                  <p>Choose your answer and wait for the evaluation.</p>
                 </div>
                 <div v-else-if="questions.every(q => getPlayerAnswer(q)) && !challenge.isEvaluated"
                   class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
@@ -68,7 +68,6 @@
                     {{ challenge.userPoints }} FAPs
                   </p>
                 </div>
-                <!-- ✨ původní obsah, beze změny formátu -->
                 <div v-if="questions.every(q => !getPlayerAnswer(q))" class="mt-2 md:mt-0">
                   <span v-if="challenge.isExpired" class="text-cool-gray"></span>
                   <span v-else class="text-cool-gray">No answers yet!</span>
@@ -91,7 +90,10 @@
                         {{ formatCorrectAnswer(q) }}
                       </span>
                     </p>
-
+                    <p v-else-if="formatCorrectAnswer(q) == null && challenge.isEvaluated">
+                      <span class="text-cool-gray">Waiting for the administrator to provide the correct answer<span
+                          class="tracking-widest">...</span></span>
+                    </p>
                     <p v-else>
                       <span class="text-cool-gray">Waiting for evaluation...</span>
                     </p>
@@ -190,9 +192,15 @@
                   <strong>Your answer:</strong> {{ getPlayerAnswer(q) }}
                 </p>
                 <p v-else></p>
-                <p class="text-sm">
+                <p v-if="formatCorrectAnswer(q) && challenge.isEvaluated" class="text-sm">
                   <strong>Correct:</strong> {{ formatCorrectAnswer(q) }}
                 </p>
+                <p v-else-if="formatCorrectAnswer(q) == null && challenge.isEvaluated">
+                  <span class="text-cool-gray">Waiting for the administrator to provide the correct answer<span
+                      class="tracking-widest">...</span></span>
+                </p>
+                <p v-else></p>
+
               </template>
 
               <!-- ✏️ Editable Questions -->
