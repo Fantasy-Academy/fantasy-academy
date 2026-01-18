@@ -195,10 +195,7 @@
                 <p v-if="formatCorrectAnswer(q) && challenge.isEvaluated" class="text-sm">
                   <strong>Correct:</strong> {{ formatCorrectAnswer(q) }}
                 </p>
-                <p v-else-if="formatCorrectAnswer(q) == null && challenge.isEvaluated">
-                  <span class="text-cool-gray">Waiting for the administrator to provide the correct answer<span
-                      class="tracking-widest">...</span></span>
-                </p>
+                <p v-else-if="formatCorrectAnswer(q) == null && challenge.isEvaluated"></p>
                 <p v-else></p>
 
               </template>
