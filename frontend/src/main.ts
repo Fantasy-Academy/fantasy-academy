@@ -1,7 +1,8 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import './index.css'
+import './index.css';
+import './assets/hint.css';
 import './styles/tailwind.css';
 import * as Sentry from '@sentry/vue';
 

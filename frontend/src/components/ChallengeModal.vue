@@ -225,6 +225,7 @@
               {{ submitting ? 'Submitting…' : 'Submit answers' }}
             </button>
           </div>
+          <!-- missing v-html in stats description pls do it! -->
           <!-- 📊 Answer statistics – DESKTOP ONLY -->
           <div v-if="questions.some(q => q.statistics)" class="hidden md:block">
             <!-- TOGGLE -->
@@ -243,9 +244,7 @@
             ]">
               <div v-for="q in questions" :key="q.id">
                 <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
-                  <p class="text-sm font-semibold text-blue-black mb-3">
-                    {{ q.text }}
-                  </p>
+                  <p class="text-sm font-semibold text-blue-black mb-3 hint-content" v-html="q.text"></p>
 
                   <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
                     No answers yet.

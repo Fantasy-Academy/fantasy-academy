@@ -31,9 +31,7 @@
       />
     </div>
 
-    <p v-if="question.hint" class="text-sm text-gray-500 mt-1">
-      {{ question.hint }}
-    </p>
+    <p v-if="question.hint" class="text-sm text-gray-500 mt-1 hint-content" v-html="question.hint "></p>
   </div>
 </template>
 

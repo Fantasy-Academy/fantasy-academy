@@ -2,11 +2,7 @@
   <div>
     <label class="block font-medium mb-1">{{ question.text }}</label>
 
-    <input
-      type="number"
-      v-model.number="localValue"
-      class="w-full border rounded px-3 py-2"
-    />
+    <input type="number" v-model.number="localValue" class="w-full border rounded px-3 py-2" />
 
     <!-- 🔹 Popis otázky (pokud existuje) -->
     <p v-if="question.description" class="mt-1 text-sm text-cool-gray">
@@ -14,16 +10,11 @@
     </p>
 
     <!-- 🔹 Obrázek otázky (pokud existuje) -->
-    <img
-      v-if="question.image"
-      :src="question.image"
-      alt=""
-      class="mt-2 max-h-32 w-full object-contain rounded-lg border border-charcoal/10"
-    />
+    <img v-if="question.image" :src="question.image" alt=""
+      class="mt-2 max-h-32 w-full object-contain rounded-lg border border-charcoal/10" />
 
-    <p v-if="question.hint" class="text-sm text-gray-500 mt-1">
-      {{ question.hint }}
-    </p>
+    <p v-if="question.hint" class="text-sm text-gray-500 mt-1 hint-content" v-html="question.hint"></p>
+
   </div>
 </template>
 
