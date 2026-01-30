@@ -19,12 +19,18 @@
 
       <!-- challenge exists -->
       <div v-else class="flex flex-col md:flex-row w-full overflow-y-auto ">
-        <div class="flex flex-col gap-6 py-6 px-6 w-full md:w-[420px] flex-shrink-0
+        <div class="flex flex-col gap-5 py-6 px-6 w-full md:w-[420px] flex-shrink-0
          order-1 md:order-none bg-white">
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
             {{ challenge.maxPoints }}FAPs
           </div>
           <div>
+            <!-- Hint -->
+            <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
+              <h1 class="font-bold">Hint</h1>
+              <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
+              </div>
+            </div>
             <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
          cursor-zoom-in hover:opacity-90 transition" @click="openImage(hintImgSrc)" />
           </div>
@@ -32,7 +38,6 @@
 
             <!-- 📱 Results Collapse (mobile only) -->
             <div>
-
               <!-- 📱 Mobile toggle button -->
               <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
            text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
@@ -119,7 +124,6 @@
                 showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
               ]">
 
-                <!-- ⚠️ tvá původní struktura – NEDOTČENA -->
                 <div v-for="q in questions" :key="q.id">
                   <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
 
@@ -170,13 +174,6 @@
           </p>
 
           <hr class="my-4 text-light-purple" />
-
-          <!-- Hint -->
-          <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mb-2">
-            <h1 class="font-bold">Hint</h1>
-            <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
-            </div>
-          </div>
 
           <!-- Answer form -->
           <div class="flex-1 pr">
