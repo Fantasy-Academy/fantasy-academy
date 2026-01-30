@@ -48,7 +48,7 @@
 
       <div class="flex flex-col gap-1 flex-1">
         <h1 class="font-bold line-clamp-1">{{ challenge.name }}</h1>
-        <h2 class="text-sm text-blue-black/70 line-clamp-2">{{ challenge.description }}</h2>
+        <h2 class="text-sm text-blue-black/70 line-clamp-2" v-html="challenge.description"></h2>
       </div>
     </div>
 

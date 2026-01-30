@@ -2,19 +2,9 @@
   <div>
     <label class="block font-medium mb-2">{{ question.text }}</label>
 
-    <div
-      v-for="opt in question.options"
-      :key="opt.id"
-      class="flex flex-col mb-3"
-    >
+    <div v-for="opt in question.options" :key="opt.id" class="flex flex-col mb-3">
       <div class="flex items-center mb-1">
-        <input
-          type="radio"
-          :name="'q' + question.id"
-          :value="opt.value"
-          v-model="localValue"
-          class="mr-2"
-        />
+        <input type="radio" :name="'q' + question.id" :value="opt.value" v-model="localValue" class="mr-2" />
         <span>{{ opt.label }}</span>
       </div>
 
@@ -24,17 +14,12 @@
       </p>
 
       <!-- 🔹 Obrázek (pokud existuje) -->
-      <img
-        v-if="opt.image"
-        :src="opt.image"
-        alt=""
-        class="mt-2 max-h-32 w-full object-contain rounded-lg border border-charcoal/10"
-      />
+      <img v-if="opt.image" :src="opt.image" alt=""
+        class="mt-2 max-h-32 w-full object-contain rounded-lg border border-charcoal/10" />
     </div>
 
-    <p v-if="question.hint" class="text-sm text-gray-500 mt-1">
-      {{ question.hint }}
-    </p>
+    <p v-if="question.hint" class="text-sm text-gray-500 mt-1 hint-content" v-html="question.hint"></p>
+
   </div>
 </template>
 

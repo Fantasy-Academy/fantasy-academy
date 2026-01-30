@@ -21,6 +21,11 @@
   margin-bottom: 2px;
 }
 
+link{
+  color: var(--color-dark-purple);
+  text-decoration: underline;
+}
+
 .hint-content h1 { font-size: 1.5rem; }
 .hint-content h2 { font-size: 1.25rem; }
 .hint-content h3 { font-size: 1.1rem; }
