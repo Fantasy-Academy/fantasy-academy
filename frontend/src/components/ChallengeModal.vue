@@ -4,8 +4,9 @@
          overflow-y-auto">
     <section class="relative flex flex-col md:flex-row gap-4 md:gap-6 bg-white rounded-lg
          w-full max-w-[95vw] md:w-[1100px]
-         h-[100dvh] md:h-auto
-         overflow-hidden" @click.stop>
+         min-h-[100dvh] md:min-h-0
+         md:max-h-[90vh]
+         overflow-visible md:overflow-hidden" @click.stop>
 
       <!-- Close button top-right -->
       <button @click="$emit('close')" class="absolute top-3 right-3 z-50 text-charcoal hover:text-black transition
@@ -18,7 +19,7 @@
       </div>
 
       <!-- challenge exists -->
-      <div v-else class="flex flex-col md:flex-row w-full overflow-y-auto ">
+      <div v-else class="flex flex-col md:flex-row w-full md:overflow-hidden">
         <div class="flex flex-col gap-5 py-6 px-6 w-full md:w-[420px] flex-shrink-0
          order-1 md:order-none bg-white">
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
@@ -164,10 +165,9 @@
         <!-- Description -->
         <!-- Description / Right side -->
         <div class="text-blue-black bg-dark-white py-6 px-6 rounded-r-lg
-         flex flex-col w-full
-         max-h-[80vh] md:max-h-[85vh]
-         overflow-y-auto  <!-- ← SCROLL TADY -->
-         order-2">
+            flex flex-col w-full
+            md:max-h-[85vh]
+            md:overflow-y-auto">
           <h1 class="font-bold text-lg">{{ challenge.name || 'Challenge' }}</h1>
           <p class="text-blue-black font-alexandria">
             <span class="hint-content" v-html="challenge.description"></span>
