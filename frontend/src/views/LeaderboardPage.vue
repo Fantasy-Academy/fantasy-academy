@@ -49,10 +49,7 @@
             <div class="col-span-12 sm:col-span-6">
               <div
                 class="inline-flex max-w-full items-center gap-4 rounded-lg px-2 py-1 font-alexandria text-blue-black">
-                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-full"
-                  :class="p.isMyself ? 'bg-golden-yellow text-blue-black' : 'bg-dark-white text-blue-black'">
-                  {{ monogram(p.playerName) }}
-                </div>
+                <AvatarInitial :name="p.playerName" size="md" :highlight="p.isMyself" />
                 <span class="truncate text-lg font-medium">
                   {{ p.playerName }}
                   <span v-if="p.isMyself" class="text-sm text-vibrant-coral">(you)</span>
@@ -99,6 +96,7 @@ import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { apiGetLeaderboards } from '@/api/leaderboards';
 import { toFriendlyError } from '@/utils/errorHandler';
+import AvatarInitial from '@/components/ui/AvatarInitial.vue';
 
 document.title = 'Fantasy Academy | Leaderboard';
 
