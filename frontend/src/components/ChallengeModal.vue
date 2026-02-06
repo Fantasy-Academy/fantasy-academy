@@ -13,10 +13,9 @@
          bg-white/80 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center shadow cursor-pointer">
         ✕
       </button>
-      <!-- Loading state -->
-      <div v-if="!challenge">
-        Loading…
-      </div>
+
+      <!-- LOADING -->
+      <div v-if="!challenge" class="p-10">Loading…</div>
 
       <!-- challenge exists -->
       <div v-else class="flex flex-col md:flex-row w-full h-full overflow-y-auto min-h-0">
@@ -25,262 +24,147 @@
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
             {{ challenge.maxPoints }}FAPs
           </div>
-          <div>
-            <!-- Hint -->
-            <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
-              <h1 class="font-bold">Hint</h1>
-              <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
-              </div>
-            </div>
-            <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
-         cursor-zoom-in hover:opacity-90 transition" @click="openImage(hintImgSrc)" />
-          </div>
-          <div>
 
-            <!-- 📱 Results Collapse (mobile only) -->
-            <div>
-              <!-- 📱 Mobile toggle button -->
-              <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
-           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
-                @click="toggleResultsMobile">
-                Overview
-                <span class="text-light-purple">{{ showResultsMobile ? '▲' : '▼' }}</span>
-              </button>
+          <!-- HINT -->
+          <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
+            <button
+              class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+                     text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
+              @click="showHintMobile = !showHintMobile"
+            >
+              Hint <span>{{ showHintMobile ? '▲' : '▼' }}</span>
+            </button>
 
-              <!-- 🖥 Desktop: always visible | 📱 Mobile: collapsible -->
-              <div :class="[
-                'transition-all duration-300 overflow-hidden',
-                showResultsMobile ? 'max-h-[1500px] mt-3' : 'max-h-0 md:max-h-none',
-                'md:max-h-none'
-              ]">
-                <div v-if="questions.every(q => !getPlayerAnswer(q)) && challenge.isExpired"
-                  class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
-                  <h2 class="font-bold">You missed this challenge!</h2>
-                  <p>Try your luck next time.</p>
-                </div>
-                <div v-else-if="questions.every(q => !getPlayerAnswer(q))"
-                  class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
-                  <h2 class="font-bold">Stay cool mate!</h2>
-                  <p>Choose your answer and wait for the evaluation.</p>
-                </div>
-                <div v-else-if="questions.every(q => getPlayerAnswer(q)) && !challenge.isEvaluated"
-                  class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
-                  <h2 class="font-bold">Stay cool mate!</h2>
-                  <p>This challenge is still ongoing<span class="tracking-widest">...</span></p>
-                </div>
-                <div v-else class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
-                  <h2>Your Outcome:</h2>
-                  <p class="font-bold">
-                    {{ challenge.userPoints }} FAPs
-                  </p>
-                </div>
-                <div v-if="questions.every(q => !getPlayerAnswer(q))" class="mt-2 md:mt-0">
-                  <span v-if="challenge.isExpired" class="text-cool-gray"></span>
-                  <span v-else class="text-cool-gray">No answers yet!</span>
-                </div>
+            <div :class="[
+              'transition-all duration-300 overflow-hidden',
+              showHintMobile ? 'max-h-[1000px]' : 'max-h-0 md:max-h-none'
+            ]">
+              <h1 class="font-bold hidden md:block">Hint</h1>
 
+              <div
+                v-if="challenge.hintText"
+                class="prose prose-sm max-w-none hint-content"
+                v-html="challenge.hintText"
+              />
 
-                <div v-else class="md:mt-0">
-                  <div v-for="q in questions" :key="q.id" class="mt-2">
-
-                    <p v-if="getPlayerAnswer(q)">
-                      <span class="text-blue-black font-medium">
-                        <span class="font-bold">Your answer:</span>
-                        {{ getPlayerAnswer(q) }}
-                      </span>
-                    </p>
-
-                    <p v-if="formatCorrectAnswer(q) && challenge.isEvaluated">
-                      <span class="text-blue-black font-medium">
-                        <span class="font-bold">Correct:</span>
-                        {{ formatCorrectAnswer(q) }}
-                      </span>
-                    </p>
-                    <p v-else-if="formatCorrectAnswer(q) == null && challenge.isEvaluated">
-                      <span class="text-cool-gray">Waiting for the administrator to provide the correct answer<span
-                          class="tracking-widest">...</span></span>
-                    </p>
-                    <p v-else>
-                      <span class="text-cool-gray">Waiting for evaluation...</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- 📊 Answer statistics -->
-            <div v-if="questions.some(q => q.statistics)" class="mt-4 md:hidden">
-
-              <!-- TOGGLE – mobile + desktop -->
-              <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
-           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
-                Answer statistics
-                <span class="text-xs text-light-purple font-bold">
-                  {{ showStats ? '▲' : '▼' }}
-                </span>
-              </button>
-
-              <!-- COLLAPSIBLE CONTENT -->
-              <div :class="[
-                'transition-all duration-300 overflow-hidden',
-                showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
-              ]">
-
-                <div v-for="q in questions" :key="q.id">
-                  <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
-
-                    <p class="text-sm font-semibold text-blue-black mb-3">
-                      {{ q.text }}
-                    </p>
-
-                    <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
-                      No answers yet.
-                    </div>
-
-                    <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
-
-                      <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
-                        <span>{{ formatStatisticAnswer(stat) }}</span>
-                        <span>{{ stat.percentage.toFixed(1) }}%</span>
-                      </div>
-
-                      <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
-                        <div class="h-full bg-light-purple rounded-full transition-all duration-500"
-                          :style="{ width: stat.percentage + '%' }" />
-                      </div>
-
-                      <p class="text-xs text-cool-gray mt-1">
-                        {{ stat.count }} players
-                      </p>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
+              <img
+                v-if="hintImgSrc"
+                :src="hintImgSrc"
+                class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
+                       cursor-zoom-in hover:opacity-90 transition mt-2"
+                @click="openImage(hintImgSrc)"
+              />
             </div>
           </div>
 
+          <!-- RESULTS -->
+          <div>
+            <button
+              class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+                     text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
+              @click="toggleResultsMobile"
+            >
+              Overview <span>{{ showResultsMobile ? '▲' : '▼' }}</span>
+            </button>
+
+            <div :class="[
+              'transition-all duration-300 overflow-hidden',
+              showResultsMobile ? 'max-h-[1500px] mt-3' : 'max-h-0 md:max-h-none'
+            ]">
+              <!-- (RESULT CONTENT BEZE ZMĚNY) -->
+              <div v-if="questions.every(q => !getPlayerAnswer(q)) && challenge.isExpired"
+                class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                <h2 class="font-bold">You missed this challenge!</h2>
+                <p>Try your luck next time.</p>
+              </div>
+
+              <div v-else-if="questions.every(q => !getPlayerAnswer(q))"
+                class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                <h2 class="font-bold">Stay cool mate!</h2>
+                <p>Choose your answer and wait for the evaluation.</p>
+              </div>
+
+              <div v-else-if="questions.every(q => getPlayerAnswer(q)) && !challenge.isEvaluated"
+                class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                <h2 class="font-bold">Stay cool mate!</h2>
+                <p>This challenge is still ongoing<span class="tracking-widest">...</span></p>
+              </div>
+
+              <div v-else class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
+                <h2>Your Outcome:</h2>
+                <p class="font-bold">{{ challenge.userPoints }} FAPs</p>
+              </div>
+            </div>
+          </div>
         </div>
 
+        <!-- 🔵 RIGHT COLUMN (SCROLLABLE ON DESKTOP) -->
+        <div class="flex-1 bg-dark-white py-6 px-6 flex flex-col md:overflow-y-auto md:min-h-0">
 
-        <!-- Description -->
-        <!-- Description / Right side -->
-        <div class="text-blue-black bg-dark-white py-6 px-6 rounded-r-lg
-            flex flex-col w-full
-            md:max-h-[85vh]
-            md:overflow-y-auto">
           <h1 class="font-bold text-lg">{{ challenge.name || 'Challenge' }}</h1>
+
           <p class="text-blue-black font-alexandria">
             <span class="hint-content" v-html="challenge.description"></span>
           </p>
 
           <hr class="my-4 text-light-purple" />
 
-          <!-- Answer form -->
-          <div class="flex-1 pr">
+          <!-- ANSWERS TOGGLE MOBILE -->
+          <button
+            v-if="!challenge.isExpired"
+            class="md:hidden w-full py-2 px-3 mb-3 rounded-lg bg-white border border-charcoal/10
+                   text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
+            @click="showAnswersMobile = !showAnswersMobile"
+          >
+            Answers <span>{{ showAnswersMobile ? '▲' : '▼' }}</span>
+          </button>
 
-            <!-- 🔥 Odpovídání na otázky (pokud není expired) -->
+          <!-- ANSWERS -->
+          <div
+            class="flex-1 transition-all duration-300 overflow-hidden"
+            :class="showAnswersMobile ? 'max-h-[5000px]' : 'max-h-0 md:max-h-none'"
+          >
             <div v-for="q in questions" :key="q.id"
               class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
 
-              <!-- Read-only (expired) -->
               <template v-if="isQuestionReadOnly(q)">
                 <p class="font-semibold mb-2">{{ q.text }}</p>
                 <p v-if="getPlayerAnswer(q)" class="text-sm mb-1">
                   <strong>Your answer:</strong> {{ getPlayerAnswer(q) }}
                 </p>
-                <p v-else></p>
-                <p v-if="formatCorrectAnswer(q) && challenge.isEvaluated" class="text-sm">
-                  <strong>Correct:</strong> {{ formatCorrectAnswer(q) }}
-                </p>
-                <p v-else-if="formatCorrectAnswer(q) == null && challenge.isEvaluated"></p>
-                <p v-else></p>
-
               </template>
 
-              <!-- ✏️ Editable Questions -->
               <template v-else>
-                <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)"
-                  v-model="answers[q.id]" />
-                <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)"
-                  v-model="answers[q.id]" />
-                <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text }"
-                  v-model="answers[q.id]" />
+                <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)" v-model="answers[q.id]" />
+                <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)" v-model="answers[q.id]" />
+                <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text }" v-model="answers[q.id]" />
                 <QuestionNumeric v-else-if="q.type === 'numeric'" :question="toNumericUI(q)" v-model="answers[q.id]" />
                 <QuestionSort v-else-if="q.type === 'sort'" :question="toSortUI(q)" v-model="sortModels[q.id]" />
-
-                <!-- Errors -->
-                <p v-if="qErrors[q.id]" class="text-vibrant-coral mt-1 text-sm font-medium">
-                  {{ qErrors[q.id] }}
-                </p>
+                <p v-if="qErrors[q.id]" class="text-vibrant-coral mt-1 text-sm font-medium">{{ qErrors[q.id] }}</p>
               </template>
             </div>
 
-            <!-- Submit -->
-            <button v-if="!readOnly" @click="handleSubmit" :disabled="submitting" class="w-full mt-4 py-2 rounded-lg text-white font-semibold animate-gradient
-         bg-[linear-gradient(270deg,var(--color-light-purple),var(--color-dark-purple),var(--color-vibrant-coral))]
-         bg-[length:200%_200%] shadow-sm transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            <button
+              v-if="!readOnly"
+              @click="handleSubmit"
+              :disabled="submitting"
+              class="w-full mt-4 py-2 rounded-lg text-white font-semibold animate-gradient
+                     bg-[linear-gradient(270deg,var(--color-light-purple),var(--color-dark-purple),var(--color-vibrant-coral))]
+                     bg-[length:200%_200%] shadow-sm transition disabled:opacity-50"
+            >
               {{ submitting ? 'Submitting…' : 'Submit answers' }}
             </button>
           </div>
-          <!-- missing v-html in stats description pls do it! -->
-          <!-- 📊 Answer statistics – DESKTOP ONLY -->
-          <div v-if="questions.some(q => q.statistics)" class="hidden md:block">
-            <!-- TOGGLE -->
-            <button class="w-full py-2 px-3 mt-4 rounded-lg bg-white border border-charcoal/10
-           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
-              Answer statistics
-              <span class="text-xs text-light-purple font-bold">
-                {{ showStats ? '▲' : '▼' }}
-              </span>
-            </button>
 
-            <!-- COLLAPSIBLE CONTENT (STEJNÝ OBSAH) -->
-            <div :class="[
-              'transition-all duration-300 overflow-hidden',
-              showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
-            ]">
-              <div v-for="q in questions" :key="q.id">
-                <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
-                  <p class="text-sm font-semibold text-blue-black mb-3 hint-content" v-html="q.text"></p>
-
-                  <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
-                    No answers yet.
-                  </div>
-
-                  <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
-                    <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
-                      <span>{{ formatStatisticAnswer(stat) }}</span>
-                      <span>{{ stat.percentage.toFixed(1) }}%</span>
-                    </div>
-
-                    <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
-                      <div class="h-full bg-light-purple rounded-full transition-all duration-500"
-                        :style="{ width: stat.percentage + '%' }" />
-                    </div>
-
-                    <p class="text-xs text-cool-gray mt-1">
-                      {{ stat.count }} players
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
   </div>
-  <!-- 🔍 Fullscreen image preview -->
-  <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
-    @click="closeImage">
-    <img :src="zoomedImage" alt="Zoomed hint" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-xl cursor-zoom-out"
-      @click.stop />
 
-    <button
-      class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-light-purple transition cursor-pointer"
-      @click="closeImage">
-      ✕
-    </button>
+  <!-- 🔍 IMAGE ZOOM -->
+  <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80" @click="closeImage">
+    <img :src="zoomedImage" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-xl cursor-zoom-out" @click.stop />
+    <button class="absolute top-4 right-4 text-white text-2xl font-bold" @click="closeImage">✕</button>
   </div>
 </template>
 
@@ -301,6 +185,7 @@ import QuestionNumeric from "@/components/questions/NumericQuestion.vue";
 import QuestionText from "@/components/questions/TextQuestion.vue";
 import QuestionSort from "@/components/questions/SortQuestion.vue";
 
+
 const props = defineProps({
   show: { type: Boolean, default: false },
   challengeId: { type: String, required: false },
@@ -315,6 +200,8 @@ const answers = reactive({}); // map questionId -> model
 const sortModels = reactive({}); // map questionId -> [{ id,label } ...] for UI sort
 const qErrors = reactive({}); // map questionId -> error string
 const submitting = ref(false);
+const showHintMobile = ref(false)
+const showAnswersMobile = ref(true)
 
 const log = (...a) => console.log("[ChallengeModal]", ...a);
 const err = (...a) => console.error("[ChallengeModal]", ...a);
@@ -704,8 +591,26 @@ onMounted(() => {
 watch(
   () => props.show,
   (val) => {
-    document.body.style.overflow = val ? "hidden" : "";
-    if (val) fetchChallenge();
+    if (val) {
+      // 🔒 LOCK PAGE SCROLL (works on iOS too)
+      scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+
+      fetchChallenge();
+    } else {
+      // 🔓 RESTORE PAGE SCROLL
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+
+      window.scrollTo(0, scrollY);
+    }
   }
 );
 watch(
