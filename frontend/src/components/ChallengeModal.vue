@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" @click="$emit('close')" class="fixed inset-0 z-50 bg-black/40
          flex items-start md:items-center justify-center
-         overflow-hidden md:overflow-y-auto py-6">
+         overflow-y-auto">
     <section class="relative flex flex-col md:flex-row gap-4 md:gap-6 bg-white rounded-lg
  w-full max-w-[95vw] md:w-[1100px]
  h-[90dvh] md:h-auto
@@ -21,33 +21,19 @@
       <!-- challenge exists -->
       <div v-else class="flex flex-col md:flex-row w-full h-full overflow-y-auto min-h-0">
         <div class="flex flex-col gap-5 py-6 px-6 w-full md:w-[420px] flex-shrink-0
- order-1 md:order-none bg-white">
+         order-1 md:order-none bg-white">
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
             {{ challenge.maxPoints }}FAPs
           </div>
-          <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
-
-            <!-- Mobile toggle -->
-            <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
-           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
-              @click="showHintMobile = !showHintMobile">
-              Hint
-              <span>{{ showHintMobile ? '▲' : '▼' }}</span>
-            </button>
-
-            <div :class="[
-              'transition-all duration-300 overflow-hidden',
-              showHintMobile ? 'max-h-[1000px]' : 'max-h-0 md:max-h-none'
-            ]">
-
-              <h1 class="font-bold hidden md:block">Hint</h1>
-
-              <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content"
-                v-html="challenge.hintText" />
-
-              <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
-                cursor-zoom-in hover:opacity-90 transition mt-2" @click="openImage(hintImgSrc)" />
+          <div>
+            <!-- Hint -->
+            <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
+              <h1 class="font-bold">Hint</h1>
+              <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content" v-html="challenge.hintText">
+              </div>
             </div>
+            <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
+         cursor-zoom-in hover:opacity-90 transition" @click="openImage(hintImgSrc)" />
           </div>
           <div>
 
@@ -179,7 +165,9 @@
         <!-- Description -->
         <!-- Description / Right side -->
         <div class="text-blue-black bg-dark-white py-6 px-6 rounded-r-lg
- flex flex-col w-full">
+            flex flex-col w-full
+            md:max-h-[85vh]
+            md:overflow-y-auto">
           <h1 class="font-bold text-lg">{{ challenge.name || 'Challenge' }}</h1>
           <p class="text-blue-black font-alexandria">
             <span class="hint-content" v-html="challenge.description"></span>
@@ -188,17 +176,7 @@
           <hr class="my-4 text-light-purple" />
 
           <!-- Answer form -->
-          <!-- 🔽 Mobile Answers Toggle -->
-          <button v-if="!challenge.isExpired" class="md:hidden w-full py-2 px-3 mb-3 rounded-lg bg-white border border-charcoal/10
-         text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
-            @click="showAnswersMobile = !showAnswersMobile">
-            Answers
-            <span>{{ showAnswersMobile ? '▲' : '▼' }}</span>
-          </button>
-
-          <!-- Answer form -->
-          <div class="flex-1 pr transition-all duration-300 overflow-hidden"
-            :class="showAnswersMobile ? 'max-h-[5000px]' : 'max-h-0 md:max-h-none'">
+          <div class="flex-1 pr">
 
             <!-- 🔥 Odpovídání na otázky (pokud není expired) -->
             <div v-for="q in questions" :key="q.id"
@@ -323,7 +301,6 @@ import QuestionNumeric from "@/components/questions/NumericQuestion.vue";
 import QuestionText from "@/components/questions/TextQuestion.vue";
 import QuestionSort from "@/components/questions/SortQuestion.vue";
 
-
 const props = defineProps({
   show: { type: Boolean, default: false },
   challengeId: { type: String, required: false },
@@ -338,8 +315,6 @@ const answers = reactive({}); // map questionId -> model
 const sortModels = reactive({}); // map questionId -> [{ id,label } ...] for UI sort
 const qErrors = reactive({}); // map questionId -> error string
 const submitting = ref(false);
-const showHintMobile = ref(false)
-const showAnswersMobile = ref(true)
 
 const log = (...a) => console.log("[ChallengeModal]", ...a);
 const err = (...a) => console.error("[ChallengeModal]", ...a);
@@ -729,26 +704,8 @@ onMounted(() => {
 watch(
   () => props.show,
   (val) => {
-    if (val) {
-      // 🔒 LOCK PAGE SCROLL (works on iOS too)
-      scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-
-      fetchChallenge();
-    } else {
-      // 🔓 RESTORE PAGE SCROLL
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.width = "";
-
-      window.scrollTo(0, scrollY);
-    }
+    document.body.style.overflow = val ? "hidden" : "";
+    if (val) fetchChallenge();
   }
 );
 watch(
