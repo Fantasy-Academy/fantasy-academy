@@ -48,7 +48,7 @@
           <router-link to="/login">
             <button class="rounded-lg text-white font-semibold animate-gradient
               bg-[linear-gradient(270deg,var(--color-light-purple),var(--color-dark-purple),var(--color-vibrant-coral))]
-              bg-[length:200%_200%] shadow-sm transition px-4 py-2">
+              bg-[length:200%_200%] shadow-sm transition px-4 py-2 cursor-pointer">
               Sign in
             </button>
           </router-link>
