@@ -6,7 +6,7 @@
  w-full max-w-[95vw] md:w-[1100px]
  h-[90dvh] md:h-auto
  md:max-h-[90vh]
- overflow-hidden" @click.stop>
+ " @click.stop>
 
       <!-- Close button top-right -->
       <button @click="$emit('close')" class="absolute top-3 right-3 z-50 text-charcoal hover:text-black transition
@@ -19,7 +19,7 @@
       </div>
 
       <!-- challenge exists -->
-      <div v-else class="flex flex-col md:flex-row w-full h-full overflow-y-auto">
+      <div v-else class="flex flex-col md:flex-row w-full h-full overflow-y-auto min-h-0">
         <div class="flex flex-col gap-5 py-6 px-6 w-full md:w-[420px] flex-shrink-0
  order-1 md:order-none bg-white">
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
