@@ -55,6 +55,8 @@
                 @click="openImage(hintImgSrc)"
               />
             </div>
+            <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
+         cursor-zoom-in hover:opacity-90 transition" @click="openImage(hintImgSrc)" />
           </div>
 
           <!-- RESULTS -->
@@ -185,7 +187,6 @@ import QuestionNumeric from "@/components/questions/NumericQuestion.vue";
 import QuestionText from "@/components/questions/TextQuestion.vue";
 import QuestionSort from "@/components/questions/SortQuestion.vue";
 
-
 const props = defineProps({
   show: { type: Boolean, default: false },
   challengeId: { type: String, required: false },
@@ -200,8 +201,6 @@ const answers = reactive({}); // map questionId -> model
 const sortModels = reactive({}); // map questionId -> [{ id,label } ...] for UI sort
 const qErrors = reactive({}); // map questionId -> error string
 const submitting = ref(false);
-const showHintMobile = ref(false)
-const showAnswersMobile = ref(true)
 
 const log = (...a) => console.log("[ChallengeModal]", ...a);
 const err = (...a) => console.error("[ChallengeModal]", ...a);
@@ -591,26 +590,8 @@ onMounted(() => {
 watch(
   () => props.show,
   (val) => {
-    if (val) {
-      // 🔒 LOCK PAGE SCROLL (works on iOS too)
-      scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-
-      fetchChallenge();
-    } else {
-      // 🔓 RESTORE PAGE SCROLL
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.width = "";
-
-      window.scrollTo(0, scrollY);
-    }
+    document.body.style.overflow = val ? "hidden" : "";
+    if (val) fetchChallenge();
   }
 );
 watch(
