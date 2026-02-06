@@ -189,10 +189,10 @@
 
           <!-- Answer form -->
           <!-- 🔽 Mobile Answers Toggle -->
-          <button class="md:hidden w-full py-2 px-3 mb-3 rounded-lg bg-white border border-charcoal/10
+          <button v-if="!challenge.isExpired" class="md:hidden w-full py-2 px-3 mb-3 rounded-lg bg-white border border-charcoal/10
          text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
             @click="showAnswersMobile = !showAnswersMobile">
-            Your Answers
+            Answers
             <span>{{ showAnswersMobile ? '▲' : '▼' }}</span>
           </button>
 
