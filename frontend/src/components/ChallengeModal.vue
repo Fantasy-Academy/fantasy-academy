@@ -27,11 +27,9 @@
 
           <!-- HINT -->
           <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
-            <button
-              class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+            <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
                      text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
-              @click="showHintMobile = !showHintMobile"
-            >
+              @click="showHintMobile = !showHintMobile">
               Hint <span>{{ showHintMobile ? '▲' : '▼' }}</span>
             </button>
 
@@ -41,29 +39,61 @@
             ]">
               <h1 class="font-bold hidden md:block">Hint</h1>
 
-              <div
-                v-if="challenge.hintText"
-                class="prose prose-sm max-w-none hint-content"
-                v-html="challenge.hintText"
-              />
+              <div v-if="challenge.hintText" class="prose prose-sm max-w-none hint-content"
+                v-html="challenge.hintText" />
 
-              <img
-                v-if="hintImgSrc"
-                :src="hintImgSrc"
-                class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
-                       cursor-zoom-in hover:opacity-90 transition mt-2"
-                @click="openImage(hintImgSrc)"
-              />
+              <img v-if="hintImgSrc" :src="hintImgSrc" class="w-full max-h-40 sm:max-h-52 md:max-h-48 object-contain rounded bg-dark-white
+                       cursor-zoom-in hover:opacity-90 transition mt-2" @click="openImage(hintImgSrc)" />
             </div>
           </div>
+        <!-- 📊 Answer statistics — MOBILE -->
+        <div v-if="questions.some(q => q.statistics)" class=" md:hidden">
 
+          <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
+            Answer statistics
+            <span class="text-xs font-bold">{{ showStats ? '▲' : '▼' }}</span>
+          </button>
+
+          <div :class="[
+            'transition-all duration-300 overflow-hidden',
+            showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
+          ]">
+            <div v-for="q in questions" :key="q.id">
+              <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+                <p class="text-sm font-semibold text-blue-black mb-3" v-html="q.text"></p>
+
+                <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                  No answers yet.
+                </div>
+
+                <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+
+                  <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                    <span>{{ formatStatisticAnswer(stat) }}</span>
+                    <span>{{ stat.percentage.toFixed(1) }}%</span>
+                  </div>
+
+                  <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
+                    <div class="h-full bg-light-purple rounded-full transition-all duration-500"
+                      :style="{ width: stat.percentage + '%' }" />
+                  </div>
+
+                  <p class="text-xs text-cool-gray mt-1">
+                    {{ stat.count }} players
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
           <!-- RESULTS -->
           <div>
-            <button
-              class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+            <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
                      text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
-              @click="toggleResultsMobile"
-            >
+              @click="toggleResultsMobile">
               Overview <span>{{ showResultsMobile ? '▲' : '▼' }}</span>
             </button>
 
@@ -71,7 +101,7 @@
               'transition-all duration-300 overflow-hidden',
               showResultsMobile ? 'max-h-[1500px] mt-3' : 'max-h-0 md:max-h-none'
             ]">
-              <!-- (RESULT CONTENT BEZE ZMĚNY) -->
+              <!-- RESULTS CONTENT -->
               <div v-if="questions.every(q => !getPlayerAnswer(q)) && challenge.isExpired"
                 class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
                 <h2 class="font-bold">You missed this challenge!</h2>
@@ -110,20 +140,15 @@
           <hr class="my-4 text-light-purple" />
 
           <!-- ANSWERS TOGGLE MOBILE -->
-          <button
-            v-if="!challenge.isExpired"
-            class="md:hidden w-full py-2 px-3 mb-3 rounded-lg bg-white border border-charcoal/10
+          <button v-if="!challenge.isExpired" class="md:hidden w-full py-2 px-3 mb-3 rounded-lg bg-white border border-charcoal/10
                    text-sm font-bold text-light-purple flex justify-between items-center shadow-sm"
-            @click="showAnswersMobile = !showAnswersMobile"
-          >
+            @click="showAnswersMobile = !showAnswersMobile">
             Answers <span>{{ showAnswersMobile ? '▲' : '▼' }}</span>
           </button>
 
           <!-- ANSWERS -->
-          <div
-            class="flex-1 transition-all duration-300 overflow-hidden"
-            :class="showAnswersMobile ? 'max-h-[99999px]' : 'max-h-0 md:max-h-none'"
-          >
+          <div class="flex-1 transition-all duration-300 overflow-hidden"
+            :class="showAnswersMobile ? 'max-h-[99999px]' : 'max-h-0 md:max-h-none'">
             <div v-for="q in questions" :key="q.id"
               class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
 
@@ -135,34 +160,75 @@
               </template>
 
               <template v-else>
-                <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)" v-model="answers[q.id]" />
-                <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)" v-model="answers[q.id]" />
-                <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text }" v-model="answers[q.id]" />
+                <QuestionSingleSelect v-if="q.type === 'single_select'" :question="toSingleSelectUI(q)"
+                  v-model="answers[q.id]" />
+                <QuestionMultiSelect v-else-if="q.type === 'multi_select'" :question="toMultiSelectUI(q)"
+                  v-model="answers[q.id]" />
+                <QuestionText v-else-if="q.type === 'text'" :question="{ id: q.id, text: q.text }"
+                  v-model="answers[q.id]" />
                 <QuestionNumeric v-else-if="q.type === 'numeric'" :question="toNumericUI(q)" v-model="answers[q.id]" />
                 <QuestionSort v-else-if="q.type === 'sort'" :question="toSortUI(q)" v-model="sortModels[q.id]" />
                 <p v-if="qErrors[q.id]" class="text-vibrant-coral mt-1 text-sm font-medium">{{ qErrors[q.id] }}</p>
               </template>
             </div>
 
-            <button
-              v-if="!readOnly"
-              @click="handleSubmit"
-              :disabled="submitting"
-              class="w-full mt-4 py-2 rounded-lg text-white font-semibold animate-gradient
+            <button v-if="!readOnly" @click="handleSubmit" :disabled="submitting" class="w-full mt-4 py-2 rounded-lg text-white font-semibold animate-gradient
                      bg-[linear-gradient(270deg,var(--color-light-purple),var(--color-dark-purple),var(--color-vibrant-coral))]
-                     bg-[length:200%_200%] shadow-sm transition disabled:opacity-50"
-            >
+                     bg-[length:200%_200%] shadow-sm transition disabled:opacity-50">
               {{ submitting ? 'Submitting…' : 'Submit answers' }}
             </button>
           </div>
+          <!-- 📊 Answer statistics — DESKTOP -->
+          <div v-if="questions.some(q => q.statistics)" class="hidden md:block">
 
+            <button class="w-full py-2 px-3 mt-4 rounded-lg bg-white border border-charcoal/10
+           text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
+              Answer statistics
+              <span class="text-xs font-bold">{{ showStats ? '▲' : '▼' }}</span>
+            </button>
+
+            <div :class="[
+              'transition-all duration-300 overflow-hidden',
+              showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
+            ]">
+              <div v-for="q in questions" :key="q.id">
+                <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+
+                  <p class="text-sm font-semibold text-blue-black mb-3 hint-content" v-html="q.text"></p>
+
+                  <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                    No answers yet.
+                  </div>
+
+                  <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+
+                    <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                      <span>{{ formatStatisticAnswer(stat) }}</span>
+                      <span>{{ stat.percentage.toFixed(1) }}%</span>
+                    </div>
+
+                    <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
+                      <div class="h-full bg-light-purple rounded-full transition-all duration-500"
+                        :style="{ width: stat.percentage + '%' }" />
+                    </div>
+
+                    <p class="text-xs text-cool-gray mt-1">
+                      {{ stat.count }} players
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </div>
 
   <!-- 🔍 IMAGE ZOOM -->
-  <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80" @click="closeImage">
+  <div v-if="zoomedImage" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+    @click="closeImage">
     <img :src="zoomedImage" class="max-h-[90vh] max-w-[90vw] rounded-lg shadow-xl cursor-zoom-out" @click.stop />
     <button class="absolute top-4 right-4 text-white text-2xl font-bold" @click="closeImage">✕</button>
   </div>
