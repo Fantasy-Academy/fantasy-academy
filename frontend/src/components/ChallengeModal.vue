@@ -71,7 +71,7 @@
               'transition-all duration-300 overflow-hidden',
               showResultsMobile ? 'max-h-[1500px] mt-3' : 'max-h-0 md:max-h-none'
             ]">
-              <!-- (RESULT CONTENT BEZE ZMĚNY) -->
+              
               <div v-if="questions.every(q => !getPlayerAnswer(q)) && challenge.isExpired"
                 class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
                 <h2 class="font-bold">You missed this challenge!</h2>
@@ -98,7 +98,7 @@
           </div>
         </div>
 
-        <!-- 🔵 RIGHT COLUMN (SCROLLABLE ON DESKTOP) -->
+        <!-- RIGHT COLUMN (SCROLLABLE ON DESKTOP) -->
         <div class="flex-1 bg-dark-white py-6 px-6 flex flex-col md:overflow-y-auto md:min-h-0">
 
           <h1 class="font-bold text-lg">{{ challenge.name || 'Challenge' }}</h1>
@@ -121,8 +121,8 @@
 
           <!-- ANSWERS -->
           <div
-            class="flex-1 transition-all duration-300 overflow-hidden"
-            :class="showAnswersMobile ? 'max-h-[5000px]' : 'max-h-0 md:max-h-none'"
+            class="flex-1 transition-all duration-300 overflow-y-scroll"
+            :class="showAnswersMobile ? 'max-h-[10000px]' : 'max-h-0 md:max-h-none'"
           >
             <div v-for="q in questions" :key="q.id"
               class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
