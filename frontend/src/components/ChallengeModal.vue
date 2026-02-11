@@ -37,7 +37,7 @@
 
             <div :class="[
               'transition-all duration-300 overflow-hidden',
-              showHintMobile ? 'max-h-[1000px]' : 'max-h-0 md:max-h-none'
+              showHintMobile ? 'max-h-[10000px]' : 'max-h-0 md:max-h-none'
             ]">
               <h1 class="font-bold hidden md:block">Hint</h1>
 
@@ -122,7 +122,7 @@
           <!-- ANSWERS -->
           <div
             class="flex-1 transition-all duration-300 overflow-hidden"
-            :class="showAnswersMobile ? 'max-h-[5000px]' : 'max-h-0 md:max-h-none'"
+            :class="showAnswersMobile ? 'max-h-[99999px]' : 'max-h-0 md:max-h-none'"
           >
             <div v-for="q in questions" :key="q.id"
               class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
