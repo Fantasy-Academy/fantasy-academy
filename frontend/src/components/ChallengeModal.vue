@@ -5,7 +5,7 @@
     <section class="relative flex flex-col md:flex-row gap-4 md:gap-6 bg-white rounded-lg
  w-full max-w-[95vw] md:w-[1100px]
  h-[90dvh] md:h-auto
- md:max-h-[90vh]
+ md:max-h-[90vh] overflow-y-scroll
  " @click.stop>
 
       <!-- Close button top-right -->
