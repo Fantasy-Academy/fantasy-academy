@@ -3,9 +3,8 @@
     <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
 
       <!-- LEFT — Logo -->
-      <router-link to="/"
-        class="text-3xl text-dark-purple font-bebas-neue tracking-wide hover:text-light-purple transition">
-        Fantasy Academy
+      <router-link to="/" class="flex items-center gap-3 hover:opacity-90 transition">
+        <img src="@/assets/logo.jpg" alt="Fantasy Academy" class="h-15 rounded w-auto object-contain" />
       </router-link>
 
       <!-- CENTER — Desktop Nav (BEZE ZMĚNY) -->
@@ -147,8 +146,3 @@ function closeMobile() {
 watch(() => route.fullPath, () => mobileOpen.value = false)
 </script>
 
-<style scoped>
-.mobile-link {
-  @apply block px-4 py-4 rounded-xl hover:bg-dark-white/10 active:scale-[0.98] transition;
-}
-</style>
