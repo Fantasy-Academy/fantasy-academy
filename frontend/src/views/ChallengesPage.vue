@@ -3,7 +3,7 @@
     <header class="mb-6 rounded-lg
                 sm:p-5 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
 
-      <div class="flex flex-col gap-2">
+      <div>
         <GameweekStatus />
       </div>
 
@@ -53,68 +53,94 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useChallenges } from '@/composables/useChallenges';
-import ChallengeCard from '@/components/ChallengeCard.vue';
-import ChallengeModal from '@/components/ChallengeModal.vue';
-import GameweekStatus from '../components/GameweekStatus.vue';
+import { ref, onMounted, computed } from 'vue'
+import { useChallenges } from '@/composables/useChallenges'
+import ChallengeCard from '@/components/ChallengeCard.vue'
+import ChallengeModal from '@/components/ChallengeModal.vue'
+import GameweekStatus from '../components/GameweekStatus.vue'
 
-const { challenges, loading, error, loadChallenges } = useChallenges();
+const { challenges, loading, error, loadChallenges } = useChallenges()
 
-document.title = 'Fantasy Academy | Challenges';
+document.title = 'Fantasy Academy | Challenges'
 
-const showModal = ref(false);
-const selectedId = ref(null);
+const showModal = ref(false)
+const selectedId = ref(null)
 
-// filter state: all | active | completed | expired
-const activeFilter = ref('active');
+// filter state: all | active | completed | expired | evaluated
+const activeFilter = ref('active')
 
-// helpers to derive status from challenge
-const isCompleted = (challenge) => !!challenge.isAnswered;
-const isExpired = (challenge) => !!challenge.isExpired;
+/* -----------------------------
+   STATUS HELPERS
+-------------------------------- */
+const isCompleted = (challenge) => !!challenge.isAnswered
+const isExpired = (challenge) => !!challenge.isExpired
+const isEvaluated = (challenge) => !!challenge.isEvaluated
+
 const isActive = (challenge) => {
   // Active = started, not expired, not completed
-  const started = challenge.isStarted ?? true;
-  return started && !isExpired(challenge) && !isCompleted(challenge);
-};
+  const started = challenge.isStarted ?? true
+  return started && !isExpired(challenge) && !isCompleted(challenge)
+}
 
-// filtered list
+/* -----------------------------
+   FILTERED LIST
+-------------------------------- */
 const filteredChallenges = computed(() => {
-  const list = challenges.value || [];
-  switch (activeFilter.value) {
-    case 'active': return list.filter(isActive);
-    case 'completed': return list.filter(isCompleted);
-    case 'expired': return list.filter(isExpired);
-    default: return list;
-  }
-});
+  const list = challenges.value || []
 
-// pill labels + counters
+  switch (activeFilter.value) {
+    case 'active':
+      return list.filter(isActive)
+
+    case 'completed':
+      return list.filter(isCompleted)
+
+    case 'expired':
+      return list.filter(isExpired)
+
+    case 'evaluated':
+      return list.filter(isEvaluated)
+
+    default:
+      return list
+  }
+})
+
+/* -----------------------------
+   FILTER PILLS + COUNTERS
+-------------------------------- */
 const filters = computed(() => {
-  const list = challenges.value || [];
+  const list = challenges.value || []
+
   const counts = {
     all: list.length,
     active: list.filter(isActive).length,
     completed: list.filter(isCompleted).length,
     expired: list.filter(isExpired).length,
-  };
+    evaluated: list.filter(isEvaluated).length,
+  }
+
   return [
     { value: 'all', label: 'All', badge: counts.all },
     { value: 'active', label: 'Active', badge: counts.active },
+    { value: 'evaluated', label: 'Evaluated', badge: counts.evaluated },
     { value: 'completed', label: 'Completed', badge: counts.completed },
     { value: 'expired', label: 'Expired', badge: counts.expired },
-  ];
-});
+  ]
+})
 
+/* -----------------------------
+   MODAL HANDLING
+-------------------------------- */
 function openChallenge(id) {
-  selectedId.value = id;
-  showModal.value = true;
+  selectedId.value = id
+  showModal.value = true
 }
 
 function handleSubmitted() {
-  showModal.value = false;
-  loadChallenges();
+  showModal.value = false
+  loadChallenges()
 }
 
-onMounted(loadChallenges);
+onMounted(loadChallenges)
 </script>
