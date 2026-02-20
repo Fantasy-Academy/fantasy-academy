@@ -46,49 +46,49 @@
                        cursor-zoom-in hover:opacity-90 transition mt-2" @click="openImage(hintImgSrc)" />
             </div>
           </div>
-        <!-- 📊 Answer statistics — MOBILE -->
-        <div v-if="questions.some(q => q.statistics)" class=" md:hidden">
+          <!-- 📊 Answer statistics — MOBILE -->
+          <div v-if="questions.some(q => q.statistics)" class=" md:hidden">
 
-          <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
+            <button class="w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
            text-sm font-bold text-light-purple flex justify-between items-center shadow-sm" @click="toggleStats">
-            Answer statistics
-            <span class="text-xs font-bold">{{ showStats ? '▲' : '▼' }}</span>
-          </button>
+              Answer statistics
+              <span class="text-xs font-bold">{{ showStats ? '▲' : '▼' }}</span>
+            </button>
 
-          <div :class="[
-            'transition-all duration-300 overflow-hidden',
-            showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
-          ]">
-            <div v-for="q in questions" :key="q.id">
-              <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
+            <div :class="[
+              'transition-all duration-300 overflow-hidden',
+              showStats ? 'max-h-[5000px] mt-4' : 'max-h-0'
+            ]">
+              <div v-for="q in questions" :key="q.id">
+                <div v-if="q.statistics" class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
 
-                <p class="text-sm font-semibold text-blue-black mb-3" v-html="q.text"></p>
+                  <p class="text-sm font-semibold text-blue-black mb-3" v-html="q.text"></p>
 
-                <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
-                  No answers yet.
-                </div>
-
-                <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
-
-                  <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
-                    <span>{{ formatStatisticAnswer(stat) }}</span>
-                    <span>{{ stat.percentage.toFixed(1) }}%</span>
+                  <div v-if="q.statistics.totalAnswers === 0" class="text-xs text-cool-gray">
+                    No answers yet.
                   </div>
 
-                  <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
-                    <div class="h-full bg-light-purple rounded-full transition-all duration-500"
-                      :style="{ width: stat.percentage + '%' }" />
+                  <div v-for="(stat, idx) in q.statistics.answers" :key="idx" class="mb-3 last:mb-0">
+
+                    <div class="flex justify-between text-sm font-medium text-blue-black mb-1">
+                      <span>{{ formatStatisticAnswer(stat) }}</span>
+                      <span>{{ stat.percentage.toFixed(1) }}%</span>
+                    </div>
+
+                    <div class="w-full h-2 bg-dark-white rounded-full overflow-hidden border border-charcoal/10">
+                      <div class="h-full bg-light-purple rounded-full transition-all duration-500"
+                        :style="{ width: stat.percentage + '%' }" />
+                    </div>
+
+                    <p class="text-xs text-cool-gray mt-1">
+                      {{ stat.count }} players
+                    </p>
                   </div>
 
-                  <p class="text-xs text-cool-gray mt-1">
-                    {{ stat.count }} players
-                  </p>
                 </div>
-
               </div>
             </div>
           </div>
-        </div>
           <!-- RESULTS -->
           <div>
             <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
@@ -153,9 +153,18 @@
               class="mb-5 rounded-xl border border-charcoal/10 bg-white p-4 shadow-sm">
 
               <template v-if="isQuestionReadOnly(q)">
-                <p class="font-semibold mb-2">{{ q.text }}</p>
+                <p class="font-semibold mb-2" v-html="q.text"></p>
+
+                <!-- USER ANSWER -->
                 <p v-if="getPlayerAnswer(q)" class="text-sm mb-1">
-                  <strong>Your answer:</strong> {{ getPlayerAnswer(q) }}
+                  <strong>Your answer:</strong>
+                  <span>{{ getPlayerAnswer(q) }}</span>
+                </p>
+
+                <!-- CORRECT ANSWER (ONLY WHEN EVALUATED) -->
+                <p v-if="challenge.isEvaluated && formatCorrectAnswer(q)" class="text-sm mt-1 text-light-purple">
+                  <strong>Correct answer: </strong>
+                  <span>{{ formatCorrectAnswer(q) }}</span>
                 </p>
               </template>
 
