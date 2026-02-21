@@ -24,7 +24,6 @@
           <div class="px-3 py-1 bg-light-purple text-white rounded-full text-xs font-semibold w-fit">
             {{ challenge.maxPoints }}FAPs
           </div>
-
           <!-- HINT -->
           <div v-if="challenge.hintText || hintImgSrc" class="flex flex-col mt-1">
             <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
@@ -46,6 +45,7 @@
                        cursor-zoom-in hover:opacity-90 transition mt-2" @click="openImage(hintImgSrc)" />
             </div>
           </div>
+
           <!-- 📊 Answer statistics — MOBILE -->
           <div v-if="questions.some(q => q.statistics)" class=" md:hidden">
 
@@ -89,6 +89,7 @@
               </div>
             </div>
           </div>
+
           <!-- RESULTS -->
           <div>
             <button class="md:hidden w-full py-2 px-3 rounded-lg bg-white border border-charcoal/10
@@ -126,6 +127,7 @@
               </div>
             </div>
           </div>
+          <ChallengeSkillPolarChart v-if="challenge.skillDistribution?.length" :skills="challenge.skillDistribution" />
         </div>
 
         <!-- 🔵 RIGHT COLUMN (SCROLLABLE ON DESKTOP) -->
@@ -252,6 +254,7 @@ import { ref, reactive, onBeforeUnmount, onMounted, watch, computed } from "vue"
 import { apiGetChallengeDetail, apiAnswerChallenge } from "@/api/challenges";
 import { resolvedImage, onImgError } from "@/utils/imageHelpers";
 import { formatStatisticAnswer } from "../utils/formatAnswers";
+import ChallengeSkillPolarChart from '../components/ChallengeSkillPolarChart.vue'
 
 // question components
 import QuestionSingleSelect from "@/components/questions/SingleSelectQuestion.vue";
@@ -565,9 +568,12 @@ async function fetchChallenge() {
       isEvaluated: !!data.isEvaluated,
       isStarted: !!data.isStarted,
       userPoints: data.myPoints ?? data.points ?? 0,
+      skillDistribution: data.skillDistribution ?? [],
     };
     questions.value = Array.isArray(data.questions) ? data.questions : [];
     initAnswerModels(questions.value);
+    console.log('skills', data.skillDistribution)
+
   } catch (e) {
     err("fetchChallenge failed:", e);
     error.value = e?.message || "Failed to load challenge.";
