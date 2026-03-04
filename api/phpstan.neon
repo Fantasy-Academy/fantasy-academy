@@ -16,9 +16,11 @@ parameters:
         - config
     scanFiles:
         - vendor/symfony/dependency-injection/Loader/Configurator/ContainerConfigurator.php
+        - config/reference.php
     excludePaths:
         - tests/bootstrap.php
         - tests/object-manager.php
+        - config/reference.php
     symfony:
         containerXmlPath: var/cache/dev/FantasyAcademy_API_SymfonyApplicationKernelDevDebugContainer.xml
     doctrine:
