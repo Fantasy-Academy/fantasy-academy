@@ -40,6 +40,8 @@ final class ChallengeDetailTest extends ApiTestCase
             'isAnswered' => false,
             'isEvaluated' => true,
             'myPoints' => null,
+            'myRank' => null,
+            'totalPlayers' => 3,
         ]);
     }
 
@@ -69,6 +71,8 @@ final class ChallengeDetailTest extends ApiTestCase
             'isEvaluated' => true,
             'hintText' => 'Something not that helpful',
             'myPoints' => 800,
+            'myRank' => 3,
+            'totalPlayers' => 3,
         ]);
 
         // Verify the question is included
@@ -103,6 +107,8 @@ final class ChallengeDetailTest extends ApiTestCase
             'isAnswered' => true,
             'isEvaluated' => false,
             'myPoints' => null,
+            'myRank' => null,
+            'totalPlayers' => null,
         ]);
 
         // Verify questions are included
@@ -136,6 +142,8 @@ final class ChallengeDetailTest extends ApiTestCase
             'isAnswered' => false,
             'isEvaluated' => false,
             'myPoints' => null,
+            'myRank' => null,
+            'totalPlayers' => null,
         ]);
 
         // Verify questions are included
@@ -343,6 +351,28 @@ final class ChallengeDetailTest extends ApiTestCase
         $this->assertNotNull($q1, 'Question 1 should be present');
         $this->assertEquals(CurrentChallenge1Fixture::CHOICE_1_ID, $q1['correctAnswer']['selectedChoiceId']);
         $this->assertEquals('Im good', $q1['correctAnswer']['selectedChoiceText']);
+    }
+
+    public function testMyRankWithTiedScores(): void
+    {
+        $client = self::createClient();
+        // User2 has 900pts on ExpiredChallenge, tied with User3 (also 900pts) → both rank 1
+        $token = TestingLogin::getJwt($client, UserFixture::USER_2_EMAIL);
+
+        $client->request('GET', '/api/challenges/' . ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID, [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+
+        $this->assertJsonContains([
+            'myPoints' => 900,
+            'myRank' => 1,
+            'totalPlayers' => 3,
+        ]);
     }
 
     public function testSkillDistributionIsIncludedInResponse(): void

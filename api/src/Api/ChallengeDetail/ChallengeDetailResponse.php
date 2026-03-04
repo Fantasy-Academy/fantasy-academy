@@ -26,6 +26,8 @@ use Symfony\Component\Uid\Uuid;
  *     hint_text: null|string,
  *     hint_image: null|string,
  *     my_points: null|int,
+ *     my_rank: null|int,
+ *     total_players: null|int,
  *     show_statistics_continuously: bool,
  *     gameweek: null|int,
  *     skill_analytical: float,
@@ -70,6 +72,8 @@ readonly final class ChallengeDetailResponse
         public null|string $hintText,
         public null|string $hintImage,
         public null|int $myPoints,
+        public null|int $myRank,
+        public null|int $totalPlayers,
         public null|int $gameweek,
         public array $skillDistribution,
     ) {
@@ -105,6 +109,8 @@ readonly final class ChallengeDetailResponse
             hintText: $row['hint_text'],
             hintImage: $row['hint_image'],
             myPoints: $row['my_points'],
+            myRank: $row['my_rank'],
+            totalPlayers: $row['total_players'],
             gameweek: $row['gameweek'],
             skillDistribution: $skillDistribution,
         );

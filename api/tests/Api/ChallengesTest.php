@@ -36,10 +36,11 @@ final class ChallengesTest extends ApiTestCase
         $this->assertIsArray($responseData);
         $this->assertCount(10, $responseData);
 
-        // Verify all challenges have isAnswered = false and myPoints = null for unauthenticated user
+        // Verify all challenges have isAnswered = false and myPoints/myRank = null for unauthenticated user
         foreach ($responseData as $challenge) {
             $this->assertFalse($challenge['isAnswered']);
             $this->assertNull($challenge['myPoints']);
+            $this->assertNull($challenge['myRank']);
         }
     }
 
@@ -85,8 +86,22 @@ final class ChallengesTest extends ApiTestCase
         $this->assertEquals(800, $challengesById[ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]['myPoints']);
         $this->assertIsInt($challengesById[ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID]['myPoints']);
 
-        // Verify myPoints is null for unevaluated challenges
+        // Verify myRank for evaluated challenges
+        // User1 has 800pts on ExpiredChallenge; User2 and User3 both have 900pts → rank 3
+        $this->assertEquals(3, $challengesById[ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]['myRank']);
+        // User1 has 1000pts on ExpiredChallenge2 (highest) → rank 1
+        $this->assertEquals(1, $challengesById[ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID]['myRank']);
+
+        // Verify totalPlayers for evaluated challenges (3 users answered each)
+        $this->assertEquals(3, $challengesById[ExpiredChallengeFixture::EXPIRED_CHALLENGE_ID]['totalPlayers']);
+        $this->assertEquals(3, $challengesById[ExpiredChallenge2Fixture::EXPIRED_CHALLENGE_2_ID]['totalPlayers']);
+
+        // Verify myPoints, myRank and totalPlayers are null for unevaluated challenges
         $this->assertNull($challengesById[CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID]['myPoints']);
+        $this->assertNull($challengesById[CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID]['myRank']);
+        $this->assertNull($challengesById[CurrentChallenge1Fixture::CURRENT_CHALLENGE_1_ID]['totalPlayers']);
         $this->assertNull($challengesById[CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]['myPoints']);
+        $this->assertNull($challengesById[CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]['myRank']);
+        $this->assertNull($challengesById[CurrentChallenge2Fixture::CURRENT_CHALLENGE_2_ID]['totalPlayers']);
     }
 }

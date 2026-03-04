@@ -49,7 +49,22 @@ readonly final class ChallengeDetailProvider implements ProviderInterface
     private function getChallengeDetail(Uuid $challengeId, null|Uuid $userId): ChallengeDetailResponse
     {
         $query = <<<SQL
-SELECT challenge.*, player_challenge_answer.answered_at, player_challenge_answer.points AS my_points
+SELECT challenge.*, player_challenge_answer.answered_at, player_challenge_answer.points AS my_points,
+    CASE
+        WHEN challenge.evaluated_at IS NOT NULL AND player_challenge_answer.points IS NOT NULL THEN
+            (SELECT COUNT(DISTINCT pca2.user_id) + 1
+             FROM player_challenge_answer pca2
+             WHERE pca2.challenge_id = challenge.id
+               AND pca2.points > player_challenge_answer.points)
+        ELSE NULL
+    END AS my_rank,
+    CASE
+        WHEN challenge.evaluated_at IS NOT NULL THEN
+            (SELECT COUNT(DISTINCT pca3.user_id)
+             FROM player_challenge_answer pca3
+             WHERE pca3.challenge_id = challenge.id)
+        ELSE NULL
+    END AS total_players
 FROM challenge
 LEFT JOIN player_challenge_answer ON challenge.id = player_challenge_answer.challenge_id AND player_challenge_answer.user_id = :userId
 WHERE challenge.id = :challengeId
