@@ -123,7 +123,23 @@
 
               <div v-else class="bg-light-purple px-2 py-1 mb-3 rounded text-white">
                 <h2>Your Outcome:</h2>
-                <p class="font-bold">{{ challenge.userPoints }} FAPs</p>
+                <div class="flex gap-3 items-end">
+                  <p class="font-bold">
+                    {{ challenge.userPoints }} FAPs
+                  </p>
+
+                  <div v-if="challenge.myRank && challenge.totalPlayers"
+                    class="flex items-center gap-1 text-sm opacity-90 pb-[1px]">
+                    <img src="../assets/rank.svg" alt="Rank" class="w-4 h-4 pb-[2px]" />
+
+                    <p>
+                      <span class="font-bold">{{ challenge.myRank }}</span>
+                      / {{ challenge.totalPlayers }}
+                    </p>
+                  </div>
+                  <p v-else></p>
+                </div>
+
               </div>
             </div>
           </div>
@@ -569,6 +585,8 @@ async function fetchChallenge() {
       isStarted: !!data.isStarted,
       userPoints: data.myPoints ?? data.points ?? 0,
       skillDistribution: data.skillDistribution ?? [],
+      myRank: data.myRank ?? null,
+      totalPlayers: data.totalPlayers ?? null,
     };
     questions.value = Array.isArray(data.questions) ? data.questions : [];
     initAnswerModels(questions.value);
