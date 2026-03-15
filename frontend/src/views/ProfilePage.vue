@@ -86,7 +86,10 @@
   </section>
   <section class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
     <ProfileSkillsPolarChart />
-    <ProfileActivityBarChart />
+    <ProfileActivityChart />
+  </section>
+  <section class="mt-4">
+    <ProfileGameweekPointsChart />
   </section>
   <section class="mt-6">
     <ProfileCompletedChallenges />
@@ -99,8 +102,9 @@ import { ref, computed, onMounted } from 'vue'
 import { getToken } from '@/services/tokenService'
 import { useAuth } from '@/composables/useAuth'
 import ProfileSkillsPolarChart from '../components/ProfileSkillsPolarChart.vue'
-import ProfileActivityBarChart from '../components/ProfileActivityBarChart.vue'
+import ProfileActivityChart from '../components/ProfileActivityChart.vue'
 import ProfileCompletedChallenges from '../components/ProfileCompletedChallenges.vue'
+import ProfileGameweekPointsChart from '../components/ProfileGameweekPointsChart.vue'
 import ChallengeModal from '../components/ChallengeModal.vue' // DOPLNĚNO
 
 const { isAuthenticated, logout, user } = useAuth()
