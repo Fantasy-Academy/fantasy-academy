@@ -38,7 +38,8 @@
           </p>
         </div>
 
-        <div class="flex flex-row items-center gap-1 rounded-full bg-dark-purple/75 px-4 py-2 text-sm font-semibold sm:px-5 sm:py-3">
+        <div
+          class="flex flex-row items-center gap-1 rounded-full bg-dark-purple/75 px-4 py-2 text-sm font-semibold sm:px-5 sm:py-3">
           <p>
             Rank:
             <span v-if="dashboardLoading">...</span>
@@ -80,7 +81,10 @@
   </section>
   <section class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
     <ProfileSkillsPolarChart />
-    <ProfileActivityBarChart />
+    <ProfileActivityChart />
+  </section>
+  <section class="mt-4">
+    <ProfileGameweekPointsChart />
   </section>
   <section class="mt-6">
     <ProfileCompletedChallenges />
@@ -93,8 +97,9 @@ import { ref, computed, onMounted } from 'vue'
 import { getToken } from '@/services/tokenService'
 import { useAuth } from '@/composables/useAuth'
 import ProfileSkillsPolarChart from '../components/ProfileSkillsPolarChart.vue'
-import ProfileActivityBarChart from '../components/ProfileActivityBarChart.vue'
+import ProfileActivityChart from '../components/ProfileActivityChart.vue'
 import ProfileCompletedChallenges from '../components/ProfileCompletedChallenges.vue'
+import ProfileGameweekPointsChart from '../components/ProfileGameweekPointsChart.vue'
 
 const { isAuthenticated, logout, user } = useAuth()
 
