@@ -57,15 +57,17 @@
         </div>
 
         <div v-else class="flex flex-row gap-4 overflow-x-auto pb-2 scrollbar-thin">
-          <div v-for="challenge in activeChallenges" :key="challenge.id" class="min-w-[260px] max-w-[260px] flex-shrink-0 flex flex-row items-center justify-between
-                 bg-dark-white p-3 rounded-xl border border-charcoal/10 shadow-sm cursor-pointer">
+          <button v-for="challenge in activeChallenges" :key="challenge.id" type="button"
+            @click="openChallenge(challenge.id)" class="min-w-[260px] max-w-[260px] flex-shrink-0 flex flex-row items-center justify-between
+               bg-dark-white p-3 rounded-xl cursor-pointer text-left
+               transition hover:scale-[1.01]">
             <div class="min-w-0 pr-3">
               <h2 class="font-semibold text-blue-black truncate">
                 {{ challenge.name }}
               </h2>
 
               <p class="mt-1 inline-flex items-center rounded-full bg-light-purple/15
-                     px-2 py-0.5 text-xs font-semibold text-light-purple">
+                   px-2 py-0.5 text-xs font-semibold text-light-purple">
                 ACTIVE
               </p>
             </div>
@@ -74,9 +76,12 @@
               class="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-white" />
 
             <div v-else class="w-16 h-16 rounded-lg bg-white border border-charcoal/10 flex-shrink-0" />
-          </div>
+          </button>
         </div>
       </div>
+
+      <ChallengeModal v-if="showModal" :show="showModal" :challenge-id="selectedChallengeId" @close="showModal = false"
+        @submitted="handleChallengeSubmitted" />
     </section>
   </section>
   <section class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -105,6 +110,10 @@ const { isAuthenticated, logout, user } = useAuth()
 
 const loading = ref(false)
 const challenges = ref([])
+
+// MODAL STATE — DOPLNĚNO
+const showModal = ref(false)
+const selectedChallengeId = ref(null)
 
 // DOPLNĚNO
 const dashboardLoading = ref(false)
@@ -137,6 +146,18 @@ function resolveChallengeImage(image) {
   if (!BASE_URL) return image
 
   return `${BASE_URL}${image.startsWith('/') ? image : `/${image}`}`
+}
+
+// DOPLNĚNO
+function openChallenge(challengeId) {
+  selectedChallengeId.value = challengeId
+  showModal.value = true
+}
+
+// DOPLNĚNO
+function handleChallengeSubmitted() {
+  showModal.value = false
+  loadChallenges()
 }
 
 // DOPLNĚNO
