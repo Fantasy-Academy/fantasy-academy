@@ -2,7 +2,7 @@
   <div class="w-full h-full rounded-xl bg-dark-white p-4">
     <div class="mb-3">
       <h3 class="font-bold text-blue-black">Skill distribution</h3>
-      <p class="text-sm text-cool-gray">Your current skill profile</p>
+      <p class="text-sm text-cool-gray">Current skill profile</p>
     </div>
 
     <div v-if="loading" class="text-sm text-cool-gray">
@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick, computed, watch } from "vue";
 import {
   Chart,
   PolarAreaController,
@@ -38,6 +38,13 @@ Chart.register(
   Tooltip,
   Legend
 );
+
+const props = defineProps({
+  playerId: {
+    type: String,
+    default: null,
+  },
+})
 
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ??
@@ -63,8 +70,11 @@ async function loadSkills() {
 
   try {
     const token = getToken();
+    const endpoint = props.playerId
+      ? `${BASE_URL}/api/player/${props.playerId}`
+      : `${BASE_URL}/api/me`;
 
-    const response = await fetch(`${BASE_URL}/api/me`, {
+    const response = await fetch(endpoint, {
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -173,6 +183,12 @@ onMounted(async () => {
   buildChart();
   window.addEventListener("resize", handleResize);
 });
+
+watch(() => props.playerId, async () => {
+  await loadSkills();
+  await nextTick();
+  buildChart();
+})
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);

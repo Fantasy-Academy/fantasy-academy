@@ -105,7 +105,6 @@ import ProfileSkillsPolarChart from '../components/ProfileSkillsPolarChart.vue'
 import ProfileActivityChart from '../components/ProfileActivityChart.vue'
 import ProfileCompletedChallenges from '../components/ProfileCompletedChallenges.vue'
 import ProfileGameweekPointsChart from '../components/ProfileGameweekPointsChart.vue'
-import ChallengeModal from '../components/ChallengeModal.vue' // DOPLNĚNO
 
 const { isAuthenticated, logout, user } = useAuth()
 

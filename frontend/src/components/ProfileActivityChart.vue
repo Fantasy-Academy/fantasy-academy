@@ -1,34 +1,36 @@
 <template>
-    <div class="w-full h-full rounded-xl bg-dark-white p-4">
-        <div class="mb-3 flex items-start justify-between gap-3">
-            <div>
-                <h3 class="font-bold text-blue-black">Gameweek activity</h3>
-                <p class="text-sm text-cool-gray">Challenges answered in recent gameweeks</p>
-            </div>
+  <div class="w-full h-full rounded-xl bg-dark-white p-4">
+    <div class="mb-3 flex items-start justify-between gap-3">
+      <div>
+        <h3 class="font-bold text-blue-black">Gameweek activity</h3>
+        <p class="text-sm text-cool-gray">Activity percentage in recent gameweeks</p>
+      </div>
 
-            <div>
-                <select v-model="selectedRange"
-                    class="rounded-lg border border-charcoal/10 bg-white px-3 py-2 text-sm text-blue-black shadow-sm outline-none transition focus:border-light-purple">
-                    <option value="max">Max</option>
-                    <option value="year">Year</option>
-                    <option value="3months">3 months</option>
-                    <option value="month">Month</option>
-                </select>
-            </div>
-        </div>
-
-        <div v-if="loading" class="text-sm text-cool-gray">
-            Loading activity...
-        </div>
-
-        <div v-else-if="!filteredGameweeks.length" class="text-sm text-cool-gray">
-            No activity data available.
-        </div>
-
-        <div v-else class="relative w-full h-[320px]">
-            <canvas ref="canvasEl"></canvas>
-        </div>
+      <div>
+        <select
+          v-model="selectedRange"
+          class="rounded-lg border border-charcoal/10 bg-white px-3 py-2 text-sm text-blue-black shadow-sm outline-none transition focus:border-light-purple"
+        >
+          <option value="max">Max</option>
+          <option value="year">Year</option>
+          <option value="3months">3 months</option>
+          <option value="month">Month</option>
+        </select>
+      </div>
     </div>
+
+    <div v-if="loading" class="text-sm text-cool-gray">
+      Loading activity...
+    </div>
+
+    <div v-else-if="!filteredGameweeks.length" class="text-sm text-cool-gray">
+      No activity data available.
+    </div>
+
+    <div v-else class="relative w-full h-[320px]">
+      <canvas ref="canvasEl"></canvas>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -54,6 +56,13 @@ Chart.register(
   Tooltip,
   Legend
 );
+
+const props = defineProps({
+  playerId: {
+    type: String,
+    default: null,
+  },
+});
 
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ??
@@ -92,16 +101,28 @@ const filteredGameweeks = computed(() => {
   return all.slice(-limit);
 });
 
-function getActivityPercentage(gw) {
-  const answered = Number(gw?.answeredChallenges ?? 0);
-  const total = Number(gw?.totalChallenges ?? 0);
+async function resolvePlayerId() {
+  if (props.playerId) return props.playerId;
 
-  if (total > 0) {
-    return Math.round((answered / total) * 100);
+  const token = getToken();
+
+  const meResponse = await fetch(`${BASE_URL}/api/me`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!meResponse.ok) {
+    throw new Error("Failed to load user info");
   }
 
-  const activity = Number(gw?.activity ?? 0);
-  return Math.round(activity * 100);
+  const meData = await meResponse.json();
+  if (!meData?.id) {
+    throw new Error("Missing user id");
+  }
+
+  return meData.id;
 }
 
 async function loadActivity() {
@@ -109,26 +130,9 @@ async function loadActivity() {
 
   try {
     const token = getToken();
+    const resolvedPlayerId = await resolvePlayerId();
 
-    const meResponse = await fetch(`${BASE_URL}/api/me`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-
-    if (!meResponse.ok) {
-      throw new Error("Failed to load user info");
-    }
-
-    const meData = await meResponse.json();
-    const userId = meData?.id;
-
-    if (!userId) {
-      throw new Error("Missing user id");
-    }
-
-    const activityResponse = await fetch(`${BASE_URL}/api/player/${userId}/activity`, {
+    const activityResponse = await fetch(`${BASE_URL}/api/player/${resolvedPlayerId}/activity`, {
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -164,7 +168,7 @@ function buildChart() {
       datasets: [
         {
           label: "Activity",
-          data: filteredGameweeks.value.map((gw) => getActivityPercentage(gw)),
+          data: filteredGameweeks.value.map((gw) => Number((gw.activity * 100).toFixed(0))),
           borderColor: "#6A01FE",
           backgroundColor: "rgba(106, 1, 254, 0.18)",
           pointBackgroundColor: "#D08BFF",
@@ -197,8 +201,7 @@ function buildChart() {
         tooltip: {
           callbacks: {
             label(ctx) {
-              const gw = filteredGameweeks.value[ctx.dataIndex];
-              return `Activity: ${ctx.raw}% (${gw.answeredChallenges}/${gw.totalChallenges})`;
+              return `Activity: ${ctx.raw}%`;
             },
           },
         },
@@ -237,14 +240,16 @@ onMounted(async () => {
   window.addEventListener("resize", handleResize);
 });
 
-watch(
-  filteredGameweeks,
-  async () => {
-    await nextTick();
-    buildChart();
-  },
-  { deep: true }
-);
+watch(filteredGameweeks, async () => {
+  await nextTick();
+  buildChart();
+}, { deep: true });
+
+watch(() => props.playerId, async () => {
+  await loadActivity();
+  await nextTick();
+  buildChart();
+});
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);
