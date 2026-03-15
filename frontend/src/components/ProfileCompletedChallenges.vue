@@ -93,9 +93,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { getToken } from '@/services/tokenService'
 import ChallengeModal from '@/components/ChallengeModal.vue'
+
+const props = defineProps({
+  playerId: {
+    type: String,
+    default: null,
+  },
+})
 
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ??
@@ -105,21 +112,17 @@ const BASE_URL =
 const loading = ref(false)
 const challenges = ref([])
 const page = ref(1)
-const pageSize = 10
+const pageSize = 5
 
 const showModal = ref(false)
 const selectedChallengeId = ref(null)
 
 const completedChallenges = computed(() => {
-  return (challenges.value || [])
-    .filter((challenge) => {
-      return !!challenge.isAnswered
-    })
-    .sort((a, b) => {
-      const aDate = a.answeredAt ? new Date(a.answeredAt).getTime() : 0
-      const bDate = b.answeredAt ? new Date(b.answeredAt).getTime() : 0
-      return bDate - aDate
-    })
+  return (challenges.value || []).sort((a, b) => {
+    const aDate = a.answeredAt ? new Date(a.answeredAt).getTime() : 0
+    const bDate = b.answeredAt ? new Date(b.answeredAt).getTime() : 0
+    return bDate - aDate
+  })
 })
 
 const totalPages = computed(() => {
@@ -142,8 +145,7 @@ function handleSubmitted() {
   loadCompletedChallenges()
 }
 
-function getAnswerPreview(question) {
-  const answer = question?.myAnswer
+function getAnswerPreviewFromAnswer(answer) {
   if (!answer) return null
 
   if (answer.textAnswer) return answer.textAnswer
@@ -167,63 +169,96 @@ function getAnswerPreview(question) {
   return null
 }
 
+function getAnswerPreview(question) {
+  return getAnswerPreviewFromAnswer(question?.myAnswer)
+}
+
 async function loadCompletedChallenges() {
   loading.value = true
 
   try {
     const token = getToken()
 
-    const response = await fetch(`${BASE_URL}/api/challenges`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    })
+    if (props.playerId) {
+      const response = await fetch(`${BASE_URL}/api/players/${props.playerId}/answers`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
 
-    if (!response.ok) {
-      throw new Error('Failed to load challenges')
-    }
+      if (!response.ok) {
+        throw new Error('Failed to load player completed challenges')
+      }
 
-    const data = await response.json()
-    const baseChallenges = Array.isArray(data) ? data : data.member ?? []
-    const completedBase = baseChallenges.filter((challenge) => !!challenge.isAnswered)
+      const data = await response.json()
+      const playerChallenges = data?.challenges ?? []
 
-    const detailedChallenges = await Promise.all(
-      completedBase.map(async (challenge) => {
-        try {
-          const detailResponse = await fetch(`${BASE_URL}/api/challenges/${challenge.id}`, {
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-          })
+      challenges.value = playerChallenges.map((challenge) => {
+        const firstAnsweredQuestion = (challenge.questions || []).find((q) => q.answer)
 
-          if (!detailResponse.ok) {
+        return {
+          id: challenge.challengeId,
+          name: challenge.challengeName,
+          myPoints: challenge.points ?? 0,
+          isEvaluated: challenge.points !== null && challenge.points !== undefined,
+          answeredAt: null,
+          myAnswerPreview: getAnswerPreviewFromAnswer(firstAnsweredQuestion?.answer),
+        }
+      })
+    } else {
+      const response = await fetch(`${BASE_URL}/api/challenges`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to load challenges')
+      }
+
+      const data = await response.json()
+      const baseChallenges = Array.isArray(data) ? data : data.member ?? []
+      const completedBase = baseChallenges.filter((challenge) => !!challenge.isAnswered)
+
+      const detailedChallenges = await Promise.all(
+        completedBase.map(async (challenge) => {
+          try {
+            const detailResponse = await fetch(`${BASE_URL}/api/challenges/${challenge.id}`, {
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+            })
+
+            if (!detailResponse.ok) {
+              return {
+                ...challenge,
+                myAnswerPreview: null,
+              }
+            }
+
+            const detailData = await detailResponse.json()
+            const firstAnsweredQuestion = (detailData.questions || []).find((q) => q.myAnswer)
+
+            return {
+              ...challenge,
+              myAnswerPreview: getAnswerPreview(firstAnsweredQuestion),
+            }
+          } catch (err) {
             return {
               ...challenge,
               myAnswerPreview: null,
             }
           }
+        })
+      )
 
-          const detailData = await detailResponse.json()
-          const firstAnsweredQuestion = (detailData.questions || []).find((q) => q.myAnswer)
+      challenges.value = detailedChallenges
+    }
 
-          return {
-            ...challenge,
-            myAnswerPreview: getAnswerPreview(firstAnsweredQuestion),
-          }
-        } catch (err) {
-          return {
-            ...challenge,
-            myAnswerPreview: null,
-          }
-        }
-      })
-    )
-
-    challenges.value = detailedChallenges
-
-    if (page.value > Math.ceil(detailedChallenges.length / pageSize)) {
+    if (page.value > Math.ceil(challenges.value.length / pageSize)) {
       page.value = 1
     }
   } catch (err) {
@@ -235,6 +270,11 @@ async function loadCompletedChallenges() {
 }
 
 onMounted(() => {
+  loadCompletedChallenges()
+})
+
+watch(() => props.playerId, () => {
+  page.value = 1
   loadCompletedChallenges()
 })
 </script>

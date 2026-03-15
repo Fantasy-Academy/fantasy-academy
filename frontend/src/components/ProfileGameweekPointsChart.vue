@@ -55,6 +55,13 @@ Chart.register(
   Legend
 );
 
+const props = defineProps({
+  playerId: {
+    type: String,
+    default: null,
+  },
+});
+
 const BASE_URL =
   import.meta.env.VITE_BACKEND_URL ??
   import.meta.env.VITE_API_BASE_URL ??
@@ -92,35 +99,44 @@ const filteredGameweeks = computed(() => {
   return all.slice(-limit);
 });
 
+async function resolvePlayerId(headers) {
+  if (props.playerId) {
+    return props.playerId;
+  }
+
+  const meResponse = await fetch(`${BASE_URL}/api/me`, {
+    headers,
+  });
+
+  if (!meResponse.ok) {
+    throw new Error("Failed to load user info");
+  }
+
+  const meData = await meResponse.json();
+  const userId = meData?.id;
+
+  if (!userId) {
+    throw new Error("Missing user id");
+  }
+
+  return userId;
+}
+
 async function loadPoints() {
   loading.value = true;
 
   try {
     const token = getToken();
 
-    const meResponse = await fetch(`${BASE_URL}/api/me`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
 
-    if (!meResponse.ok) {
-      throw new Error("Failed to load user info");
-    }
+    const resolvedPlayerId = await resolvePlayerId(headers);
 
-    const meData = await meResponse.json();
-    const userId = meData?.id;
-
-    if (!userId) {
-      throw new Error("Missing user id");
-    }
-
-    const activityResponse = await fetch(`${BASE_URL}/api/player/${userId}/activity`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+    const activityResponse = await fetch(`${BASE_URL}/api/player/${resolvedPlayerId}/activity`, {
+      headers,
     });
 
     if (!activityResponse.ok) {
@@ -145,6 +161,16 @@ function buildChart() {
     chart = null;
   }
 
+  const colors = [
+    "#6A01FE",
+    "#8B3DFF",
+    "#5C7CFF",
+    "#3F9CFF",
+    "#C65BFF",
+    "#E07BFF",
+    "#B14DFF",
+  ];
+
   chart = new Chart(canvasEl.value, {
     type: "bar",
     data: {
@@ -153,20 +179,7 @@ function buildChart() {
         {
           label: "Points",
           data: filteredGameweeks.value.map((gw) => gw.pointsEarned ?? 0),
-          backgroundColor: [
-            "#6A01FE",
-            "#8B3DFF",
-            "#5C7CFF",
-            "#3F9CFF",
-            "#C65BFF",
-            "#E07BFF",
-            "#B14DFF",
-            "#6A01FE",
-            "#8B3DFF",
-            "#5C7CFF",
-            "#3F9CFF",
-            "#C65BFF",
-          ],
+          backgroundColor: filteredGameweeks.value.map((_, index) => colors[index % colors.length]),
           borderRadius: 10,
           borderSkipped: false,
           maxBarThickness: 42,
@@ -218,6 +231,15 @@ onMounted(async () => {
   buildChart();
   window.addEventListener("resize", handleResize);
 });
+
+watch(
+  () => props.playerId,
+  async () => {
+    await loadPoints();
+    await nextTick();
+    buildChart();
+  }
+);
 
 watch(
   filteredGameweeks,
