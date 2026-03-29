@@ -1,218 +1,203 @@
-<!-- src/views/HomePage.vue -->
 <template>
-  <section class="px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <section class="bg-dark-white">
 
-<!-- HERO -->
-<div class="mx-auto max-w-6xl rounded-2xl bg-gradient-to-r from-blue-black to-charcoal text-dark-white shadow-main">
-  <div class="flex flex-col justify-between px-6 sm:px-10 lg:px-14 py-12 sm:py-16 lg:py-20 min-h-[500px]">
-    
-    <!-- Horní část - text -->
-    <div class="max-w-2xl">
-      <p class="font-alexandria text-sm sm:text-base uppercase tracking-wider text-dark-white/70">
-        Skill challenges · Seasons · Leaderboard
-      </p>
+    <!-- HERO -->
+    <div class="relative overflow-hidden min-h-[780px] bg-blue-black text-dark-white" :style="{
+      backgroundImage: `linear-gradient(to bottom, rgba(12, 26, 42, 0.38), rgba(12, 26, 42, 0.82)), url(${heroImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 lg:pt-16">
+        <div class="flex min-h-[780px] flex-col justify-between py-10 sm:py-14 lg:py-20">
+          <!-- HERO CONTENT -->
+          <div class="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center text-center">
+            <p class="font-alexandria text-xs sm:text-sm uppercase tracking-[0.35em] text-dark-white/70">
+              Skill challenges · Seasons · Leaderboard
+            </p>
 
-      <h1 class="mt-3 font-bebas-neue leading-tight tracking-wide text-5xl sm:text-6xl lg:text-7xl">
-        Level up your skills <br class="hidden sm:block" /> with Fantasy Academy
-      </h1>
+            <h1 class="mt-6 font-bebas-neue text-6xl leading-none tracking-wider sm:text-7xl lg:text-8xl">
+              Fantasy Academy
+            </h1>
 
-      <p class="mt-6 sm:mt-7 text-base sm:text-lg text-dark-white/90 font-alexandria max-w-prose">
-        Tackle challenges, earn points, climb the leaderboard, and track your progress across seasons.
-      </p>
+            <p class="mt-4 max-w-2xl font-alexandria text-sm sm:text-base lg:text-lg text-dark-white/85">
+              Tackle skill challenges, collect points, climb the leaderboard and
+              track your progress across every season.
+            </p>
 
-      <!-- CTA -->
-      <div class="mt-8 flex flex-wrap gap-4">
-        <router-link
-          to="/challenges"
-          class="inline-flex items-center justify-center rounded-lg bg-golden-yellow px-6 py-3 text-lg font-alexandria font-semibold text-blue-black shadow-sm hover:opacity-90 transition"
-        >
-          Browse Challenges
-        </router-link>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <router-link to="/challenges"
+                class="inline-flex items-center justify-center rounded-xl bg-dark-purple px-7 py-3 font-alexandria text-sm sm:text-base font-semibold text-dark-white transition hover:opacity-90">
+                Browse Challenges
+              </router-link>
 
-        <router-link
-          v-if="isAuthenticated"
-          to="/dashboard"
-          class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 px-6 py-3 text-lg font-alexandria font-semibold text-dark-white/95 hover:bg-dark-white/10 transition"
-        >
-          Go to Dashboard
-        </router-link>
-        <router-link
-          v-else
-          to="/signup"
-          class="inline-flex items-center justify-center rounded-lg border border-dark-white/30 px-6 py-3 text-lg font-alexandria font-semibold text-dark-white/95 hover:bg-dark-white/10 transition"
-        >
-          Create Account
-        </router-link>
-      </div>
+              <router-link v-if="isAuthenticated" to="/dashboard"
+                class="inline-flex items-center justify-center rounded-xl border border-dark-white/35 px-7 py-3 font-alexandria text-sm sm:text-base font-semibold text-dark-white transition hover:bg-dark-white/10">
+                Go to Dashboard
+              </router-link>
 
-      <!-- Bullet benefits -->
-      <ul class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm sm:text-base text-dark-white/80 font-alexandria">
-        <li class="inline-flex items-center gap-2">
-          <span class="inline-block h-2.5 w-2.5 rounded-full bg-pistachio"></span> New challenges weekly
-        </li>
-        <li class="inline-flex items-center gap-2">
-          <span class="inline-block h-2.5 w-2.5 rounded-full bg-golden-yellow"></span> Season-based progress
-        </li>
-        <li class="inline-flex items-center gap-2">
-          <span class="inline-block h-2.5 w-2.5 rounded-full bg-vibrant-coral"></span> Live leaderboard
-        </li>
-      </ul>
-    </div>
+              <router-link v-else to="/signup"
+                class="inline-flex items-center justify-center rounded-xl border border-dark-white/35 px-7 py-3 font-alexandria text-sm sm:text-base font-semibold text-dark-white transition hover:bg-dark-white/10">
+                Create Account
+              </router-link>
+            </div>
 
-    <!-- Spodní část - karty -->
-    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <!-- Card 1 -->
-      <div class="rounded-2xl bg-white/10 border border-white/15 p-5 sm:p-6 backdrop-blur-[1px] text-center">
-        <p class="text-xs sm:text-sm text-dark-white/80 font-alexandria">Active Players</p>
-        <p class="mt-2 font-bebas-neue text-4xl sm:text-5xl tracking-wide leading-none">
-          {{ playerCount ?? '—' }}
-        </p>
-      </div>
+            <ul
+              class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-alexandria text-xs sm:text-sm text-dark-white/80">
+              <li class="inline-flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-light-purple"></span>
+                New challenges weekly
+              </li>
+              <li class="inline-flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-dark-purple"></span>
+                Season-based progress
+              </li>
+              <li class="inline-flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-light-purple"></span>
+                Live leaderboard
+              </li>
+            </ul>
+          </div>
 
-      <!-- Card 2 -->
-      <div class="rounded-2xl bg-white/10 border border-white/15 p-5 sm:p-6 backdrop-blur-[1px] text-center">
-        <p class="text-xs sm:text-sm text-dark-white/80 font-alexandria">Total Challenges</p>
-        <p class="mt-2 font-bebas-neue text-4xl sm:text-5xl tracking-wide leading-none">
-          {{ allChallenges }}
-        </p>
-      </div>
+          <!-- HERO STATS -->
+          <div class="mx-auto mt-10 grid w-full max-w-6xl grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-dark-white/15 bg-dark-white/10 p-6 text-center backdrop-blur-sm">
+              <p class="font-alexandria text-xs uppercase tracking-wider text-dark-white/70">
+                Active Players
+              </p>
+              <p class="mt-3 font-bebas-neue text-5xl leading-none tracking-wide">
+                {{ playerCount ?? '—' }}
+              </p>
+            </div>
 
-      <!-- Card 3 -->
-      <div class="rounded-2xl bg-white/10 border border-white/15 p-5 sm:p-6 backdrop-blur-[1px] text-center">
-        <p class="text-xs sm:text-sm text-dark-white/80 font-alexandria">Live Challenges</p>
-        <p class="mt-2 font-bebas-neue text-4xl sm:text-5xl tracking-wide leading-none">
-          {{ activeChallengesCount }}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
+            <div class="rounded-2xl border border-dark-white/15 bg-dark-white/10 p-6 text-center backdrop-blur-sm">
+              <p class="font-alexandria text-xs uppercase tracking-wider text-dark-white/70">
+                Total Challenges
+              </p>
+              <p class="mt-3 font-bebas-neue text-5xl leading-none tracking-wide">
+                {{ allChallenges }}
+              </p>
+            </div>
 
-    <!-- QUICK ACTIONS -->
-    <div class="mx-auto mt-10 max-w-6xl grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <router-link
-        to="/challenges"
-        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition"
-      >
-        <h3 class="text-xl font-alexandria font-semibold text-blue-black flex items-center gap-2">
-          <span class="inline-grid h-8 w-8 place-items-center rounded-full bg-pistachio/20 text-pistachio">🏆</span>
-          Explore Challenges
-        </h3>
-        <p class="mt-2 text-sm text-cool-gray">
-          Solve tasks across multiple skills. New sets appear during the season.
-        </p>
-        <span class="mt-3 inline-block text-vibrant-coral font-semibold">Start now →</span>
-      </router-link>
-
-      <router-link
-        :to="isAuthenticated ? '/dashboard' : '/signup'"
-        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition"
-      >
-        <h3 class="text-xl font-alexandria font-semibold text-blue-black flex items-center gap-2">
-          <span class="inline-grid h-8 w-8 place-items-center rounded-full bg-golden-yellow/30 text-blue-black">📊</span>
-          {{ isAuthenticated ? 'Your Dashboard' : 'Create Account' }}
-        </h3>
-        <p class="mt-2 text-sm text-cool-gray">
-          {{ isAuthenticated
-            ? 'See your points, rank and active challenges.'
-            : 'Join and save your progress across seasons.' }}
-        </p>
-        <span class="mt-3 inline-block text-vibrant-coral font-semibold">
-          {{ isAuthenticated ? 'View dashboard →' : 'Sign up →' }}
-        </span>
-      </router-link>
-
-      <router-link
-        to="/profile"
-        class="group rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm hover:shadow-main transition"
-      >
-        <h3 class="text-xl font-alexandria font-semibold text-blue-black flex items-center gap-2">
-          <span class="inline-grid h-8 w-8 place-items-center rounded-full bg-vibrant-coral/10 text-vibrant-coral">🧑‍🚀</span>
-          Profile & Stats
-        </h3>
-        <p class="mt-2 text-sm text-cool-gray">
-          Manage your account and track your skill growth in detail.
-        </p>
-        <span class="mt-3 inline-block text-vibrant-coral font-semibold">Open profile →</span>
-      </router-link>
-    </div>
-
-    <!-- HOW IT WORKS -->
-    <div class="mx-auto mt-12 max-w-6xl">
-      <h2 class="font-bebas-neue text-3xl tracking-wide text-blue-black">How it works</h2>
-      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <p class="text-sm font-alexandria text-cool-gray">Step 1</p>
-          <h3 class="mt-1 font-alexandria text-xl font-semibold text-blue-black">Pick a challenge</h3>
-          <p class="mt-2 text-sm text-cool-gray">
-            Choose from single-select, multi-select, text, numeric, or sort questions.
-          </p>
-        </div>
-        <div class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <p class="text-sm font-alexandria text-cool-gray">Step 2</p>
-          <h3 class="mt-1 font-alexandria text-xl font-semibold text-blue-black">Submit your answers</h3>
-          <p class="mt-2 text-sm text-cool-gray">
-            Answers are validated on the client and sent to the API securely.
-          </p>
-        </div>
-        <div class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <p class="text-sm font-alexandria text-cool-gray">Step 3</p>
-          <h3 class="mt-1 font-alexandria text-xl font-semibold text-blue-black">Earn points & climb ranks</h3>
-          <p class="mt-2 text-sm text-cool-gray">
-            Score points, improve skills and watch your progress over seasons.
-          </p>
+            <div class="rounded-2xl border border-dark-white/15 bg-dark-white/10 p-6 text-center backdrop-blur-sm">
+              <p class="font-alexandria text-xs uppercase tracking-wider text-dark-white/70">
+                Live Challenges
+              </p>
+              <p class="mt-3 font-bebas-neue text-5xl leading-none tracking-wide">
+                {{ activeChallengesCount }}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- BENEFITS -->
-    <div class="mx-auto mt-12 max-w-6xl">
-      <h2 class="font-bebas-neue text-3xl tracking-wide text-blue-black">Why Fantasy Academy?</h2>
-      <ul class="mt-4 grid gap-4 sm:grid-cols-2">
-        <li class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <h3 class="font-alexandria text-lg font-semibold text-blue-black">Real API, real data</h3>
-          <p class="mt-1 text-sm text-cool-gray">
-            Challenges & answers are fetched and submitted through the OpenAPI-powered backend.
-          </p>
-        </li>
-        <li class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <h3 class="font-alexandria text-lg font-semibold text-blue-black">Season-based progression</h3>
-          <p class="mt-1 text-sm text-cool-gray">
-            Track your rank and skill evolution by season, not just overall.
-          </p>
-        </li>
-        <li class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <h3 class="font-alexandria text-lg font-semibold text-blue-black">Friendly UI & validation</h3>
-          <p class="mt-1 text-sm text-cool-gray">
-            Clear hints, helpful errors, and accessible controls to keep you in flow.
-          </p>
-        </li>
-        <li class="rounded-2xl border border-charcoal/10 bg-white p-5 shadow-sm">
-          <h3 class="font-alexandria text-lg font-semibold text-blue-black">Custom theme</h3>
-          <p class="mt-1 text-sm text-cool-gray">
-            A consistent look powered by your Tailwind palette and fonts.
-          </p>
-        </li>
-      </ul>
+    <!-- HIGHLIGHT SECTION -->
+    <div class="bg-light-purple">
+      <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
+        <!-- visual placeholder -->
+        <div class="relative flex min-h-[340px] items-center justify-center overflow-hidden rounded-[2rem]">
+          <img :src="messiImage" alt="Hero image" class="absolute inset-0 h-full w-full object-cover" />
+          <div
+            class="absolute inset-0 rounded-[2rem] border border-blue-black/10 bg-gradient-to-br from-white/10 to-white/5">
+          </div>
+        </div>
+
+        <!-- text -->
+        <div class="flex items-center">
+          <div class="max-w-xl">
+            <p class="font-alexandria text-sm uppercase tracking-[0.3em] text-blue-black/60">
+              Challenges
+            </p>
+            <h2 class="mt-3 font-bebas-neue text-5xl leading-none tracking-wide text-blue-black sm:text-6xl">
+              Players
+            </h2>
+
+            <p class="mt-5 font-alexandria text-sm leading-7 text-blue-black/80 sm:text-base">
+              Explore challenge sets across different skills, improve your score,
+              and build season progress step by step. Everything is designed to
+              feel competitive, clear, and motivating.
+            </p>
+
+            <p class="mt-4 font-alexandria text-sm leading-7 text-blue-black/75 sm:text-base">
+              Jump into active tasks, review your stats, and keep moving up the
+              leaderboard with every correct submission.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-4">
+              <router-link to="/challenges"
+                class="inline-flex items-center justify-center rounded-xl border border-dark-purple bg-dark-purple px-6 py-3 font-alexandria text-sm font-semibold text-dark-white transition hover:opacity-90">
+                Explore Challenges
+              </router-link>
+
+              <router-link to="/profile"
+                class="inline-flex items-center justify-center rounded-xl border border-dark-purple/30 px-6 py-3 font-alexandria text-sm font-semibold text-blue-black transition hover:bg-blue-black/5">
+                Open Profile
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- CALLOUT -->
-    <div class="mx-auto my-12 max-w-6xl rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="max-w-xl">
-          <h3 class="font-alexandria text-xl font-semibold text-blue-black">
-            Ready to start your next challenge?
-          </h3>
-          <p class="text-sm text-cool-gray">
-            Choose a challenge, submit answers and collect points today.
+    <!-- PROGRESS SECTION -->
+    <div class="relative overflow-hidden bg-charcoal text-dark-white" style="
+        background-image:
+          linear-gradient(to right, rgba(18, 18, 18, 0.82), rgba(18, 18, 18, 0.58)),
+          url('/your-secondary-image.jpg');
+        background-size: cover;
+        background-position: center;
+      ">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div class="max-w-2xl">
+          <p class="font-alexandria text-sm uppercase tracking-[0.3em] text-dark-white/60">
+            Progress
           </p>
+          <h2 class="mt-3 font-bebas-neue text-5xl leading-none tracking-wide sm:text-6xl">
+            Train Smarter
+          </h2>
+
+          <p class="mt-6 font-alexandria text-sm leading-7 text-dark-white/80 sm:text-base">
+            Validate answers, improve your ranking, and keep your momentum across
+            seasons. The platform is built for clarity, speed and measurable
+            progression.
+          </p>
+
+          <div class="mt-8 flex flex-wrap gap-4">
+            <router-link to="/challenges"
+              class="inline-flex items-center justify-center rounded-xl bg-dark-purple px-6 py-3 font-alexandria text-sm font-semibold text-dark-white transition hover:opacity-90">
+              Explore Challenges
+            </router-link>
+
+            <router-link :to="isAuthenticated ? '/dashboard' : '/signup'"
+              class="inline-flex items-center justify-center rounded-xl border border-dark-white/30 px-6 py-3 font-alexandria text-sm font-semibold text-dark-white transition hover:bg-dark-white/10">
+              {{ isAuthenticated ? 'Start from Dashboard' : 'Start Your Journey' }}
+            </router-link>
+          </div>
         </div>
-        <router-link
-          to="/challenges"
-          class="inline-flex items-center justify-center rounded-lg bg-vibrant-coral px-5 py-2 font-alexandria font-semibold text-white hover:bg-vibrant-coral/90 transition shadow-sm"
-        >
-          Browse Challenges →
-        </router-link>
+      </div>
+    </div>
+
+    <!-- FINAL CTA ONLY -->
+    <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <div class="rounded-[2rem] bg-dark-purple px-6 py-10 sm:px-8 lg:px-12">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div class="max-w-2xl">
+            <p class="font-alexandria text-sm uppercase tracking-[0.3em] text-dark-white/70">
+              Ready?
+            </p>
+            <h3 class="mt-2 font-bebas-neue text-4xl tracking-wide text-dark-white sm:text-5xl">
+              Start your challenge today
+            </h3>
+            <p class="mt-3 font-alexandria text-sm leading-6 text-dark-white/85">
+              Choose a challenge, submit your answers and begin collecting points.
+            </p>
+          </div>
+
+          <router-link to="/challenges"
+            class="inline-flex items-center justify-center rounded-xl bg-light-purple px-7 py-3 font-alexandria text-sm font-semibold text-blue-black transition hover:opacity-90">
+            Browse Challenges →
+          </router-link>
+        </div>
       </div>
     </div>
 
@@ -224,6 +209,10 @@ import { useAuth } from '@/composables/useAuth';
 import { useChallenges } from '@/composables/useChallenges';
 import { apiGetLeaderboards } from '@/api/leaderboards';
 import { computed, onMounted, ref } from 'vue';
+import heroImage from '../assets/hero.png';
+import messiImage from '../assets/messi.png';
+
+
 
 const { challenges, totalCount, loadChallenges } = useChallenges();
 const playerCount = ref(null);

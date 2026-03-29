@@ -1,59 +1,103 @@
 <!-- src/components/LoginForm.vue -->
 <template>
-  <section class="mx-auto w-full max-w-md px-4 py-8">
-    <div class="rounded-2xl border border-charcoal/10 bg-white p-6 shadow-sm">
-      <header class="mb-6">
-        <h1 class="font-bebas-neue text-4xl tracking-wide text-blue-black">Sign in</h1>
-        <p class="mt-1 text-sm font-alexandria text-cool-gray">
-          Welcome back! Enter your credentials to continue.
-        </p>
-      </header>
+  <section class="mx-auto w-full max-w-md px-4 py-8 sm:py-10">
+    <div class="overflow-hidden rounded-[2rem] border border-dark-purple/10 bg-white shadow-sm">
+      <!-- top accent -->
+      <div class="h-2 w-full"></div>
 
-      <form @submit.prevent="onSubmit" class="space-y-4" novalidate>
-        <!-- Email -->
-        <div>
-          <label for="email" class="mb-1 block text-sm font-medium text-blue-black">Email</label>
-          <input id="email" name="email" type="email" v-model.trim="email" autocomplete="email"
-            placeholder="name@example.com"
-            class="w-full rounded-lg border border-charcoal/20 bg-white px-3 py-2 font-alexandria text-blue-black placeholder:cool-gray/70 outline-none ring-0 focus:border-golden-yellow focus:ring-2 focus:ring-golden-yellow/40" />
-        </div>
+      <div class="p-6 sm:p-8">
+        <header class="mb-8 text-center">
+          <p class="font-alexandria text-xs uppercase tracking-[0.3em] text-cool-gray">
+            Welcome back
+          </p>
+          <h1 class="mt-3 font-bebas-neue text-4xl tracking-wide text-blue-black sm:text-5xl">
+            Sign in
+          </h1>
+          <p class="mt-2 text-sm font-alexandria text-cool-gray">
+            Enter your credentials to continue to Fantasy Academy.
+          </p>
+        </header>
 
-        <!-- Password -->
-        <div>
-          <label for="password" class="mb-1 block text-sm font-medium text-blue-black">Password</label>
-          <div class="relative">
-            <input :type="showPassword ? 'text' : 'password'" id="password" name="password" v-model="password"
-              autocomplete="current-password" placeholder="••••••••"
-              class="w-full rounded-lg border border-charcoal/20 bg-white px-3 py-2 pr-10 font-alexandria text-blue-black placeholder:cool-gray/70 outline-none ring-0 focus:border-golden-yellow focus:ring-2 focus:ring-golden-yellow/40" />
-            <button type="button"
-              class="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 text-sm text-cool-gray hover:text-blue-black"
-              @click="showPassword = !showPassword" :aria-label="showPassword ? 'Hide password' : 'Show password'">
-              {{ showPassword ? 'Hide' : 'Show' }}
-            </button>
+        <form @submit.prevent="onSubmit" class="space-y-5" novalidate>
+          <!-- Email -->
+          <div>
+            <label for="email" class="mb-2 block text-sm font-medium text-blue-black">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              v-model.trim="email"
+              autocomplete="email"
+              placeholder="name@example.com"
+              class="w-full rounded-xl border border-charcoal/15 bg-dark-white px-4 py-3 font-alexandria text-blue-black placeholder:text-cool-gray/70 outline-none transition focus:border-dark-purple focus:ring-2 focus:ring-dark-purple/20"
+            />
           </div>
-        </div>
 
-        <!-- Error -->
-        <p v-if="formError" role="alert"
-          class="rounded-md border border-vibrant-coral/30 bg-vibrant-coral/10 p-2 text-sm font-alexandria text-vibrant-coral">
-          {{ formError }}
-        </p>
+          <!-- Password -->
+          <div>
+            <label for="password" class="mb-2 block text-sm font-medium text-blue-black">
+              Password
+            </label>
+            <div class="relative">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                name="password"
+                v-model="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+                class="w-full rounded-xl border border-charcoal/15 bg-dark-white px-4 py-3 pr-16 font-alexandria text-blue-black placeholder:text-cool-gray/70 outline-none transition focus:border-dark-purple focus:ring-2 focus:ring-dark-purple/20"
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-sm font-medium text-dark-purple transition hover:bg-dark-purple/5 hover:text-blue-black"
+                @click="showPassword = !showPassword"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+              >
+                {{ showPassword ? 'Hide' : 'Show' }}
+              </button>
+            </div>
+          </div>
 
-        <!-- Submit -->
-        <button type="submit" :disabled="authLoading"
-          class="w-full rounded-lg bg-vibrant-coral py-2 font-alexandria font-semibold text-white shadow-sm transition hover:bg-vibrant-coral/90 disabled:opacity-60">
-          {{ authLoading ? 'Signing in…' : 'Sign in' }}
-        </button>
-      </form>
+          <!-- Error -->
+          <p
+            v-if="formError"
+            role="alert"
+            class="rounded-xl border border-dark-purple/20 bg-light-purple/20 px-4 py-3 text-sm font-alexandria text-dark-purple"
+          >
+            {{ formError }}
+          </p>
 
-      <div class="mt-6 flex flex-col items-center gap-2 text-sm font-alexandria">
-        <router-link to="/forgot-password" class="text-blue-black hover:underline">Forgot password?</router-link>
-        <p class="text-cool-gray">
-          Don’t have an account?
-          <router-link to="/signup" class="font-semibold text-vibrant-coral hover:underline">
-            Create one
+          <!-- Submit -->
+          <button
+            type="submit"
+            :disabled="authLoading"
+            class="w-full rounded-xl bg-dark-purple py-3 font-alexandria font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ authLoading ? 'Signing in…' : 'Sign in' }}
+          </button>
+        </form>
+
+        <div class="mt-8 flex flex-col items-center gap-3 text-sm font-alexandria">
+          <router-link
+            to="/forgot-password"
+            class="text-dark-purple transition hover:underline"
+          >
+            Forgot password?
           </router-link>
-        </p>
+
+          <p class="text-cool-gray">
+            Don’t have an account?
+            <router-link
+              to="/signup"
+              class="font-semibold text-dark-purple transition hover:underline"
+            >
+              Create one
+            </router-link>
+          </p>
+        </div>
       </div>
     </div>
   </section>
