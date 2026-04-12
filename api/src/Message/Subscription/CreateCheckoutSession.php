@@ -29,9 +29,9 @@ readonly final class CreateCheckoutSession implements UserAware
         #[Assert\NotBlank]
         #[Assert\Choice(choices: ['monthly', 'yearly'])]
         public string $plan,
-        #[Assert\Url]
+        #[Assert\Url(requireTld: false)]
         public ?string $successUrl = null,
-        #[Assert\Url]
+        #[Assert\Url(requireTld: false)]
         public ?string $cancelUrl = null,
         private ?Uuid $userId = null,
     ) {
