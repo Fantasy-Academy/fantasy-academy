@@ -66,6 +66,16 @@
               Logout
             </span>
           </div>
+          <!-- For non-members: entice upgrade -->
+          <router-link v-if="!isMember" to="/subscription"
+            class="bg-dark-purple text-white font-nunito font-bold text-sm px-4 py-2 rounded-lg hover:opacity-90 transition">
+            ⚡ Upgrade
+          </router-link>
+
+          <!-- For members: link to manage -->
+          <router-link v-else to="/subscription" class="text-golden-yellow font-nunito font-bold text-sm px-4 py-2">
+            ⭐ Premium
+          </router-link>
         </template>
       </div>
 
@@ -127,6 +137,9 @@ import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import AvatarInitial from './ui/AvatarInitial.vue'
+import { useMembership } from '@/composables/useMembership';
+
+const { isMember } = useMembership();
 
 const { isAuthenticated, logout, user } = useAuth()
 const router = useRouter()
@@ -145,4 +158,3 @@ function closeMobile() {
 
 watch(() => route.fullPath, () => mobileOpen.value = false)
 </script>
-

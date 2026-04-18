@@ -13,6 +13,13 @@
             <span @click="handleLogout" class="text-sm text-light-purple cursor-pointer hover:underline">
               Logout
             </span>
+            <div class="flex items-center gap-3">
+              <h1 class="font-bebas-neue text-4xl">{{ me?.name }}</h1>
+              <span v-if="isMember"
+                class="bg-golden-yellow text-blue-black text-xs font-nunito font-bold px-3 py-1 rounded-full">
+                ⭐ Premium
+              </span>
+            </div>
           </div>
 
           <router-link to="/profile/edit" class="flex-shrink-0 mt-1 opacity-70 hover:opacity-100 transition">
@@ -105,7 +112,9 @@ import ProfileSkillsPolarChart from '../components/ProfileSkillsPolarChart.vue'
 import ProfileActivityChart from '../components/ProfileActivityChart.vue'
 import ProfileCompletedChallenges from '../components/ProfileCompletedChallenges.vue'
 import ProfileGameweekPointsChart from '../components/ProfileGameweekPointsChart.vue'
+import { useMembership } from '@/composables/useMembership';
 
+const { isMember } = useMembership();
 const { isAuthenticated, logout, user } = useAuth()
 
 const loading = ref(false)
