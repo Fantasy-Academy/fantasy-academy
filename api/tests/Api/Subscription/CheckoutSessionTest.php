@@ -226,4 +226,56 @@ final class CheckoutSessionTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(422);
     }
+
+    public function testAcceptsLocalhostUrls(): void
+    {
+        $client = self::createClient();
+        $container = $client->getContainer();
+
+        $stripeClientStub = $this->createStub(StripeClientInterface::class);
+
+        $stripeClientStub
+            ->method('createCustomer')
+            ->willReturn(new CustomerResult(
+                customerId: 'cus_test_localhost',
+                email: 'admin@example.com',
+            ));
+
+        $stripeClientStub
+            ->method('getPricesByLookupKeys')
+            ->willReturn([
+                new PriceResult(
+                    priceId: 'price_monthly_test',
+                    productId: 'prod_test',
+                    unitAmount: 999,
+                    currency: 'eur',
+                    interval: 'month',
+                    lookupKey: 'fantasy_academy_monthly',
+                ),
+            ]);
+
+        $stripeClientStub
+            ->method('createCheckoutSession')
+            ->willReturn(new CheckoutSessionResult(
+                sessionId: 'cs_test_localhost',
+                url: 'https://checkout.stripe.com/pay/cs_test_localhost',
+            ));
+
+        $container->set(StripeClientInterface::class, $stripeClientStub);
+
+        $token = TestingLogin::getJwt($client, UserFixture::USER_1_EMAIL);
+
+        $client->request('POST', '/api/subscription/checkout', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+            ],
+            'json' => [
+                'plan' => 'monthly',
+                'successUrl' => 'http://localhost:5173/subscription/success',
+                'cancelUrl' => 'http://localhost:5173/subscription/cancel',
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+    }
 }
