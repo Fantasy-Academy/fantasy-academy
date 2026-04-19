@@ -6,9 +6,15 @@
 
         <div class="flex items-start gap-3 min-w-0">
           <div class="flex min-w-0 flex-col">
-            <h1 class="truncate font-semibold text-lg sm:text-xl">
-              {{ user.name }}
-            </h1>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="truncate font-semibold text-lg sm:text-xl">
+                {{ user.name }}
+              </h1>
+              <span v-if="isMember"
+                class="bg-golden-yellow text-blue-black text-xs font-nunito font-bold px-3 py-1 rounded-full">
+                ⭐ Premium
+              </span>
+            </div>
 
             <span @click="handleLogout" class="text-sm text-light-purple cursor-pointer hover:underline">
               Logout
@@ -105,8 +111,15 @@ import ProfileSkillsPolarChart from '../components/ProfileSkillsPolarChart.vue'
 import ProfileActivityChart from '../components/ProfileActivityChart.vue'
 import ProfileCompletedChallenges from '../components/ProfileCompletedChallenges.vue'
 import ProfileGameweekPointsChart from '../components/ProfileGameweekPointsChart.vue'
+import { useMembership } from '@/composables/useMembership';
+import { useProfile } from '@/composables/useProfile';
 
+
+
+const { isMember } = useMembership();
 const { isAuthenticated, logout, user } = useAuth()
+const { me, load: loadProfile } = useProfile();
+
 
 const loading = ref(false)
 const challenges = ref([])
@@ -233,7 +246,9 @@ async function loadChallenges() {
   }
 }
 
-onMounted(() => {
+onMounted(async() => {
+  await loadProfile()
+  console.log('[ProfilePage] isMember:', isMember.value, 'me:', me.value?.isMember)
   loadChallenges()
   loadDashboardData()
 })
