@@ -67,15 +67,17 @@
             </span>
           </div>
           <!-- For non-members: entice upgrade -->
+          <!-- UPGRADE button
           <router-link v-if="!isMember" to="/subscription"
             class="bg-dark-purple text-white font-nunito font-bold text-sm px-4 py-2 rounded-lg hover:opacity-90 transition">
             ⚡ Upgrade
           </router-link>
 
-          <!-- For members: link to manage -->
+          
           <router-link v-else to="/subscription" class="text-golden-yellow font-nunito font-bold text-sm px-4 py-2">
             ⭐ Premium
           </router-link>
+          -->
         </template>
       </div>
 
