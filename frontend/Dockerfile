@@ -2,8 +2,20 @@ FROM node:24 AS dev
 
 WORKDIR /app
 
+# PNPM_HOME must exist and be ON PATH before corepack activates pnpm. Without it
+# `pnpm config -g set` aborts with:
+#   [ERROR] The configured global bin directory "/root/.local/share/pnpm/bin" is
+#   not in PATH
+# pnpm 10 made that a hard error where pnpm 9 only warned, so this image silently
+# stopped building the moment `pnpm@latest` rolled over to 10 — nothing in this
+# repo changed. Discovered 2026-07-27, when the first rebuild since April failed.
+ENV PNPM_HOME=/pnpm
+ENV PATH="$PNPM_HOME:$PATH"
+
+# pnpm is PINNED, not `latest`: `latest` is what turned an untouched Dockerfile
+# into a broken one. Keep this in step with pnpm-lock.yaml (lockfileVersion 9.0).
 RUN corepack enable pnpm && \
-	corepack prepare --activate pnpm@latest && \
+	corepack prepare --activate pnpm@10 && \
 	pnpm config -g set store-dir /.pnpm-store
 
 
