@@ -9,14 +9,21 @@
 # Migrated from spare.srv 2026-07-27: was rsync + ssh-action into
 # /deployment/fantasy-academy on spare with a full SSH key in CI.
 #
-# BUILD SECRET vs BUILD ARG — the one thing to be careful about here:
-#   - VITE_SENTRY_DSN is a build ARG. A Sentry DSN is PUBLIC by design (it ships
-#     inside the JS bundle that every visitor downloads), so baking it into image
-#     metadata costs nothing.
-#   - SENTRY_AUTH_TOKEN is a real secret and is passed as a BuildKit SECRET MOUNT
-#     (`secrets:` -> `RUN --mount=type=secret` in frontend/Dockerfile), never as a
-#     build arg: the shared _build.yml emits SLSA provenance by default, and build
-#     args are recorded in that attestation — a build arg would publish the token.
+# BOTH Sentry values go through `secrets:`, for two DIFFERENT reasons:
+#   - SENTRY_AUTH_TOKEN is a real secret. It must not be a build arg: the shared
+#     _build.yml emits an SLSA provenance attestation by default and build args are
+#     recorded in it, so a build arg would publish the token next to the image.
+#   - VITE_SENTRY_DSN is NOT secret (it ships inside the public JS bundle) and would
+#     be fine as a build arg — except its value lives in a repo SECRET, and GitHub
+#     does NOT allow the `secrets` context inside a reusable workflow's `with:`
+#     block. Referencing it there is a hard workflow-VALIDATION error: the run dies
+#     instantly with zero jobs, is named after the file path, and says only "This run
+#     likely failed because of a workflow file issue". Hit exactly that on 2026-07-27.
+#     `secrets:` is the one place the context IS available, so the DSN rides along in
+#     BUILD_SECRETS and the Dockerfile reads it from a second secret mount.
+#     (Tidier alternative: move the DSN to a repo VARIABLE — `vars.*` IS allowed in
+#     `with:` — and keep it a build arg. Rejected only because that means re-entering
+#     the value by hand instead of keeping one source of truth.)
 # =============================================================================
 
 name: Frontend release
@@ -48,19 +55,22 @@ jobs:
       # The Dockerfile is multi-stage (dev -> build -> runner); ship the nginx
       # runner stage, not the toolchain.
       target: runner
-      # NON-SECRET only. VITE_* values are compiled into the public JS bundle.
+      # NON-SECRET only, and NO `secrets` context here — see the header.
       build_args: |
         APP_VERSION=${{ github.sha }}
         VITE_APP_VERSION=${{ github.sha }}
-        VITE_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
       deploy_sha: true
       # See backend-release.yml — needs a per-app PAT on the box first.
       await_deploy: false
     secrets:
       DEPLOY_WEBHOOK_SECRET: ${{ secrets.DEPLOY_WEBHOOK_SECRET_FRONTEND }}
-      # Mounted at build time only (id == SENTRY_AUTH_TOKEN); enables the
-      # sentryVitePlugin sourcemap upload in vite.config.ts.
-      BUILD_SECRETS: SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+      # BuildKit secret MOUNTS, available only during the build RUN:
+      #   SENTRY_AUTH_TOKEN -> enables the sentryVitePlugin sourcemap upload
+      #   VITE_SENTRY_DSN   -> compiled into the bundle by Vite (public by design;
+      #                        here only because its value lives in a repo secret)
+      BUILD_SECRETS: |
+        SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+        VITE_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
 
   sentry:
     name: Sentry release
