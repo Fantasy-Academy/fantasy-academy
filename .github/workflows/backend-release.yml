@@ -1,90 +1,82 @@
-# https://github.com/docker/build-push-action/blob/master/docs/advanced/tags-labels.md
+# =============================================================================
+# Backend release — build ghcr.io/fantasy-academy/api and deploy it to lily.
+# =============================================================================
+# Deploys via the shared TheDevs ship workflow: build+push the image, then
+# HMAC-POST a privilege-free deploy trigger to https://deploy.<host>/hooks/<app>.
+# The box pulls and runs /srv/fantasy-academy-api/deploy.sh <tag> itself — CI
+# holds NO SSH key and no server access (that is the whole point of the design).
+#
+# Migrated from spare.srv 2026-07-27 (lily.srv D42). What changed:
+#   - was: rsync + appleboy/ssh-action into /deployment/fantasy-academy on spare
+#     using DEPLOY_PRIVATE_KEY/DEPLOY_USERNAME (a full SSH key held in CI).
+#   - now: _ship.yml + a per-app HMAC secret that can ONLY re-trigger THIS app's
+#     deploy of THIS app's image.
+#
+# The `workflow_run` trigger is deliberately preserved: backend-tests.yml is
+# path-filtered to `api/**`, so a frontend-only change never rebuilds or
+# redeploys the api. That independence is why fantasy-academy is TWO app slugs on
+# lily (fantasy-academy-api + fantasy-academy-frontend), each with its own hook.
+# =============================================================================
 
 name: Backend release
 
 permissions:
-    contents: read
-    deployments: write
-    packages: write
+  contents: read
+  packages: write
 
 on:
-    workflow_run:
-        workflows: [Backend tests]
-        types:
-            - completed
-        branches:
-            - main
+  workflow_run:
+    workflows: [Backend tests]
+    types:
+      - completed
+    branches:
+      - main
 
 jobs:
-    docker:
-        name: "Docker images"
-        runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
+  ship:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: TheDevs-cz/ci/.github/workflows/_ship.yml@v1
+    permissions:
+      contents: read
+      packages: write
+    with:
+      # app == hook id == /srv/<app>/ on the box == compose project.
+      app: fantasy-academy-api
+      # Explicit: the image is named after the COMPONENT, not the repo, so the
+      # ghcr.io/<owner>/<repo> default would be wrong.
+      image: ghcr.io/fantasy-academy/api
+      context: ./api
+      # Baked into the image as SENTRY_RELEASE (see api/Dockerfile).
+      build_args: APP_VERSION=${{ github.sha }}
+      # Deploy the immutable sha-<git-sha> tag this build pushed, not "main":
+      # re-runnable and exact about which code is live.
+      deploy_sha: true
+      # Fire-and-forget for now: the red/green await needs a per-app fine-grained
+      # PAT (Commit statuses: R/W) in the box's /srv/deploy/checks.env, which does
+      # not exist for this repo yet. Until then a green run proves the trigger was
+      # ACCEPTED, not that the rollout succeeded — check the box
+      # (journalctl -u lily-deploy-runner) after a risky deploy.
+      # TODO(lily backlog): seed the PAT and flip this to true.
+      await_deploy: false
+    secrets:
+      DEPLOY_WEBHOOK_SECRET: ${{ secrets.DEPLOY_WEBHOOK_SECRET_API }}
 
-            -   name: Docker meta
-                id: meta
-                uses: docker/metadata-action@v5
-                with:
-                    # list of Docker images to use as base name for tags
-                    images: ghcr.io/Fantasy-Academy/api
-                    # generate Docker tags based on the following events/attributes
-                    tags: |
-                        type=ref,event=branch
-                        type=sha
+  sentry:
+    name: Sentry release
+    needs: ship
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-            -   name: Set up Docker Buildx
-                uses: docker/setup-buildx-action@v3
-
-            -   name: Login to GHCR
-                if: github.event_name != 'pull_request'
-                uses: docker/login-action@v3
-                with:
-                    registry: ghcr.io
-                    username: ${{ github.repository_owner }}
-                    password: ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Build and push
-                uses: docker/build-push-action@v5
-                with:
-                    context: ./api
-                    push: ${{ github.event_name != 'pull_request' }}
-                    tags: ${{ steps.meta.outputs.tags }}
-                    labels: ${{ steps.meta.outputs.labels }}
-                    cache-from: type=gha, scope=${{ github.workflow }}
-                    cache-to: type=gha, scope=${{ github.workflow }}
-                    build-args: APP_VERSION=${{ github.sha }}
-
-    deploy:
-        runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        needs:
-            - docker
-        environment:
-            name: production
-            url: https://fantasy-academy.com
-        steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
-
-            -   name: Deploy to production
-                uses: appleboy/ssh-action@master
-                with:
-                    host: fantasy-academy.com
-                    username: ${{ secrets.DEPLOY_USERNAME }}
-                    key: ${{ secrets.DEPLOY_PRIVATE_KEY }}
-                    script: cd /deployment/fantasy-academy && ./deploy-api.sh
-
-            -   name: Create Sentry release
-                uses: getsentry/action-release@v1
-                env:
-                    SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-                    SENTRY_ORG: fantasy-academy
-                    SENTRY_PROJECT: api
-                with:
-                    environment: production
-                    version: ${{ github.sha }}
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: fantasy-academy
+          SENTRY_PROJECT: api
+        with:
+          environment: production
+          version: ${{ github.sha }}
